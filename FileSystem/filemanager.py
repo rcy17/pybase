@@ -13,6 +13,11 @@ from . import param, exception
 
 
 class FileManager:
+    try:
+        FILE_OPEN_MODE = os.O_RDWR | os.O_BINARY
+    except AttributeError as exception:
+        FILE_OPEN_MODE = os.O_RDWR
+
     def __init__(self):
         self.opened_files = {}
         self.page_buffer = np.zeros((param.CACHE_CAPACITY, param.PAGE_SIZE), dtype=np.uint8)
@@ -52,7 +57,7 @@ class FileManager:
         open(filename, 'w').close()
 
     def open_file(self, filename):
-        file_id = os.open(filename, os.O_RDWR | os.O_BINARY)
+        file_id = os.open(filename, FileManager.FILE_OPEN_MODE)
         if file_id != -1:
             self.opened_files[file_id] = filename
         else:
