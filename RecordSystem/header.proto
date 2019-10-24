@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package FileHeader;
+
+message HeaderInfo {
+  uint32 record_per_page = 1;
+  uint32 page_number = 2;
+  uint32 record_number = 3;
+}
