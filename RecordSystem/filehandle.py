@@ -33,3 +33,9 @@ class FileHandle:
     def force_pages(self, pages=-1):
         pass
 
+    def append_page(self):
+        pass
+
+    def set_header_page(self):
+        pass
+
