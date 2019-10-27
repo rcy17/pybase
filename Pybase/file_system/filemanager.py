@@ -57,6 +57,10 @@ class FileManager:
     def create_file(filename):
         open(filename, 'w').close()
 
+    @staticmethod
+    def remove_file(filename):
+        os.remove(filename)
+
     def open_file(self, filename):
         file_id = os.open(filename, FileManager.FILE_OPEN_MODE)
         if file_id != -1:
@@ -112,11 +116,11 @@ class FileManager:
 
     def put_page(self, file_id, page_id, data: bytes):
         index = self.id_to_index[pack_file_page_id(file_id, page_id)]
-        self.page_buffer[index] = np.frombuffer(data, dtype=np.uint8)
+        self.page_buffer[index] = np.frombuffer(data, dtype=np.uint8, count=settings.PAGE_SIZE)
         self.dirty[index] = True
         self.replace.access(index)
 
-    def get_page(self, file_id, page_id):
+    def get_page(self, file_id, page_id) -> bytes:
         pair_id = pack_file_page_id(file_id, page_id)
         index = self.id_to_index.get(pair_id)
 

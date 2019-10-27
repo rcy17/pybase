@@ -4,7 +4,7 @@ Here give some related formulas to calculate size for special request
 Data: 2019/10/27
 """
 from Pybase import settings
-from Pybase.exceptions.record import RecordTooLong
+from Pybase.exceptions.record import RecordTooLongError
 
 
 def get_record_capacity(record_size: int) -> int:
@@ -21,5 +21,5 @@ def get_record_capacity(record_size: int) -> int:
     if x >> 3 + x * record_size > total_size:
         x -= 1
     if x <= 0:
-        raise RecordTooLong(f'Record size {record_size} is TOO LONG')
+        raise RecordTooLongError(f'Record size {record_size} is TOO LONG')
     return x
