@@ -1,5 +1,5 @@
 """
-Utils for file system
+Here provide hash and reverse function for special id
 
 Data: 2019/10/21
 """

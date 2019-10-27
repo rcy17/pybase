@@ -7,10 +7,10 @@ import os
 
 import numpy as np
 
-from .utils import pack_file_page_id, unpack_file_page_id
-from .findreplace import FindReplace
-from . import exception
 from Pybase import settings
+from Pybase.utils.id_hash import pack_file_page_id, unpack_file_page_id
+from Pybase.exceptions.file import OpenFileFailed, ReadFileFailed
+from .findreplace import FindReplace
 
 
 class FileManager:
@@ -62,7 +62,7 @@ class FileManager:
         if file_id != -1:
             self.opened_files[file_id] = filename
         else:
-            raise exception.OpenFileFailed("Can't open file " + filename)
+            raise OpenFileFailed("Can't open file " + filename)
         return file_id
 
     def close_file(self, file_id):
@@ -87,6 +87,8 @@ class FileManager:
     def write_page(file_id, page_id, data: bytes):
         """
         Write the data to the given file_id and page_id
+        Don't call this function explicitly unless creating a new page
+
         :settings file_id:
         :settings page_id:
         :settings data:
@@ -95,6 +97,18 @@ class FileManager:
         offset = page_id << settings.PAGE_SIZE_BITS
         os.lseek(file_id, offset, os.SEEK_SET)
         os.write(file_id, data)
+
+    @staticmethod
+    def new_page(file_id, data: bytes) -> int:
+        """
+        Append new page for the file and return page_id
+        :param file_id:
+        :param data: new page's data
+        :return: new page's id
+        """
+        os.lseek(file_id, 0, os.SEEK_END)
+        os.write(file_id, data)
+        return os.lseek(file_id, 0, os.SEEK_END) >> settings.PAGE_SIZE_BITS
 
     def put_page(self, file_id, page_id, data: bytes):
         index = self.id_to_index[pack_file_page_id(file_id, page_id)]
@@ -124,7 +138,7 @@ class FileManager:
         self.index_to_file_page[index] = pair_id
         data = self.read_page(file_id, page_id)
         if not data:
-            raise exception.ReadFileFailed(f"Can't read page {page_id} from file {self.opened_files[file_id]}")
+            raise ReadFileFailed(f"Can't read page {page_id} from file {self.opened_files[file_id]}")
         self.page_buffer[index] = np.frombuffer(data, dtype=np.uint8)
         return data
 

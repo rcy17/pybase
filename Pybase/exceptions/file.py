@@ -3,10 +3,7 @@ Here define exceptions for file system
 
 Date: 2019/10/21
 """
-
-
-class Error(Exception):
-    """Base class for exceptions in file system"""
+from .base import Error
 
 
 class OpenFileFailed(Error):
