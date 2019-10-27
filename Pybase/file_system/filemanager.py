@@ -9,7 +9,8 @@ import numpy as np
 
 from .utils import pack_file_page_id, unpack_file_page_id
 from .findreplace import FindReplace
-from . import param, exception
+from . import exception
+from Pybase import settings
 
 
 class FileManager:
@@ -20,10 +21,10 @@ class FileManager:
 
     def __init__(self):
         self.opened_files = {}
-        self.page_buffer = np.zeros((param.CACHE_CAPACITY, param.PAGE_SIZE), dtype=np.uint8)
-        self.dirty = np.zeros(param.CACHE_CAPACITY, dtype=np.bool)
-        self.index_to_file_page = np.full(param.CACHE_CAPACITY, param.ID_DEFAULT_VALUE)
-        self.replace = FindReplace(param.CACHE_CAPACITY)
+        self.page_buffer = np.zeros((settings.CACHE_CAPACITY, settings.PAGE_SIZE), dtype=np.uint8)
+        self.dirty = np.zeros(settings.CACHE_CAPACITY, dtype=np.bool)
+        self.index_to_file_page = np.full(settings.CACHE_CAPACITY, settings.ID_DEFAULT_VALUE)
+        self.replace = FindReplace(settings.CACHE_CAPACITY)
         self.id_to_index = {}
         self.file_size = {}
         self.last = -1
@@ -73,25 +74,25 @@ class FileManager:
         """
         Read page for the given file_id and page_id
         *This function is not recommended to call directly*
-        :param file_id:
-        :param page_id:
+        :settings file_id:
+        :settings page_id:
         :return: data: bytes
         """
-        offset = page_id << param.PAGE_SIZE_BITS
+        offset = page_id << settings.PAGE_SIZE_BITS
         os.lseek(file_id, offset, os.SEEK_SET)
-        data = os.read(file_id, param.PAGE_SIZE)
+        data = os.read(file_id, settings.PAGE_SIZE)
         return data
 
     @staticmethod
     def write_page(file_id, page_id, data: bytes):
         """
         Write the data to the given file_id and page_id
-        :param file_id:
-        :param page_id:
-        :param data:
+        :settings file_id:
+        :settings page_id:
+        :settings data:
         :return:
         """
-        offset = page_id << param.PAGE_SIZE_BITS
+        offset = page_id << settings.PAGE_SIZE_BITS
         os.lseek(file_id, offset, os.SEEK_SET)
         os.write(file_id, data)
 
@@ -115,7 +116,7 @@ class FileManager:
         last_id = self.index_to_file_page[index]
 
         # if this position is occupied, we should remove it first
-        if last_id != param.ID_DEFAULT_VALUE:
+        if last_id != settings.ID_DEFAULT_VALUE:
             self._write_back(index)
 
         # now save the new page info

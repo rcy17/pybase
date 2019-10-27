@@ -1,9 +1,8 @@
 """
-Here define related parameters
+Here are all settings number for pybase
 
-Data: 2019/10/21
+Date: 2019/10/27
 """
-
 PAGE_SIZE = 8192
 
 PAGE_INI_NUM = 2048
@@ -25,3 +24,7 @@ MAX_TABLES = 31
 FILE_ID_BITS = 16
 
 ID_DEFAULT_VALUE = -1
+
+
+
+

@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='FileHeader',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0cheader.proto\x12\nFileHeader\"Q\n\nHeaderInfo\x12\x17\n\x0frecord_per_page\x18\x01 \x01(\r\x12\x13\n\x0bpage_number\x18\x02 \x01(\r\x12\x15\n\rrecord_number\x18\x03 \x01(\rb\x06proto3')
+  serialized_pb=_b('\n\x0cheader.proto\x12\nFileHeader\"l\n\nHeaderInfo\x12\x17\n\x0frecord_per_page\x18\x01 \x01(\r\x12\x13\n\x0bpage_number\x18\x02 \x01(\r\x12\x15\n\rrecord_number\x18\x03 \x01(\r\x12\x19\n\x11\x66irst_insert_page\x18\x04 \x01(\rb\x06proto3')
 )
 
 
@@ -54,6 +54,13 @@ _HEADERINFO = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='first_insert_page', full_name='FileHeader.HeaderInfo.first_insert_page', index=3,
+      number=4, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -67,7 +74,7 @@ _HEADERINFO = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=28,
-  serialized_end=109,
+  serialized_end=136,
 )
 
 DESCRIPTOR.message_types_by_name['HeaderInfo'] = _HEADERINFO
