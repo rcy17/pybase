@@ -14,9 +14,11 @@ class RID:
         self._slot = slot_number
 
     @property
-    def page(self):
+    def page_id(self):
+        """Number in [0, page_number)"""
         return self._page
 
     @property
-    def slot(self):
+    def slot_id(self):
+        """Number in [0, record_per_page)"""
         return self._slot

@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='FileHeader',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0cheader.proto\x12\nFileHeader\"l\n\nHeaderInfo\x12\x17\n\x0frecord_per_page\x18\x01 \x01(\r\x12\x13\n\x0bpage_number\x18\x02 \x01(\r\x12\x15\n\rrecord_number\x18\x03 \x01(\r\x12\x19\n\x11\x66irst_insert_page\x18\x04 \x01(\rb\x06proto3')
+  serialized_pb=_b('\n\x0cheader.proto\x12\nFileHeader\"\x83\x01\n\nHeaderInfo\x12\x15\n\rrecord_length\x18\x01 \x01(\r\x12\x17\n\x0frecord_per_page\x18\x02 \x01(\r\x12\x13\n\x0bpage_number\x18\x03 \x01(\r\x12\x15\n\rrecord_number\x18\x04 \x01(\r\x12\x19\n\x11next_vacancy_page\x18\x05 \x01(\rb\x06proto3')
 )
 
 
@@ -34,29 +34,36 @@ _HEADERINFO = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='record_per_page', full_name='FileHeader.HeaderInfo.record_per_page', index=0,
+      name='record_length', full_name='FileHeader.HeaderInfo.record_length', index=0,
       number=1, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='page_number', full_name='FileHeader.HeaderInfo.page_number', index=1,
+      name='record_per_page', full_name='FileHeader.HeaderInfo.record_per_page', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='record_number', full_name='FileHeader.HeaderInfo.record_number', index=2,
+      name='page_number', full_name='FileHeader.HeaderInfo.page_number', index=2,
       number=3, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='first_insert_page', full_name='FileHeader.HeaderInfo.first_insert_page', index=3,
+      name='record_number', full_name='FileHeader.HeaderInfo.record_number', index=3,
       number=4, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='next_vacancy_page', full_name='FileHeader.HeaderInfo.next_vacancy_page', index=4,
+      number=5, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -73,8 +80,8 @@ _HEADERINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=28,
-  serialized_end=136,
+  serialized_start=29,
+  serialized_end=160,
 )
 
 DESCRIPTOR.message_types_by_name['HeaderInfo'] = _HEADERINFO

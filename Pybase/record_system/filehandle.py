@@ -3,6 +3,8 @@ Here defines FileHandle
 
 Data: 2019/10/24
 """
+import numpy as np
+
 from Pybase import settings
 from .manager import FileManager
 from .header_pb2 import HeaderInfo
@@ -19,7 +21,7 @@ class FileHandle:
         self._manger = manger
         self._opened = True
         self._file_name = filename
-        header_page = manger.get_page(file_id, 0)
+        header_page = manger.get_page(file_id, settings.HEADER_PAGE_ID)
         self._header = HeaderInfo.fromString(header_page)
         self._header_modified = False
 
@@ -35,27 +37,104 @@ class FileHandle:
     def header_modified(self):
         return self._header_modified
 
+    @property
+    def file_id(self):
+        return self._file_id
+
+    def _get_bitmap(self, data: np.ndarray):
+        offset = settings.RECORD_PAGE_FIXED_HEADER_SIZE
+        return np.unpackbits(data[offset: offset + (self.header.record_per_page >> 3)])
+
+    def _get_next_vacancy(self, data: np.ndarray) -> int:
+        offset = settings.RECORD_PAGE_NEXT_OFFSET
+        return int.from_bytes(data[offset: offset+ 4].tobytes(), 'big')
+
+    def _get_offset(self, slot_id):
+        header = self.header
+        return settings.RECORD_PAGE_FIXED_HEADER_SIZE + (header.record_length >> 3) + header.record_length * slot_id
+
     def modify_header(self):
         data = self._header.SerializeToString()
         data += b'\0' * (settings.PAGE_SIZE - len(data))
-        self._manger.put_page(self._file_id, 0, data)
+        self._manger.put_page(self._file_id, settings.HEADER_PAGE_ID, data)
 
     def get_record(self, rid: RID) -> Record:
-        pass
+        header = self.header
+        slot_id = rid.slot_id
+        assert rid.page_id < header.page_number
+        assert slot_id < header.record_per_page
+        data = self._manger.get_page(rid.page_id, rid.slot_id)
+        offset = self._get_offset(slot_id)
+        record = Record(rid, data[offset: offset + header.record_length])
+        return record
 
     def insert_record(self, data: bytes) -> RID:
-        pass
+        header = self.header
+        page_id = header.next_vacancy_page
+        if page_id == settings.HEADER_PAGE_ID:
+            self.append_record_page()
+            page_id = header.next_vacancy_page
+            assert page_id != settings.HEADER_PAGE_ID
+        page = self._manger.get_page(self._file_id, page_id)
+        record_length = header.record_length
+        assert len(data) == record_length
+        bitmap = self._get_bitmap(page)
+
+        # get first valid slot
+        valid_slots = np.where(bitmap)[0]
+        slot_id = valid_slots[0]
+
+        # insert record
+        offset = self._get_offset(slot_id)
+        page[offset: offset + record_length] = data
+        bitmap[slot_id] = False
+
+        # set new bitmap
+        offset = settings.RECORD_PAGE_FIXED_HEADER_SIZE
+        page[offset: offset + (header.record_per_page >> 3)] = np.packbits(bitmap)
+
+        # update header
+        header.record_number += 1
+        self._manger.put_page(self._file_id, page_id, page)
+        self._header_modified = True
+
+        # check if this page has other valid slot
+        if len(valid_slots) == 1:
+            header.next_vacancy_page = self._get_next_vacancy(page)
+            offset = settings.RECORD_PAGE_NEXT_OFFSET
+            # notice that header page's id must be 0, it can't be changed
+            page[offset: offset + 4] = settings.HEADER_PAGE_ID
+        return RID(page, slot_id)
 
     def delete_record(self, rid: RID):
         pass
 
     def update_record(self, record: Record):
-        pass
+        header = self.header
+        rid = record.rid
+        data = self._manger.get_page(rid.page_id, rid.slot_id)
+        offset = self._get_offset(rid.slot_id)
+        data[offset: offset + header.record_length] = record.data
+        self._manger.put_page(self._file_id, rid.page_id, data)
 
     def force_pages(self, pages=-1):
         pass
 
-    def append_page(self):
+    def append_record_page(self):
+        header = self.header
+        # use link list method
+        next_page = header.next_vacancy_page
+        data = np.full(settings.PAGE_SIZE, -1, dtype=np.uint8)
+        data[settings.PAGE_FLAG_OFFSET] = settings.RECORD_PAGE_FLAG
+        data[settings.RECORD_PAGE_NEXT_OFFSET: settings.RECORD_PAGE_NEXT_OFFSET + 4] = next_page.to_bytes(4, 'big')
+
+        # write data and update header
+        page_id = self._manger.new_page(self._file_id, data)
+        header.page_number += 1
+        header.next_vacancy_page = page_id
+        self._header_modified = True
+
+    def append_varchar_page(self):
         pass
 
     def set_header_page(self):

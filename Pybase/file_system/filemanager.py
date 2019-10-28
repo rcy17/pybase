@@ -85,10 +85,12 @@ class FileManager:
         offset = page_id << settings.PAGE_SIZE_BITS
         os.lseek(file_id, offset, os.SEEK_SET)
         data = os.read(file_id, settings.PAGE_SIZE)
+        if not data:
+            raise ReadFileFailed(f"Can't read page {page_id} from file {file_id}")
         return data
 
     @staticmethod
-    def write_page(file_id, page_id, data: bytes):
+    def write_page(file_id, page_id, data: np.ndarray):
         """
         Write the data to the given file_id and page_id
         Don't call this function explicitly unless creating a new page
@@ -100,10 +102,10 @@ class FileManager:
         """
         offset = page_id << settings.PAGE_SIZE_BITS
         os.lseek(file_id, offset, os.SEEK_SET)
-        os.write(file_id, data)
+        os.write(file_id, data.tobytes())
 
     @staticmethod
-    def new_page(file_id, data: bytes) -> int:
+    def new_page(file_id, data: np.ndarray) -> int:
         """
         Append new page for the file and return page_id
         :param file_id:
@@ -111,16 +113,20 @@ class FileManager:
         :return: new page's id
         """
         os.lseek(file_id, 0, os.SEEK_END)
-        os.write(file_id, data)
+        os.write(file_id, data.tobytes())
         return os.lseek(file_id, 0, os.SEEK_END) >> settings.PAGE_SIZE_BITS
 
-    def put_page(self, file_id, page_id, data: bytes):
-        index = self.id_to_index[pack_file_page_id(file_id, page_id)]
-        self.page_buffer[index] = np.frombuffer(data, dtype=np.uint8, count=settings.PAGE_SIZE)
+    def put_page(self, file_id, page_id, data: np.ndarray):
+        index = self.id_to_index.get(pack_file_page_id(file_id, page_id))
+        if index is None:
+            self.get_page(file_id, page_id)
+            # then assert can't be None
+            index = self.id_to_index.get(pack_file_page_id(file_id, page_id))
+        self.page_buffer[index] = data
         self.dirty[index] = True
         self.replace.access(index)
 
-    def get_page(self, file_id, page_id) -> bytes:
+    def get_page(self, file_id, page_id) -> np.ndarray:
         pair_id = pack_file_page_id(file_id, page_id)
         index = self.id_to_index.get(pair_id)
 
@@ -141,9 +147,10 @@ class FileManager:
         self.id_to_index[pair_id] = index
         self.index_to_file_page[index] = pair_id
         data = self.read_page(file_id, page_id)
+        data = np.frombuffer(data, np.uint8, settings.PAGE_SIZE)
         if not data:
             raise ReadFileFailed(f"Can't read page {page_id} from file {self.opened_files[file_id]}")
-        self.page_buffer[index] = np.frombuffer(data, dtype=np.uint8)
+        self.page_buffer[index] = data
         return data
 
     def release_cache(self):

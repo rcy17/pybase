@@ -3,8 +3,9 @@ syntax = "proto3";
 package FileHeader;
 
 message HeaderInfo {
-  uint32 record_per_page = 1;
-  uint32 page_number = 2;
-  uint32 record_number = 3;
-  uint32 first_insert_page = 4;
+  uint32 record_length = 1;
+  uint32 record_per_page = 2;
+  uint32 page_number = 3;
+  uint32 record_number = 4;
+  uint32 next_vacancy_page = 5;
 }
