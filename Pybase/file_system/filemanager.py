@@ -112,9 +112,9 @@ class FileManager:
         :param data: new page's data
         :return: new page's id
         """
-        os.lseek(file_id, 0, os.SEEK_END)
+        pos = os.lseek(file_id, 0, os.SEEK_END)
         os.write(file_id, data.tobytes())
-        return os.lseek(file_id, 0, os.SEEK_END) >> settings.PAGE_SIZE_BITS
+        return pos >> settings.PAGE_SIZE_BITS
 
     def put_page(self, file_id, page_id, data: np.ndarray):
         index = self.id_to_index.get(pack_file_page_id(file_id, page_id))
@@ -133,7 +133,7 @@ class FileManager:
         # if index is not None, then just past to
         if index is not None:
             self._access(index)
-            return self.page_buffer[index].tobytes()
+            return self.page_buffer[index]
 
         # else we should get a position in cache
         index = self.replace.find()
@@ -148,10 +148,8 @@ class FileManager:
         self.index_to_file_page[index] = pair_id
         data = self.read_page(file_id, page_id)
         data = np.frombuffer(data, np.uint8, settings.PAGE_SIZE)
-        if not data:
-            raise ReadFileFailed(f"Can't read page {page_id} from file {self.opened_files[file_id]}")
         self.page_buffer[index] = data
-        return data
+        return data.copy()
 
     def release_cache(self):
         for index in np.nditer(np.where(self.dirty)[0]):

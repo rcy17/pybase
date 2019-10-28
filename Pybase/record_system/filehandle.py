@@ -23,7 +23,7 @@ class FileHandle:
         self._opened = True
         self._file_name = filename
         header_page = manger.get_page(file_id, settings.HEADER_PAGE_ID)
-        self._header = HeaderInfo.fromString(header_page)
+        self._header = HeaderInfo.FromString(header_page)
         self._header_modified = False
 
     @property
@@ -75,12 +75,12 @@ class FileHandle:
         assert rid.page_id < header.page_number
         assert slot_id < header.record_per_page
         if data is None:
-            data = self._manger.get_page(rid.page_id, rid.slot_id)
+            data = self._manger.get_page(self._file_id, rid.page_id)
         offset = self._get_offset(slot_id)
         record = Record(rid, data[offset: offset + header.record_length])
         return record
 
-    def insert_record(self, data: bytes) -> RID:
+    def insert_record(self, data: np.ndarray) -> RID:
         header = self.header
         page_id = header.next_vacancy_page
         if page_id == settings.HEADER_PAGE_ID:
