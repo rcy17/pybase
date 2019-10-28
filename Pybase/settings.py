@@ -33,6 +33,10 @@ MAX_COLUMNS = 31
 
 MAX_TABLES = 31
 
+# file header settings
+
+HEADER_LENGTH_BYTES = 4
+
 # record settings
 
 RECORD_PAGE_FIXED_HEADER_SIZE = 5

@@ -10,7 +10,7 @@ class FindReplace:
     def __init__(self, capacity):
         self._capacity = capacity
         self.list = LinkList(capacity, 1)
-        for i in range(capacity):
+        for i in range(capacity - 1, 0, -1):
             self.list.insert_first(0, i)
 
     def find(self):

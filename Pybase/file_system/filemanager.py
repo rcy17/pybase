@@ -44,7 +44,7 @@ class FileManager:
 
     def _write_back(self, index):
         if self.dirty[index]:
-            self.write_page(*unpack_file_page_id(index), self.page_buffer[index].tobytes())
+            self.write_page(*unpack_file_page_id(self.index_to_file_page[index]), self.page_buffer[index])
         self._release(index)
 
     def _release(self, index):
@@ -70,7 +70,8 @@ class FileManager:
         return file_id
 
     def close_file(self, file_id):
-        self.opened_files.pop(file_id)
+        # notice that in shutdown file_id already popped
+        self.opened_files.pop(file_id, None)
         os.close(file_id)
 
     @staticmethod

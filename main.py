@@ -8,7 +8,7 @@ from Pybase.record_system.rid import RID
 import numpy as np
 
 
-if __name__ == '__main__':
+def main():
     # now just do some test
     manager = RecordManager()
     manager.create_file('1.db', 20)
@@ -18,3 +18,5 @@ if __name__ == '__main__':
     print(file.get_record(RID(1, 1)))
 
 
+if __name__ == '__main__':
+    main()

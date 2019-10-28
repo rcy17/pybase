@@ -6,8 +6,8 @@ Data: 2019/10/24
 import numpy as np
 
 from Pybase import settings
+from Pybase.utils.header import header_serialize, header_deserialize
 from .manager import FileManager
-from .header_pb2 import HeaderInfo
 from .record import Record
 from .rid import RID
 
@@ -23,7 +23,7 @@ class FileHandle:
         self._opened = True
         self._file_name = filename
         header_page = manger.get_page(file_id, settings.HEADER_PAGE_ID)
-        self._header = HeaderInfo.FromString(header_page)
+        self._header = header_deserialize(header_page)
         self._header_modified = False
 
     @property
@@ -65,9 +65,7 @@ class FileHandle:
         return self._manger.put_page(self._file_id, page_id, data)
 
     def modify_header(self):
-        data = self._header.SerializeToString()
-        data += b'\0' * (settings.PAGE_SIZE - len(data))
-        self._manger.put_page(self._file_id, settings.HEADER_PAGE_ID, data)
+        self._manger.put_page(self._file_id, settings.HEADER_PAGE_ID, header_serialize(self._header))
 
     def get_record(self, rid: RID, data=None) -> Record:
         header = self.header

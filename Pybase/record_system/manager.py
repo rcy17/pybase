@@ -3,14 +3,12 @@ Here defines RecordManager
 
 Data: 2019/10/24
 """
-import numpy as np
-
 from Pybase.file_system import FileManager
-from Pybase import settings
 from Pybase.utils.formula import get_record_capacity
-from Pybase.exceptions.record import PageOverflowError, RecordFileReopenError
+from Pybase.utils.header import header_serialize
+from Pybase.exceptions.record import RecordFileReopenError
 from .filehandle import FileHandle
-from .header_pb2 import HeaderInfo
+from Pybase.utils.header_pb2 import HeaderInfo
 
 
 class RecordManager:
@@ -33,12 +31,7 @@ class RecordManager:
         header.page_number = 1
         header.record_number = 0
         header.next_vacancy_page = 0
-        if header.ByteSize() > settings.PAGE_SIZE:
-            raise PageOverflowError(f'Header page with {header.ByteSize()} bytes is overflow')
-        header_data = header.SerializeToString()
-        data = np.zeros(settings.PAGE_SIZE, dtype=np.uint8)
-        data[:len(header_data)] = np.frombuffer(header_data, dtype=np.uint8)
-        self._FM.new_page(file, data)
+        self._FM.new_page(file, header_serialize(header))
 
         # close the file
         self._FM.close_file(file)
