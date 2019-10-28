@@ -1,5 +1,5 @@
 """
-Here defines Record
+Here defines Record and Condition
 
 Data: 2019/10/24
 """
@@ -24,3 +24,21 @@ class Record:
     @property
     def data(self) -> np.ndarray:
         return self._data
+
+    def partial_serialize(self, attr_type, attr_length, attr_offset):
+        attr_type.from_bytes(self._data[attr_offset: attr_offset + attr_length].tobytes(), 'big')
+
+
+class Condition:
+    """
+    Class for condition of scan
+    """
+    def __init__(self, attr_type, attr_length, attr_offset, operator, value):
+        self._attr_type = attr_type
+        self._attr_length = attr_length
+        self._attr_offset = attr_offset
+        self._operator = operator
+        self._value = value
+
+    def is_satisfied(self, record: Record):
+        return True
