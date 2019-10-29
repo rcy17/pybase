@@ -13,6 +13,9 @@ class RID:
         self._page = page_number
         self._slot = slot_number
 
+    def __str__(self):
+        return f'{{page_id: {self.page_id}, slot_id: {self.slot_id}}}'
+
     @property
     def page_id(self):
         """Number in [0, page_number)"""

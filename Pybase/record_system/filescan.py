@@ -15,30 +15,33 @@ class FileScan:
     """
     Class to define method of scan the file
     """
-    def __init__(self, handle: FileHandle,  condition: Condition):
+
+    def __init__(self, handle: FileHandle, condition: Condition = None):
         self._condition = condition
         self._handle = handle
         pass
 
-    def records(self) -> Record:
+    def __iter__(self):
         """
-        Now we can use for-loop to finish scan, for example:
+        Now we can finish scan as an iterator, for example:
         ```
-        scanner = FileScan(handle, condition)
-        for record in scanner.records():
+        for record in FileScan(handle, condition):
             pass    # do something with record
         ```
         or like this:
         ```
-        records = list(FileScan(handle, condition).records())
+        records = list(FileScan(handle, condition))
         ```
         """
+        return self.records()
+
+    def records(self) -> Record:
         for page_id in range(1, self._handle.header.page_number):
             page = self._handle.get_page(page_id)
             if page[settings.PAGE_FLAG_OFFSET] != settings.RECORD_PAGE_FLAG:
                 continue
             bitmap = self._handle.get_bitmap(page)
-            for slot_id in np.where(bitmap == 0):
+            for slot_id in np.where(bitmap == 0)[0]:
                 record = self._handle.get_record(RID(page_id, slot_id), page)
-                if self._condition.is_satisfied(record):
+                if self._condition is None or self._condition.is_satisfied(record):
                     yield record

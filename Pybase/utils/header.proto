@@ -8,4 +8,5 @@ message HeaderInfo {
     uint32 page_number = 3;
     uint32 record_number = 4;
     uint32 next_vacancy_page = 5;
+    string filename = 6;
 }

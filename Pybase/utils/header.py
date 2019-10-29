@@ -17,7 +17,7 @@ def header_serialize(header: HeaderInfo) -> np.ndarray:
     if data_length + bias > settings.PAGE_SIZE:
         raise PageOverflowError(f'Page with {data_length + bias} bytes is beyond page size {settings.PAGE_SIZE}')
     page = np.zeros(settings.PAGE_SIZE, dtype=np.uint8)
-    page[:bias] = np.frombuffer(bias.to_bytes(bias, 'big'), np.uint8)
+    page[:bias] = np.frombuffer(data_length.to_bytes(bias, 'big'), np.uint8)
     page[bias: bias + data_length] = np.frombuffer(data, np.uint8)
     return page
 

@@ -26,7 +26,7 @@ class FileManager:
         self.index_to_file_page = np.full(settings.CACHE_CAPACITY, settings.ID_DEFAULT_VALUE)
         self.replace = FindReplace(settings.CACHE_CAPACITY)
         self.id_to_index = {}
-        self.file_size = {}
+        # self.file_size = {}
         self.last = -1
 
     def __del__(self):
@@ -64,14 +64,24 @@ class FileManager:
     def open_file(self, filename):
         file_id = os.open(filename, FileManager.FILE_OPEN_MODE)
         if file_id != -1:
-            self.opened_files[file_id] = filename
+            self.opened_files[file_id] = set()
         else:
             raise OpenFileFailed("Can't open file " + filename)
         return file_id
 
     def close_file(self, file_id):
         # notice that in shutdown file_id already popped
-        self.opened_files.pop(file_id, None)
+        pages = self.opened_files.pop(file_id, None)
+        for index in pages:
+            # remove index information
+            pair_id = self.index_to_file_page[index]
+            self.id_to_index.pop(pair_id)
+            # remove from replace
+            self.replace.free(index)
+            # write back
+            if self.dirty[index]:
+                self.write_page(*unpack_file_page_id(pair_id), self.page_buffer[index])
+                self.dirty[index] = False
         os.close(file_id)
 
     @staticmethod
@@ -146,6 +156,7 @@ class FileManager:
 
         # now save the new page info
         self.id_to_index[pair_id] = index
+        self.opened_files[file_id].add(index)
         self.index_to_file_page[index] = pair_id
         data = self.read_page(file_id, page_id)
         data = np.frombuffer(data, np.uint8, settings.PAGE_SIZE)
@@ -153,7 +164,7 @@ class FileManager:
         return data.copy()
 
     def release_cache(self):
-        for index in np.nditer(np.where(self.dirty)[0]):
+        for index in np.where(self.dirty)[0]:
             self._write_back(index)
         self.page_buffer.fill(0)
         self.dirty.fill(False)

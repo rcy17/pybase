@@ -19,6 +19,10 @@ class RecordManager:
         self._FM = FileManager()
         self.opened_files = set()
 
+    @property
+    def file_manager(self):
+        return self._FM
+
     def create_file(self, filename, record_length):
         # create file
         self._FM.create_file(filename)
@@ -31,6 +35,7 @@ class RecordManager:
         header.page_number = 1
         header.record_number = 0
         header.next_vacancy_page = 0
+        header.filename = filename
         self._FM.new_page(file, header_serialize(header))
 
         # close the file
@@ -43,7 +48,7 @@ class RecordManager:
         if filename in self.opened_files:
             raise RecordFileReopenError(f'File {filename} is already opened')
         file = self._FM.open_file(filename)
-        handle = FileHandle(self._FM, file, filename)
+        handle = FileHandle(self, file, filename)
         self.opened_files.add(filename)
         return handle
 
@@ -52,6 +57,7 @@ class RecordManager:
             handle.modify_header()
         self.opened_files.remove(handle.filename)
         self._FM.close_file(handle.file_id)
+        handle.is_opened = False
 
 
 
