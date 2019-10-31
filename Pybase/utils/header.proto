@@ -2,6 +2,12 @@ syntax = "proto3";
 
 package FileHeader;
 
+
+
+message Attr {
+
+}
+
 message HeaderInfo {
     uint32 record_length = 1;
     uint32 record_per_page = 2;
