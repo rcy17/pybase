@@ -14,8 +14,11 @@ class TreeNode:
         self._parent_id = None
         self._child_key: list = []
         self._child_val: list = []
+        self._type = -1
     
     def lower_bound(self, key):
+        if len(self._child_key) == 0:
+            return None
         low, high = 0, len(self._child_key) - 1
         pos = len(self._child_key)
         while low < high:
@@ -29,6 +32,8 @@ class TreeNode:
         return pos
 
     def upper_bound(self, key):
+        if len(self._child_key) == 0:
+            return None
         low, high = 0, len(self._child_key) - 1
         pos = len(self._child_key)
         while low < high:
@@ -42,14 +47,14 @@ class TreeNode:
             pos = low
         return pos
 
-    def split(self) -> tuple(list, list):
+    def split(self):
         mid = int((len(self._child_key) + 1) / 2)
         half_key = self._child_key[mid:]
         half_rid = self._child_val[mid:]
         self._child_key = self._child_key[:mid]
         self._child_val = self._child_val[:mid]
         self._clen = mid
-        return (half_key, half_rid)
+        return (half_key, half_rid, self._child_key[mid])
     
     def child_vals(self) -> list:
         return self._child_val
@@ -70,13 +75,13 @@ class TreeNode:
         pass
 
     @abstractmethod
-    def lower_rid(self, key) -> RID:
-        pass
-
-    @abstractmethod
-    def upper_rid(self, key) -> RID:
-        pass
-
-    @abstractmethod
     def to_array(self) -> np.ndarray:
+        pass
+
+    @abstractmethod
+    def search(self, key):
+        pass
+
+    @abstractmethod
+    def range(self, low, high):
         pass

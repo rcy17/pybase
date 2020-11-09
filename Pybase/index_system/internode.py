@@ -1,41 +1,61 @@
+from Pybase import settings
 from .treenode import TreeNode
 from ..record_system.rid import RID
 from .treenode import TreeNode
+from .leafnode import LeafNode
 import numpy as np
+from random import randint
 
 class InterNode(TreeNode):
-    def __init__(self, page_id, parent_id ,child_keys, child_nodes) -> None:
+    def __init__(self,page_id, parent_id ,child_keys, child_nodes) -> None:
         self._page_id = page_id
         self._parent_id = parent_id
         self._child_key = child_keys
         self._child_val = child_nodes
-    
-    def lower_rid(self, key) -> RID:
-        # DEBUG:Maybe is upper_bound
-        pos = self.lower_bound(key)
-        node: TreeNode = self._child_val[pos]
-        return node.lower_rid(key)
-    
-    def upper_rid(self, key) -> RID:
-        # DEBUG:Maybe is lower_bound
-        pos = self.upper_bound(key)
-        node: TreeNode = self._child_val[pos]
-        return node.upper_bound(key)
+        self._type = 0
     
     def insert(self, key, val):
         pos = self.lower_bound(key)
-        node: TreeNode = self._child_val[pos]
-        node.insert(key, val)
-        # Check need split or not
+        if pos == len(self._child_key):
+            pos -= 1
+        if pos == None:
+            self._child_key.append(key)
+            # DEBUG: Get new Page Here
+            new_page_id = self._page_id + randint(1, 255)
+            node = LeafNode(new_page_id, self._page_id, 0, 0, [], [])
+            self._child_val.append(node)
+            node.insert(key, val)
+        else:
+            node: TreeNode = self._child_val[pos]
+            node.insert(key, val)
+            # Check need split or not
+            if node.page_size() > settings.PAGE_SIZE:
+                new_keys, new_vals, mid_val = node.split()
+                tmp_val = self._child_key[pos]
+                self._child_key[pos] = mid_val
+                self._child_key.insert(pos + 1, tmp_val)
+                # Allocate new Page
+                new_page_id = self._page_id + randint(1, 255)
+                new_node = None
+                if node._type == 0:
+                    new_node = InterNode(new_page_id, self._page_id, new_keys, new_vals)
+                elif node._type == 1:
+                    node._next_id = new_page_id
+                    new_node = LeafNode(new_page_id, self._page_id, node._page_id, node._next_id, new_keys, new_vals)
+                assert(isinstance(new_node, TreeNode))
+                self._child_val.insert(pos + 1, new_node)
     
     def remove(self, key, val):
         pos = self.lower_bound(key)
         node: TreeNode = self._child_val[pos]
         node.remove(key, val)
         # Check need merge of not
+        if len(node._child_key) == 0:
+            self._child_key.pop(pos)
+            self._child_val.pop(pos)
 
     def page_size(self):
-        return 16 + self._clen * 16
+        return 16 + len(self._child_key) * 16
     
     def to_array(self) -> np.ndarray:
         data = [0, self._parent_id]
@@ -44,5 +64,17 @@ class InterNode(TreeNode):
             data.append(self._child_val[i].page_id())
         return np.array(data)
     
+    def search(self, key):
+        pos = self.lower_bound(key)
+        if pos == len(self._child_val):
+            pos -= 1
+        print(pos)
+        # DEBUG: Add Exception Here
+        return self._child_val[pos].search(key)
     
+    def range(self, low, high):
+        low_pos = self.lower_bound(low)
+        high_pos = self.upper_bound(high)
+        for i in range(low_pos, high_pos):
+            yield self._child_val[i].range(low, high)
     

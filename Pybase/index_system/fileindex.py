@@ -12,12 +12,13 @@ from ..record_system.rid import RID
 from .treenode import TreeNode
 from .leafnode import LeafNode
 from .internode import InterNode
+from queue import Queue
 
 class FileIndex:
     def __init__(self, handle: FileHandle, root_id) -> None:
         self._root_id = root_id
         self._handle = handle
-        self._root = TreeNode()
+        self._root = InterNode(root_id, root_id, [], [])
 
     def buildNode(self, page_id) -> TreeNode:
         data = self._handle.get_page(page_id)
@@ -64,14 +65,28 @@ class FileIndex:
         
 
     def dump(self):
-        # Write back
-        pass
+        q = [self._root]
+        while len(q) > 0:
+            node = q.pop(0)
+            page_id = node.page_id()
+            if isinstance(node, InterNode):
+                for i in node.child_vals():
+                    q.append(i)
+            # self._handle.put_page(page_id, node.to_array())
+            print(page_id, node.to_array())
+        
 
     def insert(self, key, rid:RID):
         self._root.insert(key, rid)
         # Check if root need change
+        if self._root.page_size() > settings.PAGE_SIZE:
+            # split
+            
+            pass
 
     def remove(self, key, rid:RID):
         self._root.remove(key, rid)
-        # Ckeck if root need change
+    
+    def search(self, key):
+        return self._root.search(key)
 
