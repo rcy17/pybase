@@ -3,6 +3,7 @@ Here defines FileIndex
 
 Date: 2020/11/05
 """
+from random import randint
 import numpy as np
 
 from Pybase import settings
@@ -80,9 +81,20 @@ class FileIndex:
         self._root.insert(key, rid)
         # Check if root need change
         if self._root.page_size() > settings.PAGE_SIZE:
-            # split
+            new_root_id = self._root_id + randint(1, 255)
+            new_root = InterNode(new_root_id, new_root_id, [], [])
+            self._root._parent_id = new_root_id
+            max_key = self._root._child_key[len(self._root._child_key) - 1]
+            new_keys, new_vals, mid_key = self._root.split()
+            old_node = self._root
+            # DEBUG:
+            new_page_id = self._root_id + randint(1, 255)
+            new_node = InterNode(new_page_id, new_root_id, new_keys, new_vals)
+            self._root = new_root
+            self._root_id = new_root_id
+            self._root._child_key = [mid_key, max_key]
+            self._root._child_val = [old_node, new_node]
             
-            pass
 
     def remove(self, key, rid:RID):
         self._root.remove(key, rid)
