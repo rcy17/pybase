@@ -76,7 +76,9 @@ class InterNode(TreeNode):
         return self._child_val[pos].search(key)
 
     def range(self, low, high):
-        low_pos = self.lower_bound(low)
-        high_pos = self.upper_bound(high)
-        for i in range(low_pos, high_pos):
-            yield self._child_val[i].range(low, high)
+        pos_low = self.lower_bound(low)
+        pos_high = self.upper_bound(high)
+        records = []
+        for i in range(pos_low, pos_high + 1):
+            records += self._child_val[i].range(low, high)
+        return records

@@ -56,7 +56,7 @@ class TreeNode:
         half_rid = self._child_val[mid:]
         self._child_key = self._child_key[:mid]
         self._child_val = self._child_val[:mid]
-        return half_key, half_rid, self._child_key[mid]
+        return half_key, half_rid, self._child_key[mid - 1]
 
     def child_values(self) -> list:
         return self._child_val

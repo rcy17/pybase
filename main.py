@@ -4,6 +4,7 @@ This is entry file for this project
 Data: 2019/10/21
 """
 import numpy as np
+from numpy.lib.function_base import select
 from Pybase.record_system.manager import RecordManager
 from Pybase.record_system.rid import RID
 from Pybase.record_system.record import Condition
@@ -12,29 +13,29 @@ from Pybase.index_system.fileindex import FileIndex
 from Pybase.index_system.leafnode import LeafNode
 from random import randint
 
-def insert_test(file):
-    indexer = FileIndex(file, 1)
-    # for i in range(5):
-    indexer.insert(5, RID(0, 5))
-    indexer.insert(1, RID(0, 1))
-    indexer.insert(2, RID(0, 2))
-    indexer.insert(4, RID(0, 4))
-    indexer.insert(3, RID(0, 3))
-    for i in indexer._root.child_values()[0].child_values():
+def insert_test(file, page_id):
+    print("Init Test...")
+    indexer = FileIndex(file, page_id)
+    for i in range(4096):
+        indexer.insert(i, RID(0, i))
+    for i in range(4090, 4100):
+        res = indexer.search(i)
+        print("Search %d:"%i, None if res == None else res.slot_id )
+    print("Range [100, 110]:")
+    for i in indexer.range(100, 110):
         print(i)
-    for i in range(7):
-        print("Search %d:"%i, indexer._root.search(i))
-    # print(indexer._root.search(0))
     indexer.dump()
+    print("Test End")
 
 
-def load_test(file):
-    indexer = FileIndex(file, 1)
+def load_test(file, page_id):
+    print("Load Test...")
+    indexer = FileIndex(file, page_id)
     indexer.load()
-    for i in indexer._root.child_values()[0].child_values():
-        print(i)
-    for i in range(7):
-        print("Search %d:"%i, indexer._root.search(i))
+    for i in range(4090, 4100):
+        res = indexer.search(i)
+        print("Search %d:"%i, None if res == None else res.slot_id )
+    print("Test End")
 
 
 def main():
@@ -42,8 +43,10 @@ def main():
     manager = RecordManager()
     manager.create_file('1.db', 32)
     file = manager.open_file('1.db')
-    # insert_test(file)
-    load_test(file)
+    print()
+    page_id = file.new_page()
+    insert_test(file, page_id)
+    load_test(file, page_id)
     manager.close_file(file)
 
 

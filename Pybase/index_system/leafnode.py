@@ -62,5 +62,4 @@ class LeafNode(TreeNode):
     def range(self, low, high):
         pos_low = self.lower_bound(low)
         pos_high = self.upper_bound(high)
-        for i in range(pos_low, pos_high):
-            yield self._child_val[i]
+        return self._child_val[pos_low:pos_high]
