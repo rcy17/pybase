@@ -20,7 +20,7 @@ def main():
     indexer = FileIndex(file, 0)
     for i in range(5):
         indexer.insert(i, RID(0, i))
-    for i in indexer._root.child_vals()[0].child_vals():
+    for i in indexer._root.child_values()[0].child_values():
         print(i)
     val = indexer._root.search(2)
     print(val)

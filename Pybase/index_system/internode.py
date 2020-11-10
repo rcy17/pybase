@@ -6,19 +6,21 @@ from .leafnode import LeafNode
 import numpy as np
 from random import randint
 
+
 class InterNode(TreeNode):
-    def __init__(self,page_id, parent_id ,child_keys, child_nodes) -> None:
+    def __init__(self, page_id, parent_id, child_keys, child_nodes) -> None:
+        super(InterNode, self).__init__()
         self._page_id = page_id
         self._parent_id = parent_id
         self._child_key = child_keys
         self._child_val = child_nodes
         self._type = 0
-    
+
     def insert(self, key, val):
         pos = self.lower_bound(key)
         if pos == len(self._child_key):
             pos -= 1
-        if pos == None:
+        if pos is None:
             self._child_key.append(key)
             # DEBUG: Get new Page Here
             new_page_id = self._page_id + randint(1, 255)
@@ -42,9 +44,9 @@ class InterNode(TreeNode):
                 elif node._type == 1:
                     node._next_id = new_page_id
                     new_node = LeafNode(new_page_id, self._page_id, node._page_id, node._next_id, new_keys, new_vals)
-                assert(isinstance(new_node, TreeNode))
+                assert (isinstance(new_node, TreeNode))
                 self._child_val.insert(pos + 1, new_node)
-    
+
     def remove(self, key, val):
         pos = self.lower_bound(key)
         node: TreeNode = self._child_val[pos]
@@ -56,14 +58,14 @@ class InterNode(TreeNode):
 
     def page_size(self):
         return 16 + len(self._child_key) * 16
-    
+
     def to_array(self) -> np.ndarray:
         data = [0, self._parent_id]
         for i in range(len(self._child_key)):
             data.append(self._child_key[i])
             data.append(self._child_val[i].page_id())
         return np.array(data)
-    
+
     def search(self, key):
         pos = self.lower_bound(key)
         if pos == len(self._child_val):
@@ -71,10 +73,9 @@ class InterNode(TreeNode):
         print(pos)
         # DEBUG: Add Exception Here
         return self._child_val[pos].search(key)
-    
+
     def range(self, low, high):
         low_pos = self.lower_bound(low)
         high_pos = self.upper_bound(high)
         for i in range(low_pos, high_pos):
             yield self._child_val[i].range(low, high)
-    

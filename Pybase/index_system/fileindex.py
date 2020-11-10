@@ -15,32 +15,32 @@ from .leafnode import LeafNode
 from .internode import InterNode
 from queue import Queue
 
+
 class FileIndex:
     def __init__(self, handle: FileHandle, root_id) -> None:
         self._root_id = root_id
         self._handle = handle
         self._root = InterNode(root_id, root_id, [], [])
 
-    def buildNode(self, page_id) -> TreeNode:
+    def build_node(self, page_id) -> TreeNode:
         data = self._handle.get_page(page_id)
         parent_id = data[1]
-        node = None
         if data[0] == 1:
             prev_id = data[2]
             next_id = data[3]
             child_keys = [data[i] for i in range(int((len(data) - 4) / 3))]
             child_rids = [RID(data[i + 1], data[i + 2]) for i in range(int((len(data) - 4) / 3))]
-            assert(len(child_keys) == len(child_rids))
+            assert len(child_keys) == len(child_rids)
             node = LeafNode(page_id, parent_id, prev_id, next_id, child_keys, child_rids)
         else:
             child_keys = [data[i] for i in range(int((len(data) - 2) / 2))]
-            child_nodes = [self.buildNode(data[i + 1]) for i in range(int((len(data) - 2) / 2))]
-            assert(len(child_keys) == len(child_nodes))
+            child_nodes = [self.build_node(data[i + 1]) for i in range(int((len(data) - 2) / 2))]
+            assert len(child_keys) == len(child_nodes)
             node = InterNode(page_id, parent_id, child_keys, child_nodes)
         return node
 
     def load(self):
-        '''
+        """
         Tree Node Page Structure:
         Node Type = 0 is InterNode
         InterNode:
@@ -48,22 +48,20 @@ class FileIndex:
 
         Node Type = 1 is LeafNode
         | Node Type | Parent PID | Prev PID | Next PID | Key 1 | RID 1 | ... |
-        '''
+        """
         data = self._handle.get_page(self._root_id)
         node_type = data[0]
         parent_id = data[1]
-        clen = data[2]
-        assert(node_type == 0)
-        assert(parent_id == self._root_id)
-        assert(len(data) == 2*clen + 3)
-        self._root = self.buildNode(self._root_id)
+        children = data[2]
+        assert (node_type == 0)
+        assert (parent_id == self._root_id)
+        assert (len(data) == 2 * children + 3)
+        self._root = self.build_node(self._root_id)
 
-
-    def build(self, keyList:list, ridList:list):
-        assert(len(keyList) == len(ridList))
-        for i in range(len(keyList)):
-            self.insert(keyList[i], ridList[i])
-        
+    def build(self, key_list: list, rid_list: list):
+        assert (len(key_list) == len(rid_list))
+        for i in range(len(key_list)):
+            self.insert(key_list[i], rid_list[i])
 
     def dump(self):
         q = [self._root]
@@ -71,13 +69,12 @@ class FileIndex:
             node = q.pop(0)
             page_id = node.page_id()
             if isinstance(node, InterNode):
-                for i in node.child_vals():
+                for i in node.child_values():
                     q.append(i)
             # self._handle.put_page(page_id, node.to_array())
             print(page_id, node.to_array())
-        
 
-    def insert(self, key, rid:RID):
+    def insert(self, key, rid: RID):
         self._root.insert(key, rid)
         # Check if root need change
         if self._root.page_size() > settings.PAGE_SIZE:
@@ -85,20 +82,18 @@ class FileIndex:
             new_root = InterNode(new_root_id, new_root_id, [], [])
             self._root._parent_id = new_root_id
             max_key = self._root._child_key[len(self._root._child_key) - 1]
-            new_keys, new_vals, mid_key = self._root.split()
+            new_keys, new_values, mid_key = self._root.split()
             old_node = self._root
             # DEBUG:
             new_page_id = self._root_id + randint(1, 255)
-            new_node = InterNode(new_page_id, new_root_id, new_keys, new_vals)
+            new_node = InterNode(new_page_id, new_root_id, new_keys, new_values)
             self._root = new_root
             self._root_id = new_root_id
             self._root._child_key = [mid_key, max_key]
             self._root._child_val = [old_node, new_node]
-            
 
-    def remove(self, key, rid:RID):
+    def remove(self, key, rid: RID):
         self._root.remove(key, rid)
-    
+
     def search(self, key):
         return self._root.search(key)
-

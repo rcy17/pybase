@@ -8,6 +8,7 @@ from abc import abstractmethod
 from ..record_system.rid import RID
 import numpy as np
 
+
 class TreeNode:
     def __init__(self):
         self._page_id = None
@@ -15,7 +16,7 @@ class TreeNode:
         self._child_key: list = []
         self._child_val: list = []
         self._type = -1
-    
+
     def lower_bound(self, key):
         if len(self._child_key) == 0:
             return None
@@ -53,12 +54,11 @@ class TreeNode:
         half_rid = self._child_val[mid:]
         self._child_key = self._child_key[:mid]
         self._child_val = self._child_val[:mid]
-        self._clen = mid
-        return (half_key, half_rid, self._child_key[mid])
-    
-    def child_vals(self) -> list:
+        return half_key, half_rid, self._child_key[mid]
+
+    def child_values(self) -> list:
         return self._child_val
-    
+
     def page_id(self):
         return self._page_id
 

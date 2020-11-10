@@ -33,8 +33,9 @@ class LinkList:
     def insert_first(self, list_id, index):
         self.remove(index)
         head = list_id + self._capacity
+        first = self._next[head]
         self._link(head, index)
-        self._link(index, self._next[head])
+        self._link(index, first)
 
     def get_first(self, list_id):
         return self._next[list_id + self._capacity]
