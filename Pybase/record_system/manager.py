@@ -20,7 +20,7 @@ class RecordManager:
         self.opened_files = set()
 
     @property
-    def file_manager(self):
+    def file_manager(self) -> FileManager:
         return self._FM
 
     def create_file(self, filename, record_length):
