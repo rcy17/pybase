@@ -8,13 +8,14 @@ from random import randint
 
 
 class InterNode(TreeNode):
-    def __init__(self, page_id, parent_id, child_keys, child_nodes) -> None:
+    def __init__(self, page_id, parent_id, child_keys, child_nodes, handle) -> None:
         super(InterNode, self).__init__()
         self._page_id = page_id
         self._parent_id = parent_id
         self._child_key = child_keys
         self._child_val = child_nodes
         self._type = 0
+        self._handle = handle
 
     def insert(self, key, val):
         pos = self.lower_bound(key)
@@ -24,7 +25,7 @@ class InterNode(TreeNode):
             self._child_key.append(key)
             # DEBUG: Get new Page Here
             new_page_id = self._page_id + randint(1, 255)
-            node = LeafNode(new_page_id, self._page_id, 0, 0, [], [])
+            node = LeafNode(new_page_id, self._page_id, 0, 0, [], [], self._handle)
             self._child_val.append(node)
             node.insert(key, val)
         else:
@@ -60,11 +61,13 @@ class InterNode(TreeNode):
         return 16 + len(self._child_key) * 16
 
     def to_array(self) -> np.ndarray:
-        data = [0, self._parent_id]
+        arr = np.zeros(settings.PAGE_SIZE/4, np.uint32)
+        arr[0:3] = [0, self._parent_id, len(self._child_key)]
         for i in range(len(self._child_key)):
-            data.append(self._child_key[i])
-            data.append(self._child_val[i].page_id())
-        return np.array(data)
+            arr[3+2*i:5+2*i] = [self._child_key[i], self._child_val[i]]
+        arr.dtype = np.uint8
+        assert arr.size == settings.PAGE_SIZE
+        return arr
 
     def search(self, key):
         pos = self.lower_bound(key)

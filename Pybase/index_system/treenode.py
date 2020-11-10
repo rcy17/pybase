@@ -4,6 +4,7 @@ Here defines Treenodes.
 Date: 2020/11/05
 """
 
+from Pybase.record_system.filehandle import FileHandle
 from abc import abstractmethod
 from ..record_system.rid import RID
 import numpy as np
@@ -16,6 +17,7 @@ class TreeNode:
         self._child_key: list = []
         self._child_val: list = []
         self._type = -1
+        self._handle: FileHandle = None
 
     def lower_bound(self, key):
         if len(self._child_key) == 0:

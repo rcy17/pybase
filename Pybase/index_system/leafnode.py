@@ -1,10 +1,11 @@
+from Pybase import settings
 from .treenode import TreeNode
 from ..record_system.rid import RID
 import numpy as np
 
 
 class LeafNode(TreeNode):
-    def __init__(self, page_id, parent_id, prev_id, next_id, child_keys, child_rids) -> None:
+    def __init__(self, page_id, parent_id, prev_id, next_id, child_keys, child_rids, handle) -> None:
         super(LeafNode, self).__init__()
         self._page_id = page_id
         self._parent_id = parent_id
@@ -13,6 +14,7 @@ class LeafNode(TreeNode):
         self._child_key = child_keys
         self._child_val = child_rids
         self._type = 1
+        self._handle = handle
 
     def insert(self, key, val):
         high = self.upper_bound(key)
@@ -40,13 +42,13 @@ class LeafNode(TreeNode):
         return 32 + len(self._child_key) * 24
 
     def to_array(self) -> np.ndarray:
-        # DEBUG: Need to be optimized
-        data = [0, self._parent_id, self._prev_id, self._next_id]
+        arr = np.zeros(settings.PAGE_SIZE/4, np.uint32)
+        arr[0:5] = [1, self._parent_id, self._prev_id, self._next_id, len(self._child_key)]
         for i in range(len(self._child_key)):
-            data.append(self._child_key[i])
-            data.append(self._child_val[i].page_id)
-            data.append(self._child_val[i].slot_id)
-        return np.array(data)
+            arr[5 + 3*i: 8+3*i] = [self._child_key[i], self._child_val[i].page_id, self._child_val[i].slot_id]
+        arr.dtype = np.uint8
+        assert arr.size == settings.PAGE_SIZE
+        return arr
 
     def search(self, key):
         pos = self.lower_bound(key)

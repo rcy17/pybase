@@ -20,23 +20,26 @@ class FileIndex:
     def __init__(self, handle: FileHandle, root_id) -> None:
         self._root_id = root_id
         self._handle = handle
-        self._root = InterNode(root_id, root_id, [], [])
+        self._root = InterNode(root_id, root_id, [], [], self._handle)
 
     def build_node(self, page_id) -> TreeNode:
         data = self._handle.get_page(page_id)
+        data.dtype = np.uint32
         parent_id = data[1]
         if data[0] == 1:
             prev_id = data[2]
             next_id = data[3]
-            child_keys = [data[i] for i in range(int((len(data) - 4) / 3))]
-            child_rids = [RID(data[i + 1], data[i + 2]) for i in range(int((len(data) - 4) / 3))]
+            child_len = data[4]
+            child_keys = [data[i] for i in range(child_len)]
+            child_rids = [RID(data[i + 1], data[i + 2]) for i in range(child_len)]
             assert len(child_keys) == len(child_rids)
-            node = LeafNode(page_id, parent_id, prev_id, next_id, child_keys, child_rids)
+            node = LeafNode(page_id, parent_id, prev_id, next_id, child_keys, child_rids, self._handle)
         else:
-            child_keys = [data[i] for i in range(int((len(data) - 2) / 2))]
-            child_nodes = [self.build_node(data[i + 1]) for i in range(int((len(data) - 2) / 2))]
+            child_len = data[2]
+            child_keys = [data[i] for i in range(child_len)]
+            child_nodes = [self.build_node(data[i + 1]) for i in range(child_len)]
             assert len(child_keys) == len(child_nodes)
-            node = InterNode(page_id, parent_id, child_keys, child_nodes)
+            node = InterNode(page_id, parent_id, child_keys, child_nodes, self._handle)
         return node
 
     def load(self):
@@ -79,14 +82,14 @@ class FileIndex:
         # Check if root need change
         if self._root.page_size() > settings.PAGE_SIZE:
             new_root_id = self._root_id + randint(1, 255)
-            new_root = InterNode(new_root_id, new_root_id, [], [])
+            new_root = InterNode(new_root_id, new_root_id, [], [], self._handle)
             self._root._parent_id = new_root_id
             max_key = self._root._child_key[len(self._root._child_key) - 1]
             new_keys, new_values, mid_key = self._root.split()
             old_node = self._root
             # DEBUG:
-            new_page_id = self._root_id + randint(1, 255)
-            new_node = InterNode(new_page_id, new_root_id, new_keys, new_values)
+            new_page_id = self._handle.
+            new_node = InterNode(new_page_id, new_root_id, new_keys, new_values, self._handle)
             self._root = new_root
             self._root_id = new_root_id
             self._root._child_key = [mid_key, max_key]
