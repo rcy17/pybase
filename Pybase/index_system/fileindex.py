@@ -3,7 +3,6 @@ Here defines FileIndex
 
 Date: 2020/11/05
 """
-from random import randint
 import numpy as np
 
 from Pybase import settings
@@ -53,12 +52,12 @@ class FileIndex:
         | Node Type | Parent PID | Prev PID | Next PID | Key 1 | RID 1 | ... |
         """
         data = self._handle.get_page(self._root_id)
+        print(data)
+        data.dtype = np.uint32
         node_type = data[0]
         parent_id = data[1]
-        children = data[2]
         assert (node_type == 0)
         assert (parent_id == self._root_id)
-        assert (len(data) == 2 * children + 3)
         self._root = self.build_node(self._root_id)
 
     def build(self, key_list: list, rid_list: list):
@@ -74,21 +73,21 @@ class FileIndex:
             if isinstance(node, InterNode):
                 for i in node.child_values():
                     q.append(i)
-            # self._handle.put_page(page_id, node.to_array())
+            self._handle.put_page(page_id, node.to_array())
             print(page_id, node.to_array())
 
     def insert(self, key, rid: RID):
         self._root.insert(key, rid)
         # Check if root need change
         if self._root.page_size() > settings.PAGE_SIZE:
-            new_root_id = self._root_id + randint(1, 255)
+            new_root_id = self._handle.new_page()
             new_root = InterNode(new_root_id, new_root_id, [], [], self._handle)
             self._root._parent_id = new_root_id
             max_key = self._root._child_key[len(self._root._child_key) - 1]
             new_keys, new_values, mid_key = self._root.split()
             old_node = self._root
             # DEBUG:
-            new_page_id = self._handle.
+            new_page_id = self._handle.new_page()
             new_node = InterNode(new_page_id, new_root_id, new_keys, new_values, self._handle)
             self._root = new_root
             self._root_id = new_root_id

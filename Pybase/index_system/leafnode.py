@@ -42,7 +42,7 @@ class LeafNode(TreeNode):
         return 32 + len(self._child_key) * 24
 
     def to_array(self) -> np.ndarray:
-        arr = np.zeros(settings.PAGE_SIZE/4, np.uint32)
+        arr = np.zeros(int(settings.PAGE_SIZE/4), np.uint32)
         arr[0:5] = [1, self._parent_id, self._prev_id, self._next_id, len(self._child_key)]
         for i in range(len(self._child_key)):
             arr[5 + 3*i: 8+3*i] = [self._child_key[i], self._child_val[i].page_id, self._child_val[i].slot_id]
@@ -52,6 +52,8 @@ class LeafNode(TreeNode):
 
     def search(self, key):
         pos = self.lower_bound(key)
+        if pos == len(self._child_key):
+            return None
         if self._child_key[pos] == key:
             return self._child_val[pos]
         else:

@@ -4,7 +4,6 @@ from ..record_system.rid import RID
 from .treenode import TreeNode
 from .leafnode import LeafNode
 import numpy as np
-from random import randint
 
 
 class InterNode(TreeNode):
@@ -24,7 +23,7 @@ class InterNode(TreeNode):
         if pos is None:
             self._child_key.append(key)
             # DEBUG: Get new Page Here
-            new_page_id = self._page_id + randint(1, 255)
+            new_page_id = self._handle.new_page()
             node = LeafNode(new_page_id, self._page_id, 0, 0, [], [], self._handle)
             self._child_val.append(node)
             node.insert(key, val)
@@ -38,13 +37,13 @@ class InterNode(TreeNode):
                 self._child_key[pos] = mid_val
                 self._child_key.insert(pos + 1, tmp_val)
                 # Allocate new Page
-                new_page_id = self._page_id + randint(1, 255)
+                new_page_id = self._handle.new_page()
                 new_node = None
                 if node._type == 0:
-                    new_node = InterNode(new_page_id, self._page_id, new_keys, new_vals)
+                    new_node = InterNode(new_page_id, self._page_id, new_keys, new_vals, self._handle)
                 elif node._type == 1:
                     node._next_id = new_page_id
-                    new_node = LeafNode(new_page_id, self._page_id, node._page_id, node._next_id, new_keys, new_vals)
+                    new_node = LeafNode(new_page_id, self._page_id, node._page_id, node._next_id, new_keys, new_vals, self._handle)
                 assert (isinstance(new_node, TreeNode))
                 self._child_val.insert(pos + 1, new_node)
 
@@ -61,10 +60,10 @@ class InterNode(TreeNode):
         return 16 + len(self._child_key) * 16
 
     def to_array(self) -> np.ndarray:
-        arr = np.zeros(settings.PAGE_SIZE/4, np.uint32)
+        arr = np.zeros(int(settings.PAGE_SIZE/4), np.uint32)
         arr[0:3] = [0, self._parent_id, len(self._child_key)]
         for i in range(len(self._child_key)):
-            arr[3+2*i:5+2*i] = [self._child_key[i], self._child_val[i]]
+            arr[3+2*i:5+2*i] = [self._child_key[i], self._child_val[i]._page_id]
         arr.dtype = np.uint8
         assert arr.size == settings.PAGE_SIZE
         return arr
@@ -73,7 +72,6 @@ class InterNode(TreeNode):
         pos = self.lower_bound(key)
         if pos == len(self._child_val):
             pos -= 1
-        print(pos)
         # DEBUG: Add Exception Here
         return self._child_val[pos].search(key)
 
