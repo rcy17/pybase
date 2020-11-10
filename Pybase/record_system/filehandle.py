@@ -70,7 +70,7 @@ class FileHandle:
         return self._manger.file_manager.put_page(self._file_id, page_id, data)
 
     def new_page(self) -> int:
-        return self._manger.file_manager.new_page(self._file_id, np.zeros(settings.PAGE_SIZE), dtype=np.uint8)
+        return self._manger.file_manager.new_page(self._file_id, np.zeros(settings.PAGE_SIZE, dtype=np.uint8))
 
     def modify_header(self):
         self._manger.file_manager.put_page(self._file_id, settings.HEADER_PAGE_ID, header_serialize(self._header))
