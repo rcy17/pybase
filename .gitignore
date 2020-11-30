@@ -203,7 +203,7 @@ fabric.properties
 
 ############################## Here begins custom ignorance ##############################
 
-# now ignore nothing
+data
 *.db
 
 ############################## Here ends custom ignorance  ##############################

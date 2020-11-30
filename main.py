@@ -3,51 +3,39 @@ This is entry file for this project
 
 Data: 2019/10/21
 """
-import numpy as np
-from numpy.lib.function_base import select
-from Pybase.record_system.manager import RecordManager
-from Pybase.record_system.rid import RID
-from Pybase.record_system.record import Condition
-from Pybase.record_system.filescan import FileScan
-from Pybase.index_system.fileindex import FileIndex
-from Pybase.index_system.leafnode import LeafNode
-from random import randint
+import os
+import stat
+import sys
+import tempfile
+from pathlib import Path
 
-def insert_test(file, page_id):
-    print("Init Test...")
-    indexer = FileIndex(file, page_id)
-    for i in range(4096):
-        indexer.insert(i, RID(0, i))
-    for i in range(4090, 4100):
-        res = indexer.search(i)
-        print("Search %d:"%i, None if res == None else res.slot_id )
-    print("Range [100, 110]:")
-    for i in indexer.range(100, 110):
-        print(i)
-    indexer.dump()
-    print("Test End")
-
-
-def load_test(file, page_id):
-    print("Load Test...")
-    indexer = FileIndex(file, page_id)
-    indexer.load()
-    for i in range(4090, 4100):
-        res = indexer.search(i)
-        print("Search %d:"%i, None if res == None else res.slot_id )
-    print("Test End")
+from Pybase.manage_system.manager import SystemManger
 
 
 def main():
-    # now just do some test
-    manager = RecordManager()
-    manager.create_file('1.db', 32)
-    file = manager.open_file('1.db')
-    print()
-    page_id = file.new_page()
-    insert_test(file, page_id)
-    load_test(file, page_id)
-    manager.close_file(file)
+    bath_path = Path('data')
+    manager = SystemManger(bath_path)
+    if len(sys.argv) < 2:
+        # python main.py
+        mode = os.fstat(0).st_mode
+        while True:
+            if not stat.S_ISREG(mode):
+                # if stdin is redirected, do not print
+                print('pybase> ', end='')
+            try:
+                line = input()
+            except (KeyboardInterrupt, EOFError):
+                break
+            if line in ('quit', 'exit', '.quit', '.exit'):
+                break
+            file = tempfile.NamedTemporaryFile('w', delete=False, encoding='utf-8')
+            file.write(line)
+            file.close()
+            manager.execute(file.name)
+            os.unlink(file.name)
+    else:
+        # python main.py <in.sql>
+        manager.execute(sys.argv[1])
 
     file = manager.open_file('1.db')
     load_test(file, page_id)

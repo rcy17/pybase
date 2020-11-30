@@ -23,9 +23,12 @@ class RecordManager:
     def file_manager(self) -> FileManager:
         return self._FM
 
-    def create_file(self, filename, record_length):
+    def create_file(self, filename, record_length, append=False):
         # create file
-        self._FM.create_file(filename)
+        if append:
+            self._FM.touch_file(filename)
+        else:
+            self._FM.create_file(filename)
 
         # open the file to add header page
         file = self._FM.open_file(filename)

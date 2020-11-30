@@ -62,6 +62,10 @@ class FileManager:
         open(filename, 'w').close()
 
     @staticmethod
+    def touch_file(filename):
+        open(filename, 'a').close()
+
+    @staticmethod
     def remove_file(filename):
         os.remove(filename)
 
