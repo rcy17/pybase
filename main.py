@@ -49,6 +49,9 @@ def main():
     load_test(file, page_id)
     manager.close_file(file)
 
+    file = manager.open_file('1.db')
+    load_test(file, page_id)
+
 
 if __name__ == '__main__':
     main()

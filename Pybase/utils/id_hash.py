@@ -11,4 +11,5 @@ def pack_file_page_id(file_id, page_id):
 
 
 def unpack_file_page_id(pair_id):
-    return pair_id & (1 << settings.FILE_ID_BITS) - 1, pair_id >> settings.FILE_ID_BITS
+    """return (file_id, page_id)"""
+    return pair_id & ((1 << settings.FILE_ID_BITS) - 1), pair_id >> settings.FILE_ID_BITS

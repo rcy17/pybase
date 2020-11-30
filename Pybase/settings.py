@@ -17,9 +17,7 @@ PAGE_SIZE_BITS = 13
 
 # cache settings
 
-CACHE_CAPACITY = 60000
-
-HASH_MOD = 60000
+CACHE_CAPACITY = 1024
 
 # file settings
 

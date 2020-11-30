@@ -20,14 +20,16 @@ class FileManager:
         FILE_OPEN_MODE = os.O_RDWR
 
     def __init__(self):
-        self.opened_files = {}
+        self.file_cache_pages = {}
+        self.file_id_to_name = {}
+        self.file_name_to_id = {}
         self.page_buffer = np.zeros((settings.CACHE_CAPACITY, settings.PAGE_SIZE), dtype=np.uint8)
         self.dirty = np.zeros(settings.CACHE_CAPACITY, dtype=np.bool)
-        self.index_to_file_page = np.full(settings.CACHE_CAPACITY, settings.ID_DEFAULT_VALUE)
+        self.index_to_file_page = np.full(settings.CACHE_CAPACITY, settings.ID_DEFAULT_VALUE, dtype=np.int64)
         self.replace = FindReplace(settings.CACHE_CAPACITY)
-        self.id_to_index = {}
+        self.file_page_to_index = {}
         # self.file_size = {}
-        self.last = -1
+        self.last = settings.ID_DEFAULT_VALUE
 
     def __del__(self):
         self.shutdown()
@@ -50,8 +52,10 @@ class FileManager:
     def _release(self, index):
         self.dirty[index] = False
         self.replace.free(index)
-        self.id_to_index.pop(self.index_to_file_page[index])
-        self.index_to_file_page[index] = -1
+        file_page = self.index_to_file_page[index]
+        self.file_cache_pages[unpack_file_page_id(file_page)[0]].remove(index)
+        self.file_page_to_index.pop(file_page)
+        self.index_to_file_page[index] = settings.ID_DEFAULT_VALUE
 
     @staticmethod
     def create_file(filename):
@@ -62,30 +66,36 @@ class FileManager:
         os.remove(filename)
 
     def open_file(self, filename):
+        if filename in self.file_name_to_id:
+            return self.file_name_to_id[filename]
         file_id = os.open(filename, FileManager.FILE_OPEN_MODE)
-        if file_id != -1:
-            self.opened_files[file_id] = set()
-        else:
+        if file_id == settings.ID_DEFAULT_VALUE:
             raise OpenFileFailed("Can't open file " + filename)
+        self.file_cache_pages[file_id] = set()
+        self.file_name_to_id[filename] = file_id
+        self.file_id_to_name[file_id] = filename
         return file_id
 
     def close_file(self, file_id):
         # notice that in shutdown file_id already popped
-        pages = self.opened_files.pop(file_id, None)
+        pages = self.file_cache_pages.pop(file_id, {})
         for index in pages:
             # remove index information
-            pair_id = self.index_to_file_page[index]
-            self.id_to_index.pop(pair_id)
+            file_page = self.index_to_file_page[index]
+            self.index_to_file_page[index] = settings.ID_DEFAULT_VALUE
+            self.file_page_to_index.pop(file_page)
             # remove from replace
             self.replace.free(index)
             # write back
             if self.dirty[index]:
-                self.write_page(*unpack_file_page_id(pair_id), self.page_buffer[index])
+                self.write_page(*unpack_file_page_id(file_page), self.page_buffer[index])
                 self.dirty[index] = False
         os.close(file_id)
+        filename = self.file_id_to_name.pop(file_id)
+        self.file_name_to_id.pop(filename)
 
     @staticmethod
-    def read_page(file_id, page_id):
+    def read_page(file_id, page_id) -> bytes:
         """
         Read page for the given file_id and page_id
         *This function is not recommended to call directly*
@@ -105,11 +115,6 @@ class FileManager:
         """
         Write the data to the given file_id and page_id
         Don't call this function explicitly unless creating a new page
-
-        :settings file_id:
-        :settings page_id:
-        :settings data:
-        :return:
         """
         offset = page_id << settings.PAGE_SIZE_BITS
         os.lseek(file_id, offset, os.SEEK_SET)
@@ -128,18 +133,19 @@ class FileManager:
         return pos >> settings.PAGE_SIZE_BITS
 
     def put_page(self, file_id, page_id, data: np.ndarray):
-        index = self.id_to_index.get(pack_file_page_id(file_id, page_id))
+        file_page = pack_file_page_id(file_id, page_id)
+        index = self.file_page_to_index.get(file_page)
         if index is None:
             self.get_page(file_id, page_id)
             # then assert can't be None
-            index = self.id_to_index.get(pack_file_page_id(file_id, page_id))
+            index = self.file_page_to_index.get(file_page)
         self.page_buffer[index] = data
         self.dirty[index] = True
         self.replace.access(index)
 
-    def get_page(self, file_id, page_id) -> np.ndarray:
-        pair_id = pack_file_page_id(file_id, page_id)
-        index = self.id_to_index.get(pair_id)
+    def _get_page(self, file_id, page_id) -> np.ndarray:
+        file_page = pack_file_page_id(file_id, page_id)
+        index = self.file_page_to_index.get(file_page)
 
         # if index is not None, then just past to
         if index is not None:
@@ -155,24 +161,34 @@ class FileManager:
             self._write_back(index)
 
         # now save the new page info
-        self.id_to_index[pair_id] = index
-        self.opened_files[file_id].add(index)
-        self.index_to_file_page[index] = pair_id
+        self.file_page_to_index[file_page] = index
+        self.file_cache_pages[file_id].add(index)
+        self.index_to_file_page[index] = file_page
         data = self.read_page(file_id, page_id)
         data = np.frombuffer(data, np.uint8, settings.PAGE_SIZE)
         self.page_buffer[index] = data
-        return data.copy()
+        return self.page_buffer[index]
+
+    def get_page_reference(self, file_id, page_id) -> np.ndarray:
+        page = self._get_page(file_id, page_id)
+        self.mark_dirty(self.file_page_to_index[pack_file_page_id(file_id, page_id)])
+        return page
+
+    def get_page(self, file_id, page_id) -> np.ndarray:
+        return self._get_page(file_id, page_id).copy()
 
     def release_cache(self):
         for index in np.where(self.dirty)[0]:
             self._write_back(index)
         self.page_buffer.fill(0)
         self.dirty.fill(False)
-        self.index_to_file_page.fill(-1)
-        self.id_to_index.clear()
-        self.last = -1
+        self.index_to_file_page.fill(settings.ID_DEFAULT_VALUE)
+        self.file_page_to_index.clear()
+        self.last = settings.ID_DEFAULT_VALUE
 
     def shutdown(self):
         self.release_cache()
-        while self.opened_files:
-            self.close_file(self.opened_files.popitem()[0])
+        # Notice that close_file will change file_cache_pages
+        # So we can't just use for-in loop
+        while self.file_cache_pages:
+            self.close_file(self.file_cache_pages.popitem()[0])
