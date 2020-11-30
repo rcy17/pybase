@@ -1,0 +1,7 @@
+# Ignore other files
+*
+!.gitignore
+!__init__.py
+!SQLLexer.py
+!SQLParser.py
+!SQLVisitor.py
