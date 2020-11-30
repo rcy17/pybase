@@ -1,7 +1,7 @@
 """
 This is entry file for this project
 
-Data: 2019/10/21
+Data: 2020/10/30
 """
 import os
 import stat
@@ -10,11 +10,13 @@ import tempfile
 from pathlib import Path
 
 from Pybase.manage_system.manager import SystemManger
+from Pybase.manage_system.visitor import SystemVisitor
 
 
 def main():
+    visitor = SystemVisitor()
     bath_path = Path('data')
-    manager = SystemManger(bath_path)
+    manager = SystemManger(visitor, bath_path)
     if len(sys.argv) < 2:
         # python main.py
         mode = os.fstat(0).st_mode
@@ -36,9 +38,6 @@ def main():
     else:
         # python main.py <in.sql>
         manager.execute(sys.argv[1])
-
-    file = manager.open_file('1.db')
-    load_test(file, page_id)
 
 
 if __name__ == '__main__':

@@ -496,18 +496,76 @@ class SQLParser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
 
-        def Identifier(self):
-            return self.getToken(SQLParser.Identifier, 0)
 
         def getRuleIndex(self):
             return SQLParser.RULE_db_statement
 
+     
+        def copyFrom(self, ctx:ParserRuleContext):
+            super().copyFrom(ctx)
+
+
+
+    class Drop_dbContext(Db_statementContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a SQLParser.Db_statementContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def Identifier(self):
+            return self.getToken(SQLParser.Identifier, 0)
+
         def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitDb_statement" ):
-                return visitor.visitDb_statement(self)
+            if hasattr( visitor, "visitDrop_db" ):
+                return visitor.visitDrop_db(self)
             else:
                 return visitor.visitChildren(self)
 
+
+    class Show_tablesContext(Db_statementContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a SQLParser.Db_statementContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitShow_tables" ):
+                return visitor.visitShow_tables(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class Create_dbContext(Db_statementContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a SQLParser.Db_statementContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def Identifier(self):
+            return self.getToken(SQLParser.Identifier, 0)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitCreate_db" ):
+                return visitor.visitCreate_db(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class Use_dbContext(Db_statementContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a SQLParser.Db_statementContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def Identifier(self):
+            return self.getToken(SQLParser.Identifier, 0)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitUse_db" ):
+                return visitor.visitUse_db(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -520,6 +578,7 @@ class SQLParser ( Parser ):
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [SQLParser.T__3]:
+                localctx = SQLParser.Create_dbContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 68
                 self.match(SQLParser.T__3)
@@ -529,6 +588,7 @@ class SQLParser ( Parser ):
                 self.match(SQLParser.Identifier)
                 pass
             elif token in [SQLParser.T__5]:
+                localctx = SQLParser.Drop_dbContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 71
                 self.match(SQLParser.T__5)
@@ -538,6 +598,7 @@ class SQLParser ( Parser ):
                 self.match(SQLParser.Identifier)
                 pass
             elif token in [SQLParser.T__6]:
+                localctx = SQLParser.Use_dbContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
                 self.state = 74
                 self.match(SQLParser.T__6)
@@ -545,6 +606,7 @@ class SQLParser ( Parser ):
                 self.match(SQLParser.Identifier)
                 pass
             elif token in [SQLParser.T__1]:
+                localctx = SQLParser.Show_tablesContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
                 self.state = 76
                 self.match(SQLParser.T__1)

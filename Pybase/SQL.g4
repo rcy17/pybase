@@ -3,7 +3,7 @@ grammar SQL;
 Operator: '=' | '<>' | '<=' | '>=' | '<' | '>' ;
 Identifier: [a-zA-Z_] [a-zA-Z_0-9]*;
 Integer: [0-9]+;
-String:  '\'' [^']* '\'';
+String:  '\'' (~'\'')* '\'';
 Whitespace: [ \t\n\r]+ -> skip;
 
 program
@@ -23,10 +23,10 @@ system_statement
     ;
 
 db_statement
-    : 'CREATE' 'DATABASE' Identifier
-    | 'DROP' 'DATABASE' Identifier
-    | 'USE' Identifier
-    | 'SHOW' 'TABLES'
+    : 'CREATE' 'DATABASE' Identifier    # create_db
+    | 'DROP' 'DATABASE' Identifier      # drop_db
+    | 'USE' Identifier                  # use_db
+    | 'SHOW' 'TABLES'                   # show_tables
     ;
 
 table_statement

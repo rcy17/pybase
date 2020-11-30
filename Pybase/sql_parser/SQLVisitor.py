@@ -24,8 +24,23 @@ class SQLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by SQLParser#db_statement.
-    def visitDb_statement(self, ctx:SQLParser.Db_statementContext):
+    # Visit a parse tree produced by SQLParser#create_db.
+    def visitCreate_db(self, ctx:SQLParser.Create_dbContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#drop_db.
+    def visitDrop_db(self, ctx:SQLParser.Drop_dbContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#use_db.
+    def visitUse_db(self, ctx:SQLParser.Use_dbContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#show_tables.
+    def visitShow_tables(self, ctx:SQLParser.Show_tablesContext):
         return self.visitChildren(ctx)
 
 
