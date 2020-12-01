@@ -205,5 +205,7 @@ fabric.properties
 
 data
 *.db
+temp*
+.INDEX
 
 ############################## Here ends custom ignorance  ##############################

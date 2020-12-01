@@ -2,6 +2,7 @@ from Pybase import settings
 from .treenode import TreeNode
 from .indexhandler import IndexHandler
 import numpy as np
+import math
 
 
 class LeafNode(TreeNode):
@@ -45,8 +46,15 @@ class LeafNode(TreeNode):
     def to_array(self) -> np.ndarray:
         arr = np.zeros(int(settings.PAGE_SIZE/4), np.uint32)
         arr[0:5] = [1, self._parent_id, self._prev_id, self._next_id, len(self._child_key)]
+        bytesize = math.ceil(self._keylen / 8)
+        def transform_data(i:int) -> None:
+            res = self._child_key[i]
+            for j in range(bytesize):
+                arr[5 + (bytesize + 2) * i + j] =  res & 0xFFFFFFFF
+                res >>= 32
         for i in range(len(self._child_key)):
-            arr[5 + 3*i: 8+3*i] = [self._child_key[i], self._child_val[i].page_id, self._child_val[i].slot_id]
+            transform_data(i)
+            arr[5 + bytesize + (bytesize + 2) * i: 7 + bytesize + (bytesize + 2) * i] = [self._child_val[i].page_id, self._child_val[i].slot_id]
         arr.dtype = np.uint8
         assert arr.size == settings.PAGE_SIZE
         return arr

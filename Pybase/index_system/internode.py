@@ -5,7 +5,7 @@ from .treenode import TreeNode
 from .leafnode import LeafNode
 from .indexhandler import IndexHandler
 import numpy as np
-
+import math
 
 class InterNode(TreeNode):
     def __init__(self, page_id, parent_id, child_keys, child_nodes, handle:IndexHandler, keylen:int = 8) -> None:
@@ -64,8 +64,15 @@ class InterNode(TreeNode):
     def to_array(self) -> np.ndarray:
         arr = np.zeros(int(settings.PAGE_SIZE/4), np.uint32)
         arr[0:3] = [0, self._parent_id, len(self._child_key)]
+        bytesize = math.ceil(self._keylen / 8)
+        def transform_data(i:int) -> None:
+            res = self._child_key[i]
+            for j in range(bytesize):
+                arr[3 + (bytesize + 1) * i + j] =  res & 0xFFFFFFFF
+                res >>= 32
         for i in range(len(self._child_key)):
-            arr[3+2*i:5+2*i] = [self._child_key[i], self._child_val[i]._page_id]
+            transform_data(i)
+            arr[3 + bytesize + (bytesize + 1) * i] = self._child_val[i]._page_id
         arr.dtype = np.uint8
         assert arr.size == settings.PAGE_SIZE
         return arr

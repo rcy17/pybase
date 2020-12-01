@@ -26,24 +26,24 @@ class FileIndex:
         bytesize = math.ceil(self._keylen / 8)
         node = None
         parent_id = data[1]
-        def transform_data(data: np.ndarray, index: int) -> int:
+        def transform_data(i: int) -> int:
             res = 0
-            for i in range(bytesize):
-                data <<= 8
-                data += data[index + i]
+            for j in range(bytesize):
+                res
+                res += data[i + j]
             return res
         if data[0] == 1:
             prev_id = data[2]
             next_id = data[3]
             child_len = data[4]
-            child_keys = [transform_data(data, (bytesize + 2)*i + 5) for i in range(child_len)]
+            child_keys = [transform_data((bytesize + 2)*i + 5) for i in range(child_len)]
             child_rids = [RID(data[(bytesize + 2)*i + 5 + bytesize], data[(bytesize + 2)*i + 6 + bytesize]) for i in range(child_len)]
             assert len(child_keys) == len(child_rids)
             node = LeafNode(page_id, parent_id, prev_id, next_id, child_keys, child_rids, self._handle, self._keylen)
         elif data[0] == 0:
             child_len = data[2] 
-            child_keys = [data[2*i + 3] for i in range(child_len)]
-            child_nodes = [self.build_node(data[2*i + 4]) for i in range(child_len)]
+            child_keys = [transform_data((bytesize + 1)*i + 3) for i in range(child_len)]
+            child_nodes = [self.build_node(data[(1 + bytesize)*i + 3 + bytesize]) for i in range(child_len)]
             assert len(child_keys) == len(child_nodes)
             node = InterNode(page_id, parent_id, child_keys, child_nodes, self._handle, self._keylen)
         return node
