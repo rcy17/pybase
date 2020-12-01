@@ -27,7 +27,11 @@ class FileIndex:
         node = None
         parent_id = data[1]
         def transform_data(data: np.ndarray, index: int) -> int:
-            return 0
+            res = 0
+            for i in range(bytesize):
+                data <<= 8
+                data += data[index + i]
+            return res
         if data[0] == 1:
             prev_id = data[2]
             next_id = data[3]
