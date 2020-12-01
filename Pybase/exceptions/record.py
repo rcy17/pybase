@@ -20,7 +20,7 @@ class PageOverflowError(Error):
     """
 
 
-class RecordFileReopenError(Error):
+class RecordFileOperationError(Error):
     """
-    This will be raised when
+    This will be raised when record file open or close failed
     """

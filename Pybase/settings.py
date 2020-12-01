@@ -49,3 +49,11 @@ HEADER_PAGE_ID = 0
 RECORD_PAGE_FLAG = 0
 
 VARCHAR_PAGE_FLAG = 1
+
+
+# file suffix
+
+TABLE_FILE_SUFFIX = '.table'
+INDEX_FILE_SUFFIX = '.index'
+META_FILE_NAME = '.meta'
+

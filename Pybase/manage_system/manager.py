@@ -12,6 +12,7 @@ from Pybase.sql_parser.SQLParser import SQLParser
 from Pybase.record_system.manager import RecordManager
 # from Pybase.index_system.
 from Pybase.exceptions.run_sql import DateBaseError
+from Pybase.settings import (INDEX_FILE_SUFFIX, TABLE_FILE_SUFFIX, META_FILE_NAME)
 
 
 class SystemManger:
@@ -25,6 +26,13 @@ class SystemManger:
         self.using_db = None
         self.visitor = visitor
         self.visitor.manager = self
+
+    def get_db_path(self, db_name):
+        return self._base_path / db_name
+
+    def get_table_path(self, table_name):
+        assert self.using_db is not None
+        return self._base_path / self.using_db / table_name
 
     def execute(self, filename):
         input_stream = FileStream(filename)
@@ -40,7 +48,7 @@ class SystemManger:
     def create_db(self, name):
         if name in self.dbs:
             raise DateBaseError(f"Can't create existing database {name}")
-        db_path = self._base_path / name
+        db_path = self.get_db_path(name)
         assert not db_path.exists()
         db_path.mkdir(parents=True)
         self.dbs.add(name)
@@ -48,9 +56,13 @@ class SystemManger:
     def drop_db(self, name):
         if name not in self.dbs:
             raise DateBaseError(f"Can't drop not existing database {name}")
-        db_path = self._base_path / name
+        db_path = self.get_db_path(name)
         assert db_path.exists()
         for each in db_path.iterdir():
+            if each.suffix == TABLE_FILE_SUFFIX and str(each) in self._RM.opened_files:
+                self._RM.close_file(str(each))
+            if each.suffix == INDEX_FILE_SUFFIX:
+                pass
             each.unlink()
         db_path.rmdir()
         self.dbs.remove(name)
@@ -66,4 +78,5 @@ class SystemManger:
         if self.using_db is None:
             raise DateBaseError(f"No using database to show tables")
         for file in (self._base_path / self.using_db).iterdir():
-            print(file.name)
+            if file.suffix == '.table':
+                print(file.stem)

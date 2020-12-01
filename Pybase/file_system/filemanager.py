@@ -58,22 +58,22 @@ class FileManager:
         self.index_to_file_page[index] = settings.ID_DEFAULT_VALUE
 
     @staticmethod
-    def create_file(filename):
+    def create_file(filename: str):
         open(filename, 'w').close()
 
     @staticmethod
-    def touch_file(filename):
+    def touch_file(filename: str):
         open(filename, 'a').close()
 
     @staticmethod
-    def remove_file(filename):
+    def remove_file(filename: str):
         os.remove(filename)
     
     @staticmethod
-    def exists_file(filename):
+    def exists_file(filename: str):
         return os.path.exists(filename)
 
-    def open_file(self, filename):
+    def open_file(self, filename: str):
         if filename in self.file_name_to_id:
             return self.file_name_to_id[filename]
         file_id = os.open(filename, FileManager.FILE_OPEN_MODE)
@@ -84,7 +84,7 @@ class FileManager:
         self.file_id_to_name[file_id] = filename
         return file_id
 
-    def close_file(self, file_id):
+    def close_file(self, file_id: int):
         # notice that in shutdown file_id already popped
         pages = self.file_cache_pages.pop(file_id, {})
         for index in pages:

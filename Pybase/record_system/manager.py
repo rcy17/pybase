@@ -6,7 +6,7 @@ Data: 2019/10/24
 from Pybase.file_system import FileManager
 from Pybase.utils.formula import get_record_capacity
 from Pybase.utils.header import header_serialize
-from Pybase.exceptions.record import RecordFileReopenError
+from Pybase.exceptions.record import RecordFileOperationError
 from .filehandle import FileHandle
 from Pybase.utils.header_pb2 import HeaderInfo
 
@@ -17,7 +17,7 @@ class RecordManager:
     """
     def __init__(self):
         self._FM = FileManager()
-        self.opened_files = set()
+        self.opened_files = {}
 
     @property
     def file_manager(self) -> FileManager:
@@ -49,16 +49,19 @@ class RecordManager:
 
     def open_file(self, filename):
         if filename in self.opened_files:
-            raise RecordFileReopenError(f'File {filename} is already opened')
+            raise RecordFileOperationError(f'File {filename} is already opened')
         file = self._FM.open_file(filename)
         handle = FileHandle(self, file, filename)
-        self.opened_files.add(filename)
+        self.opened_files[filename] = handle
         return handle
 
-    def close_file(self, handle: FileHandle):
+    def close_file(self, filename):
+        if filename not in self.opened_files:
+            raise RecordFileOperationError(f'File {filename} is not opened')
+        handle = self.opened_files[filename]
         if handle.header_modified:
             handle.modify_header()
-        self.opened_files.remove(handle.filename)
+        self.opened_files.pop(handle.filename)
         self._FM.close_file(handle.file_id)
         handle.is_opened = False
 
