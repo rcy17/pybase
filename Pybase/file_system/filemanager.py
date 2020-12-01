@@ -68,6 +68,10 @@ class FileManager:
     @staticmethod
     def remove_file(filename):
         os.remove(filename)
+    
+    @staticmethod
+    def exists_file(filename):
+        return os.path.exists(filename)
 
     def open_file(self, filename):
         if filename in self.file_name_to_id:

@@ -1,11 +1,11 @@
 from Pybase import settings
 from .treenode import TreeNode
-from ..record_system.rid import RID
+from .indexhandler import IndexHandler
 import numpy as np
 
 
 class LeafNode(TreeNode):
-    def __init__(self, page_id, parent_id, prev_id, next_id, child_keys, child_rids, handle) -> None:
+    def __init__(self, page_id, parent_id, prev_id, next_id, child_keys, child_rids, handle:IndexHandler, keylen:int = 8) -> None:
         super(LeafNode, self).__init__()
         self._page_id = page_id
         self._parent_id = parent_id
@@ -15,6 +15,7 @@ class LeafNode(TreeNode):
         self._child_val = child_rids
         self._type = 1
         self._handle = handle
+        self._keylen = keylen
 
     def insert(self, key, val):
         high = self.upper_bound(key)
@@ -39,7 +40,7 @@ class LeafNode(TreeNode):
         self._child_val.pop(pos)
 
     def page_size(self) -> int:
-        return 32 + len(self._child_key) * 24
+        return 32 + len(self._child_key) * (self._keylen + 16)
 
     def to_array(self) -> np.ndarray:
         arr = np.zeros(int(settings.PAGE_SIZE/4), np.uint32)
