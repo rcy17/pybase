@@ -23,12 +23,12 @@ def main():
         while True:
             if not stat.S_ISREG(mode):
                 # if stdin is redirected, do not print
-                print('pybase> ', end='')
+                print(f'pybase({manager.using_db})> ', end='')
             try:
                 line = input()
             except (KeyboardInterrupt, EOFError):
                 break
-            if line in ('quit', 'exit', '.quit', '.exit'):
+            if line.strip().lower() in ('quit', 'exit', '.quit', '.exit'):
                 break
             file = tempfile.NamedTemporaryFile('w', delete=False, encoding='utf-8')
             file.write(line)

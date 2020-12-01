@@ -59,7 +59,7 @@ class FileHandle:
         offset = settings.RECORD_PAGE_NEXT_OFFSET
         data[offset: offset + 4] = np.frombuffer(page_id.to_bytes(4, 'big'), dtype=np.uint8)
 
-    def _get_offset(self, slot_id):
+    def _get_record_offset(self, slot_id):
         header = self.header
         return settings.RECORD_PAGE_FIXED_HEADER_SIZE + (header.record_length >> 3) + header.record_length * slot_id
 
@@ -82,7 +82,7 @@ class FileHandle:
         assert slot_id < header.record_per_page
         if data is None:
             data = self._manger.file_manager.get_page(self._file_id, rid.page_id)
-        offset = self._get_offset(slot_id)
+        offset = self._get_record_offset(slot_id)
         record = Record(rid, data[offset: offset + header.record_length])
         return record
 
@@ -103,7 +103,7 @@ class FileHandle:
         slot_id = valid_slots[0]
 
         # insert record
-        offset = self._get_offset(slot_id)
+        offset = self._get_record_offset(slot_id)
         page[offset: offset + record_length] = data
         bitmap[slot_id] = False
 
@@ -139,7 +139,7 @@ class FileHandle:
         self._header_modified = True
 
         # check to update first_vacancy_page
-        if self._get_offset(page) == page_id:
+        if self._get_next_vacancy(page) == page_id:
             self._set_next_vacancy(page, header.next_vacancy_page)
             header.next_vacancy_page = page_id
 
@@ -150,7 +150,7 @@ class FileHandle:
         header = self.header
         rid = record.rid
         data = self._manger.file_manager.get_page(rid.page_id, rid.slot_id)
-        offset = self._get_offset(rid.slot_id)
+        offset = self._get_record_offset(rid.slot_id)
         data[offset: offset + header.record_length] = record.data
         self._manger.file_manager.put_page(self._file_id, rid.page_id, data)
 
