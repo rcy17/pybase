@@ -5,18 +5,20 @@
 
 ## Header
 
-每个header中会存有部分关于记录的结构，其具体实现主要借助了protobuf直接序列化相关信息以减少工作量。
+每个header中会存有部分关于记录的结构，直接使用json进行记录。
 记录信息如下：
 
-1. record_length：表示一条记录的固定长度；
+- record_length：int, 表示一条记录的固定长度；
 
-2. record_per_page：表示每页的记录数；
+- record_per_page：int, 表示每页的记录数；
 
-3. page_number：表示该表总页数；
+- page_number：int, 表示该表总页数；
 
-4. record_number：表示该表记录总数；
+- record_number：int, 表示该表记录总数；
 
-5. next_vacancy_page：表示下一个有空位页的页码;
+- next_vacancy_page：int, 表示下一个有空位页的页码;
+
+- bitmap_length: int, 表示每页位图所占大小；
 
 ## 参考资料
 

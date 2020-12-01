@@ -4,17 +4,16 @@ Here defines RecordManager
 Data: 2019/10/24
 """
 from Pybase.file_system import FileManager
-from Pybase.utils.formula import get_record_capacity
-from Pybase.utils.header import header_serialize
+from Pybase.utils.header import get_record_capacity, header_serialize, get_bitmap_length
 from Pybase.exceptions.record import RecordFileOperationError
 from .filehandle import FileHandle
-from Pybase.utils.header_pb2 import HeaderInfo
 
 
 class RecordManager:
     """
     Class to manage records of database
     """
+
     def __init__(self):
         self._FM = FileManager()
         self.opened_files = {}
@@ -32,13 +31,17 @@ class RecordManager:
 
         # open the file to add header page
         file = self._FM.open_file(filename)
-        header = HeaderInfo()
-        header.record_length = record_length
-        header.record_per_page = get_record_capacity(record_length)
-        header.page_number = 1
-        header.record_number = 0
-        header.next_vacancy_page = 0
-        header.filename = filename
+        record_per_page = get_record_capacity(record_length)
+        bitmap_length = get_bitmap_length(record_per_page)
+        header = {
+            'record_length': record_length,
+            'record_per_page': record_per_page,
+            'page_number': 1,
+            'record_number': 0,
+            'next_vacancy_page': 0,
+            'filename': filename,
+            'bitmap_length': bitmap_length,
+        }
         self._FM.new_page(file, header_serialize(header))
 
         # close the file
@@ -64,7 +67,3 @@ class RecordManager:
         self.opened_files.pop(handle.filename)
         self._FM.close_file(handle.file_id)
         handle.is_opened = False
-
-
-
-

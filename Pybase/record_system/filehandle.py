@@ -6,8 +6,8 @@ Data: 2019/10/24
 import numpy as np
 
 from Pybase import settings
-from Pybase.utils.header import header_serialize, header_deserialize
 # from .manager import FileManager, RecordManager
+from Pybase.utils.header import header_deserialize, header_serialize
 from .record import Record
 from .rid import RID
 
@@ -49,7 +49,7 @@ class FileHandle:
 
     def get_bitmap(self, data: np.ndarray):
         offset = settings.RECORD_PAGE_FIXED_HEADER_SIZE
-        return np.unpackbits(data[offset: offset + (self.header.record_per_page >> 3)])
+        return np.unpackbits(data[offset: offset + (self.header['record_per_page'] >> 3)])
 
     def _get_next_vacancy(self, data: np.ndarray) -> int:
         offset = settings.RECORD_PAGE_NEXT_OFFSET
@@ -61,7 +61,8 @@ class FileHandle:
 
     def _get_record_offset(self, slot_id):
         header = self.header
-        return settings.RECORD_PAGE_FIXED_HEADER_SIZE + (header.record_length >> 3) + header.record_length * slot_id
+        return settings.RECORD_PAGE_FIXED_HEADER_SIZE + (header['record_length'] >> 3) + header[
+            'record_length'] * slot_id
 
     def get_page(self, page_id) -> np.ndarray:
         return self._manger.file_manager.get_page(self._file_id, page_id)
@@ -78,12 +79,12 @@ class FileHandle:
     def get_record(self, rid: RID, data=None) -> Record:
         header = self.header
         slot_id = rid.slot_id
-        assert rid.page_id < header.page_number
-        assert slot_id < header.record_per_page
+        assert rid.page_id < header['page_number']
+        assert slot_id < header['record_per_page']
         if data is None:
             data = self._manger.file_manager.get_page(self._file_id, rid.page_id)
         offset = self._get_record_offset(slot_id)
-        record = Record(rid, data[offset: offset + header.record_length])
+        record = Record(rid, data[offset: offset + header['record_length']])
         return record
 
     def insert_record(self, data: np.ndarray) -> RID:
@@ -94,7 +95,7 @@ class FileHandle:
             page_id = header.next_vacancy_page
             assert page_id != settings.HEADER_PAGE_ID
         page = self._manger.file_manager.get_page(self._file_id, page_id)
-        record_length = header.record_length
+        record_length = header['record_length']
         assert len(data) == record_length
         bitmap = self.get_bitmap(page)
 
@@ -109,10 +110,10 @@ class FileHandle:
 
         # set new bitmap
         offset = settings.RECORD_PAGE_FIXED_HEADER_SIZE
-        page[offset: offset + (header.record_per_page >> 3)] = np.packbits(bitmap)
+        page[offset: offset + (header['record_per_page'] >> 3)] = np.packbits(bitmap)
 
         # update header
-        header.record_number += 1
+        header['record_number'] += 1
         self._header_modified = True
 
         # check if this is the last valid slot
@@ -135,7 +136,7 @@ class FileHandle:
         # just use lazy deletion
         assert bitmap[slot_id] is False
         bitmap[slot_id] = True
-        header.record_number -= 1
+        header['record_number'] -= 1
         self._header_modified = True
 
         # check to update first_vacancy_page
@@ -151,7 +152,7 @@ class FileHandle:
         rid = record.rid
         data = self._manger.file_manager.get_page(rid.page_id, rid.slot_id)
         offset = self._get_record_offset(rid.slot_id)
-        data[offset: offset + header.record_length] = record.data
+        data[offset: offset + header['record_length']] = record.data
         self._manger.file_manager.put_page(self._file_id, rid.page_id, data)
 
     def force_pages(self, pages=-1):
@@ -167,6 +168,6 @@ class FileHandle:
 
         # write data and update header
         page_id = self._manger.file_manager.new_page(self._file_id, data)
-        header.page_number += 1
+        header['page_number'] += 1
         header.next_vacancy_page = page_id
         self._header_modified = True
