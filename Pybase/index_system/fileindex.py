@@ -7,12 +7,10 @@ import numpy as np
 
 from Pybase import settings
 from ..record_system.filehandle import FileHandle
-from ..record_system.record import Record, Condition
 from ..record_system.rid import RID
 from .treenode import TreeNode
 from .leafnode import LeafNode
 from .internode import InterNode
-from queue import Queue
 
 
 class FileIndex:
