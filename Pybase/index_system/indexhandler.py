@@ -17,6 +17,7 @@ class IndexHandler:
     '''
     def __init__(self, manager: FileManager, dirhead="./") -> None:
         self._manager = manager
+        self._is_modified = False
         if self._manager.exists_file(dirhead + INDEX_FILE):
             self._file_id = self._manager.open_file(dirhead + INDEX_FILE)
         else:
@@ -27,6 +28,7 @@ class IndexHandler:
         return self._manager.get_page(self._file_id, page_id)
     
     def put_page(self, page_id, data: np.ndarray):
+        self._is_modified = True
         return self._manager.put_page(self._file_id, page_id, data)
 
     def new_page(self) -> int:
