@@ -61,6 +61,18 @@ class MetaHandler:
         if self._db_info._tbMap.get(tbname) is None:
             return None
         return self._db_info._tbMap.get(tbname)._pid
+    
+    def update_index_root(self, tbname, colname, new_root):
+        if self._db_info._tbMap.get(tbname) is None:
+            # Error
+            pass
+        table: TableInfo = self._db_info._tbMap[tbname]
+        if table._colMap.get(colname) is None:
+            # Error
+            pass
+        column = table._colMap[colname]
+        assert column._is_index == True
+        column._root_id = new_root
 
     def _dump(self):
         outfile = open(self._db_name + META_FILE, "w")

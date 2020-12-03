@@ -3,6 +3,9 @@ Here defines SystemManger class
 
 Date: 2020/11/30
 """
+from Pybase.meta_system.manager import MetaManager
+from Pybase.index_system.manager import IndexManager
+from Pybase.file_system.filemanager import FileManager
 from pathlib import Path
 
 from antlr4 import FileStream, CommonTokenStream
@@ -18,8 +21,10 @@ from Pybase.settings import (INDEX_FILE_SUFFIX, TABLE_FILE_SUFFIX, META_FILE_NAM
 class SystemManger:
     """Class to manage the whole system"""
     def __init__(self, visitor, base_path: Path):
-        self._RM = RecordManager()
-        self._FM = self._RM.file_manager
+        self._FM = FileManager()
+        self._RM = RecordManager(self._FM)
+        self._IM = IndexManager(self._FM)
+        self._MM = MetaManager()
         self._base_path = base_path
         base_path.mkdir(exist_ok=True, parents=True)
         self.dbs = {path.name for path in base_path.iterdir()}

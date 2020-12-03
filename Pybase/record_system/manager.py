@@ -14,8 +14,8 @@ class RecordManager:
     Class to manage records of database
     """
 
-    def __init__(self):
-        self._FM = FileManager()
+    def __init__(self, manager: FileManager):
+        self._FM = manager
         self.opened_files = {}
 
     @property

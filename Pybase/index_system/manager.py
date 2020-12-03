@@ -2,14 +2,13 @@
 """
 
 from Pybase import settings
-from numpy.lib.function_base import select
 from Pybase.file_system.filemanager import FileManager
 from .indexhandler import IndexHandler
 from .fileindex import FileIndex
 
 class IndexManager:
-    def __init__(self) -> None:
-        self._FM = FileManager()
+    def __init__(self, manager: FileManager) -> None:
+        self._FM = manager
         self._open_indexes = {}
 
     @property
