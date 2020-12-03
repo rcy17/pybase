@@ -20,6 +20,7 @@ from Pybase.settings import (INDEX_FILE_SUFFIX, TABLE_FILE_SUFFIX, META_FILE_NAM
 
 class SystemManger:
     """Class to manage the whole system"""
+
     def __init__(self, visitor, base_path: Path):
         self._FM = FileManager()
         self._RM = RecordManager(self._FM)
@@ -40,13 +41,13 @@ class SystemManger:
         return self._base_path / self.using_db / table_name
 
     def execute(self, filename):
-        input_stream = FileStream(filename)
+        input_stream = FileStream(filename, encoding='utf-8')
         lexer = SQLLexer(input_stream)
         tokens = CommonTokenStream(lexer)
         parser = SQLParser(tokens)
         tree = parser.program()
         try:
-            self.visitor.visit(tree)
+            return self.visitor.visit(tree)
         except DateBaseError as e:
             print(e)
 
@@ -82,6 +83,4 @@ class SystemManger:
     def show_tables(self):
         if self.using_db is None:
             raise DateBaseError(f"No using database to show tables")
-        for file in (self._base_path / self.using_db).iterdir():
-            if file.suffix == '.table':
-                print(file.stem)
+        return [file.stem for file in (self._base_path / self.using_db).iterdir() if file.suffix == '.table']
