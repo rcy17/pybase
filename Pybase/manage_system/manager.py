@@ -16,6 +16,7 @@ from Pybase.record_system.manager import RecordManager
 # from Pybase.index_system.
 from Pybase.exceptions.run_sql import DateBaseError
 from Pybase.settings import (INDEX_FILE_SUFFIX, TABLE_FILE_SUFFIX, META_FILE_NAME)
+from Pybase.meta_system.info import ColumnInfo, TableInfo, DbInfo
 
 
 class SystemManger:
@@ -84,3 +85,32 @@ class SystemManger:
         if self.using_db is None:
             raise DateBaseError(f"No using database to show tables")
         return [file.stem for file in (self._base_path / self.using_db).iterdir() if file.suffix == '.table']
+
+    
+    def create_table(self, tbinfo: TableInfo):
+        
+        pass
+
+    def drop_table(self, tbname):
+        pass
+
+    def add_column(self, tbname, colinfo: ColumnInfo):
+        
+        pass
+
+    def drop_column(self, tbname, colname):
+        pass
+
+    def create_index(self, tbname, colname):
+        # Remember to get the size of colname
+        pass
+
+    def insert_record(self, tbname, value):
+        '''
+        value is a dict like:
+        {key: 1, value: 2}
+        '''
+        # Remember to get the order in Record from meta
+        pass
+        
+    
