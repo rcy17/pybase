@@ -44,18 +44,98 @@ class SQLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by SQLParser#table_statement.
-    def visitTable_statement(self, ctx:SQLParser.Table_statementContext):
+    # Visit a parse tree produced by SQLParser#create_table.
+    def visitCreate_table(self, ctx:SQLParser.Create_tableContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by SQLParser#index_statement.
-    def visitIndex_statement(self, ctx:SQLParser.Index_statementContext):
+    # Visit a parse tree produced by SQLParser#drop_table.
+    def visitDrop_table(self, ctx:SQLParser.Drop_tableContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by SQLParser#alter_statement.
-    def visitAlter_statement(self, ctx:SQLParser.Alter_statementContext):
+    # Visit a parse tree produced by SQLParser#describe_table.
+    def visitDescribe_table(self, ctx:SQLParser.Describe_tableContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#insert_into_table.
+    def visitInsert_into_table(self, ctx:SQLParser.Insert_into_tableContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#delete_from_table.
+    def visitDelete_from_table(self, ctx:SQLParser.Delete_from_tableContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#update_table.
+    def visitUpdate_table(self, ctx:SQLParser.Update_tableContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#select_table.
+    def visitSelect_table(self, ctx:SQLParser.Select_tableContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#create_index.
+    def visitCreate_index(self, ctx:SQLParser.Create_indexContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#drop_index.
+    def visitDrop_index(self, ctx:SQLParser.Drop_indexContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#alter_add_index.
+    def visitAlter_add_index(self, ctx:SQLParser.Alter_add_indexContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#alter_drop_index.
+    def visitAlter_drop_index(self, ctx:SQLParser.Alter_drop_indexContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#alter_table_add.
+    def visitAlter_table_add(self, ctx:SQLParser.Alter_table_addContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#alter_table_drop.
+    def visitAlter_table_drop(self, ctx:SQLParser.Alter_table_dropContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#alter_table_change.
+    def visitAlter_table_change(self, ctx:SQLParser.Alter_table_changeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#alter_table_rename.
+    def visitAlter_table_rename(self, ctx:SQLParser.Alter_table_renameContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#alter_table_drop_pk.
+    def visitAlter_table_drop_pk(self, ctx:SQLParser.Alter_table_drop_pkContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#alter_table_drop_foreign_key.
+    def visitAlter_table_drop_foreign_key(self, ctx:SQLParser.Alter_table_drop_foreign_keyContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#alter_table_add_pk.
+    def visitAlter_table_add_pk(self, ctx:SQLParser.Alter_table_add_pkContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#alter_table_add_foreign_key.
+    def visitAlter_table_add_foreign_key(self, ctx:SQLParser.Alter_table_add_foreign_keyContext):
         return self.visitChildren(ctx)
 
 
