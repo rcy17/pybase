@@ -26,7 +26,7 @@ class SystemManger:
     def __init__(self, visitor: SQLVisitor, base_path: Path):
         self._FM = FileManager()
         self._RM = RecordManager(self._FM)
-        self._IM = IndexManager(self._FM)
+        self._IM = IndexManager(self._FM, base_path)
         self._MM = MetaManager(base_path)
         self._base_path = base_path
         base_path.mkdir(exist_ok=True, parents=True)

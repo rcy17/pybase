@@ -7,16 +7,17 @@ from .indexhandler import IndexHandler
 from .fileindex import FileIndex
 
 class IndexManager:
-    def __init__(self, manager: FileManager) -> None:
+    def __init__(self, manager: FileManager, home_dir="./") -> None:
         self._FM = manager
         self._open_indexes = {}
+        self._home_dir = home_dir
 
     @property
     def file_manager(self) -> FileManager:
         return self._FM
     
     def create_index(self, dbname, colname, keylen) -> FileIndex:
-        handle = IndexHandler(self._FM, dbname)
+        handle = IndexHandler(self._FM, dbname, self._home_dir)
         fileindex = FileIndex(handle, handle.new_page(), keylen)
         fileindex.dump()
         self._open_indexes[(dbname, colname)] = fileindex
