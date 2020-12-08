@@ -15,7 +15,7 @@ from Pybase.sql_parser.SQLParser import SQLParser
 from Pybase.sql_parser.SQLVisitor import SQLVisitor
 from Pybase.record_system.manager import RecordManager
 # from Pybase.index_system.
-from Pybase.exceptions.run_sql import DateBaseError
+from Pybase.exceptions.run_sql import DataBaseError
 from Pybase.settings import (INDEX_FILE_SUFFIX, TABLE_FILE_SUFFIX, META_FILE_NAME)
 from Pybase.meta_system.info import ColumnInfo, TableInfo, DbInfo
 
@@ -50,12 +50,12 @@ class SystemManger:
         tree = parser.program()
         try:
             return self.visitor.visit(tree)
-        except DateBaseError as e:
+        except DataBaseError as e:
             print(e)
 
     def create_db(self, name):
         if name in self.dbs:
-            raise DateBaseError(f"Can't create existing database {name}")
+            raise DataBaseError(f"Can't create existing database {name}")
         db_path = self.get_db_path(name)
         assert not db_path.exists()
         db_path.mkdir(parents=True)
@@ -63,7 +63,7 @@ class SystemManger:
 
     def drop_db(self, name):
         if name not in self.dbs:
-            raise DateBaseError(f"Can't drop not existing database {name}")
+            raise DataBaseError(f"Can't drop not existing database {name}")
         db_path = self.get_db_path(name)
         assert db_path.exists()
         for each in db_path.iterdir():
@@ -79,25 +79,26 @@ class SystemManger:
 
     def use_db(self, name):
         if name not in self.dbs:
-            raise DateBaseError(f"Can't use not existing database {name}")
+            raise DataBaseError(f"Can't use not existing database {name}")
         self.using_db = name
 
     def show_tables(self):
         if self.using_db is None:
-            raise DateBaseError(f"No using database to show tables")
+            raise DataBaseError(f"No using database to show tables")
         return [file.stem for file in (self._base_path / self.using_db).iterdir() if file.suffix == '.table']
 
-    
-    def create_table(self, tbinfo: TableInfo):
+    def create_table(self, tb_info: TableInfo):
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to create table")
         meta_handle = self._MM.open_meta(self.using_db)
-        meta_handle.add_table(TableInfo)
+        meta_handle.add_table(tb_info)
         pass
 
     def drop_table(self, tbname):
         pass
 
     def add_column(self, tbname, colinfo: ColumnInfo):
-        
+
         pass
 
     def drop_column(self, tbname, colname):
@@ -114,5 +115,3 @@ class SystemManger:
         '''
         # Remember to get the order in Record from meta
         pass
-        
-    

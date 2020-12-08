@@ -69,12 +69,12 @@ class MetaHandler:
         column._root_id = new_root
 
     def _dump(self):
-        outfile = open(self._db_name + META_FILE, "w")
+        outfile = open(self._db_name + META_FILE, "wb")
         pickle.dump(self._db_info, outfile)
         outfile.close()
     
     def _load(self):
-        infile = open(self._db_name + META_FILE, 'r')
+        infile = open(self._db_name + META_FILE, 'rb')
         self._db_info = pickle.load(infile)
         infile.close()
     

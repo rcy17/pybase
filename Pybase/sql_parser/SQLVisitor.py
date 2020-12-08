@@ -144,8 +144,18 @@ class SQLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by SQLParser#field.
-    def visitField(self, ctx:SQLParser.FieldContext):
+    # Visit a parse tree produced by SQLParser#normal_field.
+    def visitNormal_field(self, ctx:SQLParser.Normal_fieldContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#primary_key_field.
+    def visitPrimary_key_field(self, ctx:SQLParser.Primary_key_fieldContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#foreign_key_field.
+    def visitForeign_key_field(self, ctx:SQLParser.Foreign_key_fieldContext):
         return self.visitChildren(ctx)
 
 

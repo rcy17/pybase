@@ -6,7 +6,7 @@ Date: 2020/11/30
 from .base import Error
 
 
-class DateBaseError(Error):
+class DataBaseError(Error):
     """
     Data Base Error for db sql
     """

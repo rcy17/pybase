@@ -1511,33 +1511,72 @@ class SQLParser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
 
+
+        def getRuleIndex(self):
+            return SQLParser.RULE_field
+
+     
+        def copyFrom(self, ctx:ParserRuleContext):
+            super().copyFrom(ctx)
+
+
+
+    class Primary_key_fieldContext(FieldContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a SQLParser.FieldContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def identifiers(self):
+            return self.getTypedRuleContext(SQLParser.IdentifiersContext,0)
+
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitPrimary_key_field" ):
+                return visitor.visitPrimary_key_field(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class Foreign_key_fieldContext(FieldContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a SQLParser.FieldContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
         def Identifier(self, i:int=None):
             if i is None:
                 return self.getTokens(SQLParser.Identifier)
             else:
                 return self.getToken(SQLParser.Identifier, i)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitForeign_key_field" ):
+                return visitor.visitForeign_key_field(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class Normal_fieldContext(FieldContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a SQLParser.FieldContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def Identifier(self):
+            return self.getToken(SQLParser.Identifier, 0)
         def type_(self):
             return self.getTypedRuleContext(SQLParser.Type_Context,0)
-
 
         def value(self):
             return self.getTypedRuleContext(SQLParser.ValueContext,0)
 
 
-        def identifiers(self):
-            return self.getTypedRuleContext(SQLParser.IdentifiersContext,0)
-
-
-        def getRuleIndex(self):
-            return SQLParser.RULE_field
-
         def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitField" ):
-                return visitor.visitField(self)
+            if hasattr( visitor, "visitNormal_field" ):
+                return visitor.visitNormal_field(self)
             else:
                 return visitor.visitChildren(self)
-
 
 
 
@@ -1551,6 +1590,7 @@ class SQLParser ( Parser ):
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [SQLParser.Identifier]:
+                localctx = SQLParser.Normal_fieldContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 227
                 self.match(SQLParser.Identifier)
@@ -1578,6 +1618,7 @@ class SQLParser ( Parser ):
 
                 pass
             elif token in [SQLParser.T__28]:
+                localctx = SQLParser.Primary_key_fieldContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 237
                 self.match(SQLParser.T__28)
@@ -1591,6 +1632,7 @@ class SQLParser ( Parser ):
                 self.match(SQLParser.T__10)
                 pass
             elif token in [SQLParser.T__30]:
+                localctx = SQLParser.Foreign_key_fieldContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
                 self.state = 243
                 self.match(SQLParser.T__30)
