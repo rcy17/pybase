@@ -11,12 +11,14 @@ from pathlib import Path
 
 from Pybase.manage_system.manager import SystemManger
 from Pybase.manage_system.visitor import SystemVisitor
+from Pybase.printer import TablePrinter, CSVPrinter
 
 
 def main():
     visitor = SystemVisitor()
     bath_path = Path('data')
     manager = SystemManger(visitor, bath_path)
+    printer = TablePrinter()
     if len(sys.argv) < 2:
         # python main.py
         mode = os.fstat(0).st_mode
@@ -33,7 +35,7 @@ def main():
             file = tempfile.NamedTemporaryFile('w', delete=False, encoding='utf-8')
             file.write(line)
             file.close()
-            manager.execute(file.name)
+            printer.print(manager.execute(file.name))
             os.unlink(file.name)
     else:
         # python main.py <in.sql>

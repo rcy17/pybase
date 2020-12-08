@@ -7,6 +7,7 @@ from Pybase.sql_parser.SQLParser import SQLParser
 from Pybase.sql_parser.SQLVisitor import SQLVisitor
 from Pybase.utils.tools import to_str
 from .manager import SystemManger
+from .result import QueryResult
 
 
 class SystemVisitor(SQLVisitor):
@@ -16,8 +17,11 @@ class SystemVisitor(SQLVisitor):
         super().__init__()
         self.manager: SystemManger = manager
 
+    def aggregateResult(self, aggregate, nextResult):
+        return aggregate if nextResult is None else nextResult
+
     def visitSystem_statement(self, ctx: SQLParser.System_statementContext):
-        print(*self.manager.dbs, sep='\n')
+        return QueryResult('databases', tuple(self.manager.dbs))
 
     def visitCreate_db(self, ctx: SQLParser.Create_dbContext):
         self.manager.create_db(to_str(ctx.Identifier()))
@@ -29,4 +33,4 @@ class SystemVisitor(SQLVisitor):
         self.manager.use_db(to_str(ctx.Identifier()))
 
     def visitShow_tables(self, ctx: SQLParser.Show_tablesContext):
-        self.manager.show_tables()
+        return QueryResult('tables', self.manager.show_tables())

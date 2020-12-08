@@ -3,6 +3,9 @@ Here defines SystemManger class
 
 Date: 2020/11/30
 """
+from Pybase.meta_system.manager import MetaManager
+from Pybase.index_system.manager import IndexManager
+from Pybase.file_system.filemanager import FileManager
 from pathlib import Path
 
 from antlr4 import FileStream, CommonTokenStream
@@ -14,13 +17,17 @@ from Pybase.record_system.manager import RecordManager
 # from Pybase.index_system.
 from Pybase.exceptions.run_sql import DateBaseError
 from Pybase.settings import (INDEX_FILE_SUFFIX, TABLE_FILE_SUFFIX, META_FILE_NAME)
+from Pybase.meta_system.info import ColumnInfo, TableInfo, DbInfo
 
 
 class SystemManger:
     """Class to manage the whole system"""
+
     def __init__(self, visitor: SQLVisitor, base_path: Path):
-        self._RM = RecordManager()
-        self._FM = self._RM.file_manager
+        self._FM = FileManager()
+        self._RM = RecordManager(self._FM)
+        self._IM = IndexManager(self._FM)
+        self._MM = MetaManager()
         self._base_path = base_path
         base_path.mkdir(exist_ok=True, parents=True)
         self.dbs = {path.name for path in base_path.iterdir()}
@@ -36,13 +43,13 @@ class SystemManger:
         return self._base_path / self.using_db / table_name
 
     def execute(self, filename):
-        input_stream = FileStream(filename)
+        input_stream = FileStream(filename, encoding='utf-8')
         lexer = SQLLexer(input_stream)
         tokens = CommonTokenStream(lexer)
         parser = SQLParser(tokens)
         tree = parser.program()
         try:
-            self.visitor.visit(tree)
+            return self.visitor.visit(tree)
         except DateBaseError as e:
             print(e)
 
@@ -78,6 +85,33 @@ class SystemManger:
     def show_tables(self):
         if self.using_db is None:
             raise DateBaseError(f"No using database to show tables")
-        for file in (self._base_path / self.using_db).iterdir():
-            if file.suffix == '.table':
-                print(file.stem)
+        return [file.stem for file in (self._base_path / self.using_db).iterdir() if file.suffix == '.table']
+
+    
+    def create_table(self, tbinfo: TableInfo):
+        
+        pass
+
+    def drop_table(self, tbname):
+        pass
+
+    def add_column(self, tbname, colinfo: ColumnInfo):
+        
+        pass
+
+    def drop_column(self, tbname, colname):
+        pass
+
+    def create_index(self, tbname, colname):
+        # Remember to get the size of colname
+        pass
+
+    def insert_record(self, tbname, value):
+        '''
+        value is a dict like:
+        {key: 1, value: 2}
+        '''
+        # Remember to get the order in Record from meta
+        pass
+        
+    
