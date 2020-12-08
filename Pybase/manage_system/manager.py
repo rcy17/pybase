@@ -88,7 +88,8 @@ class SystemManger:
 
     
     def create_table(self, tbinfo: TableInfo):
-        
+        meta_handle = self._MM.open_meta(self.using_db)
+        meta_handle.add_table(TableInfo)
         pass
 
     def drop_table(self, tbname):

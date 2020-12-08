@@ -10,6 +10,7 @@ from numpy.lib.npyio import load
 
 from Pybase import settings
 from .info import TableInfo, ColumnInfo, DbInfo
+from Pybase.exceptions.meta import TableExistenceError, ColumnExistenceError
 
 
 META_FILE = ".meta"
@@ -57,19 +58,12 @@ class MetaHandler:
     def get_table(self, tbname):
         return self._db_info._tbMap.get(tbname)
     
-    def get_table_pid(self, tbname):
-        if self._db_info._tbMap.get(tbname) is None:
-            return None
-        return self._db_info._tbMap.get(tbname)._pid
-    
     def update_index_root(self, tbname, colname, new_root):
         if self._db_info._tbMap.get(tbname) is None:
-            # Error
-            pass
+            raise TableExistenceError(f"Table {tbname} should exists.")
         table: TableInfo = self._db_info._tbMap[tbname]
         if table._colMap.get(colname) is None:
-            # Error
-            pass
+            raise ColumnExistenceError(f"Column {colname} should exists.")
         column = table._colMap[colname]
         assert column._is_index == True
         column._root_id = new_root
