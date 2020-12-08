@@ -15,7 +15,7 @@ class MetaManager:
         if self._meta_list.get(dbname) is None:
             handle = MetaHandler(dbname, homedir=self._home_dir)
             self._meta_list[dbname] = handle
-        return self._meta_list.get(dbname, homedir=self._home_dir)
+        return self._meta_list[dbname]
 
     def close_meta(self, dbname):
         if self._meta_list.get(dbname) is None:
