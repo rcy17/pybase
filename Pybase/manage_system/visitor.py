@@ -47,7 +47,6 @@ class SystemVisitor(SQLVisitor):
     def visitCreate_table(self, ctx: SQLParser.Create_tableContext):
         columns = ctx.field_list().accept(self)
         table_name = to_str(ctx.Identifier())
-        from IPython import embed
         self.manager.create_table(TableInfo(table_name, columns))
 
     def visitField_list(self, ctx: SQLParser.Field_listContext):
@@ -76,7 +75,7 @@ class SystemVisitor(SQLVisitor):
                 name, = names
                 assert name in name_to_column
                 primary_key = name
-        return name_to_column.values()
+        return list(name_to_column.values())
 
     def visitNormal_field(self, ctx: SQLParser.Normal_fieldContext):
         pass

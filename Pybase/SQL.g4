@@ -68,8 +68,8 @@ field
     ;
 
 type_
-    : 'INT' (Integer)?
-    | 'VARCHAR' (Integer)?
+    : 'INT' '(' Integer ')'
+    | 'VARCHAR' '(' Integer ')'
     | 'DATE'
     | 'FLOAT'
     ;
