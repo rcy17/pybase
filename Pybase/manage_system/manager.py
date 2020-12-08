@@ -9,6 +9,7 @@ from antlr4 import FileStream, CommonTokenStream
 
 from Pybase.sql_parser.SQLLexer import SQLLexer
 from Pybase.sql_parser.SQLParser import SQLParser
+from Pybase.sql_parser.SQLVisitor import SQLVisitor
 from Pybase.record_system.manager import RecordManager
 # from Pybase.index_system.
 from Pybase.exceptions.run_sql import DateBaseError
@@ -17,7 +18,7 @@ from Pybase.settings import (INDEX_FILE_SUFFIX, TABLE_FILE_SUFFIX, META_FILE_NAM
 
 class SystemManger:
     """Class to manage the whole system"""
-    def __init__(self, visitor, base_path: Path):
+    def __init__(self, visitor: SQLVisitor, base_path: Path):
         self._RM = RecordManager()
         self._FM = self._RM.file_manager
         self._base_path = base_path
