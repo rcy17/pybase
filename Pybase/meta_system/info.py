@@ -1,10 +1,11 @@
 from Pybase.exceptions.meta import TableExistenceError, ColumnExistenceError
 
 class ColumnInfo:
-    def __init__(self, type, name, size, is_index=False, root_id = None, foreign = None) -> None:
+    def __init__(self, type, name, size, default = None, is_index=False, root_id = None, foreign = None) -> None:
         self._type = type
         self._name = name
         self._size = size
+        self._default = default
         self._is_index = is_index
         self._root_id = root_id
         self._foreign = foreign
