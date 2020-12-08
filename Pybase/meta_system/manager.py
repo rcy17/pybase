@@ -6,15 +6,16 @@ from .metahandler import MetaHandler
 from Pybase.file_system.filemanager import FileManager
 
 class MetaManager:
-    def __init__(self) -> None:
+    def __init__(self, homedir="./") -> None:
         self._FM = FileManager()
         self._meta_list = {}
+        self._home_dir = homedir
     
     def open_meta(self, dbname) -> MetaHandler:
         if self._meta_list.get(dbname) is None:
-            handle = MetaHandler(dbname)
+            handle = MetaHandler(dbname, homedir=self._home_dir)
             self._meta_list[dbname] = handle
-        return self._meta_list.get(dbname)
+        return self._meta_list.get(dbname, homedir=self._home_dir)
 
     def close_meta(self, dbname):
         if self._meta_list.get(dbname) is None:

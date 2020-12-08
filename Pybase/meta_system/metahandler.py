@@ -16,9 +16,10 @@ from Pybase.exceptions.meta import TableExistenceError, ColumnExistenceError
 META_FILE = ".meta"
 
 class MetaHandler:
-    def __init__(self, dbname="./") -> None:
+    def __init__(self, dbname=".", homedir="./") -> None:
         self._db_info = None
         self._db_name = dbname
+        self._home_dir = homedir
         if os.path.exists(dbname + META_FILE):
             self._load()
         else:
@@ -69,12 +70,12 @@ class MetaHandler:
         column._root_id = new_root
 
     def _dump(self):
-        outfile = open(self._db_name + META_FILE, "wb")
+        outfile = open(self._home_dir + self._db_name + "/" + self._db_name + META_FILE, "wb")
         pickle.dump(self._db_info, outfile)
         outfile.close()
     
     def _load(self):
-        infile = open(self._db_name + META_FILE, 'rb')
+        infile = open(self._home_dir + self._db_name + "/" + self._db_name + META_FILE, 'rb')
         self._db_info = pickle.load(infile)
         infile.close()
     

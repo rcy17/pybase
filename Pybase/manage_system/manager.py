@@ -27,7 +27,7 @@ class SystemManger:
         self._FM = FileManager()
         self._RM = RecordManager(self._FM)
         self._IM = IndexManager(self._FM)
-        self._MM = MetaManager()
+        self._MM = MetaManager(base_path)
         self._base_path = base_path
         base_path.mkdir(exist_ok=True, parents=True)
         self.dbs = {path.name for path in base_path.iterdir()}
