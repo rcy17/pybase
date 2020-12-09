@@ -3,9 +3,6 @@ Here defines SystemManger class
 
 Date: 2020/11/30
 """
-from Pybase.meta_system.manager import MetaManager
-from Pybase.index_system.manager import IndexManager
-from Pybase.file_system.filemanager import FileManager
 from pathlib import Path
 
 from antlr4 import FileStream, CommonTokenStream
@@ -13,8 +10,10 @@ from antlr4 import FileStream, CommonTokenStream
 from Pybase.sql_parser.SQLLexer import SQLLexer
 from Pybase.sql_parser.SQLParser import SQLParser
 from Pybase.sql_parser.SQLVisitor import SQLVisitor
+from Pybase.file_system.filemanager import FileManager
 from Pybase.record_system.manager import RecordManager
-# from Pybase.index_system.
+from Pybase.index_system.manager import IndexManager
+from Pybase.meta_system.manager import MetaManager
 from Pybase.exceptions.run_sql import DataBaseError
 from Pybase.settings import (INDEX_FILE_SUFFIX, TABLE_FILE_SUFFIX, META_FILE_NAME)
 from Pybase.meta_system.info import ColumnInfo, TableInfo, DbInfo

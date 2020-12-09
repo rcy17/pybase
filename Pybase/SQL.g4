@@ -4,6 +4,7 @@ Operator: '=' | '<>' | '<=' | '>=' | '<' | '>' ;
 Identifier: [a-zA-Z_] [a-zA-Z_0-9]*;
 Integer: [0-9]+;
 String:  '\'' (~'\'')* '\'';
+Float: ('-')? [0-9]+ '.' [0-9]*;
 Whitespace: [ \t\n\r]+ -> skip;
 
 program
@@ -53,7 +54,7 @@ alter_statement
     | 'ALTER' 'TABLE' Identifier 'RENAME' 'TO' Identifier                       # alter_table_rename
     | 'ALTER' 'TABLE' Identifier 'DROP' 'PRIMARY' 'KEY' (Identifier)?           # alter_table_drop_pk
     | 'ALTER' 'TABLE' Identifier 'DROP' 'FOREIGN' 'KEY' Identifier              # alter_table_drop_foreign_key
-    | 'ALTER' 'TABLE' Identifier 'ADD' ('CONSTRAINT' Identifier)? 'PRIMARY' 'KEY' '(' identifiers ')'      # alter_table_add_pk
+    | 'ALTER' 'TABLE' Identifier 'ADD' 'CONSTRAINT' Identifier 'PRIMARY' 'KEY' '(' identifiers ')'      # alter_table_add_pk
     | 'ALTER' 'TABLE' Identifier 'ADD' 'CONSTRAINT' Identifier 'FOREIGN' 'KEY' '(' identifiers ')' 'REFERENCES' Identifier '(' identifiers ')'  # alter_table_add_foreign_key
     ;
 
@@ -85,6 +86,7 @@ value_list
 value
     : Integer
     | String
+    | Float
     | 'NULL'
     ;
 
