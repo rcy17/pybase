@@ -20,7 +20,7 @@ class MetaHandler:
         self._db_info = None
         self._db_name = dbname
         self._home_dir = homedir
-        if os.path.exists(dbname + META_FILE):
+        if os.path.exists(self._home_dir / self._db_name / (self._db_name + META_FILE)):
             self._load()
         else:
             self._db_info = DbInfo(dbname, [])
@@ -29,6 +29,7 @@ class MetaHandler:
     def add_table(self, table: TableInfo):
         self._db_info.insert_table(table)
         self._dump()
+        print(f"Add talbe {table._name}")
     
     def add_col(self, tbname, column: ColumnInfo, colindex: int):
         self._db_info.insert_column(tbname, column, colindex)
@@ -42,22 +43,22 @@ class MetaHandler:
         self._db_info.remove_column(tbname, colname)
         self._dump()
 
-    def get_column(self, tbname, colname):
+    def get_column(self, tbname, colname) -> ColumnInfo:
         table = self._db_info._tbMap.get(tbname)
         if table is None:
             return None
         else:
-            return table._colMap.get(colname)
+            return table._colMap[colname]
     
-    def get_column_index(self, tbname, colname):
+    def get_column_index(self, tbname, colname) -> int:
         table = self._db_info._tbMap.get(tbname)
         if table is None:
             return None
         else:
-            return table._colIndex.get(colname)
+            return table._colIndex[colname]
     
-    def get_table(self, tbname):
-        return self._db_info._tbMap.get(tbname)
+    def get_table(self, tbname) -> TableInfo:
+        return self._db_info._tbMap[tbname]
     
     def update_index_root(self, tbname, colname, new_root):
         if self._db_info._tbMap.get(tbname) is None:

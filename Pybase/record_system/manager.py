@@ -39,7 +39,7 @@ class RecordManager:
             'page_number': 1,
             'record_number': 0,
             'next_vacancy_page': 0,
-            'filename': filename,
+            'filename': str(filename),
             'bitmap_length': bitmap_length,
         }
         self._FM.new_page(file, header_serialize(header))

@@ -9,6 +9,16 @@ class ColumnInfo:
         self._is_index = is_index
         self._root_id = root_id
         self._foreign = foreign
+    
+    def get_size(self) -> int:
+        if self._type == "INT":
+            return (self._size + 3) // 4
+        elif self._type == "DATE":
+            return 8
+        elif self._type == "FLOAT":
+            return 8
+        elif self._type == "VARCHAR":
+            return self._size
 
 
 class TableInfo:
@@ -33,6 +43,9 @@ class TableInfo:
         else:
             self._colindex.pop(colname)
             self._colMap.pop(colname)
+    
+    def get_size(self) -> int:
+        return sum([col.get_size() for col in self._colMap.values()])
 
 
 class DbInfo:

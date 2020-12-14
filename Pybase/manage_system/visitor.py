@@ -42,6 +42,10 @@ class SystemVisitor(SQLVisitor):
         self.manager.use_db(to_str(ctx.Identifier()))
 
     def visitShow_tables(self, ctx: SQLParser.Show_tablesContext):
+        # 
+        print("Tables:")
+        for table in self.manager.show_tables():
+            print(table)
         return QueryResult('tables', self.manager.show_tables())
 
     def visitCreate_table(self, ctx: SQLParser.Create_tableContext):
@@ -93,3 +97,7 @@ class SystemVisitor(SQLVisitor):
         type_ = to_str(ctx.getChild(0))
         size = to_int(ctx.Integer()) if ctx.Integer() else 0
         return type_, size
+    
+    def visitDescribe_table(self, ctx: SQLParser.Describe_tableContext):
+        tbname = to_str(ctx.getChild(1))
+        self.manager.describe_table(tbname)

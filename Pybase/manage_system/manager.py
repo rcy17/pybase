@@ -6,6 +6,8 @@ Date: 2020/11/30
 from pathlib import Path
 
 from antlr4 import FileStream, CommonTokenStream
+from Pybase import settings
+from Pybase.file_system import filemanager
 
 from Pybase.sql_parser.SQLLexer import SQLLexer
 from Pybase.sql_parser.SQLParser import SQLParser
@@ -91,13 +93,29 @@ class SystemManger:
             raise DataBaseError(f"No using database to create table")
         meta_handle = self._MM.open_meta(self.using_db)
         meta_handle.add_table(tb_info)
-        pass
+        record_length = tb_info.get_size()
+        self._RM.create_file(str(self.get_table_path(tb_info._name)) + settings.TABLE_FILE_SUFFIX, record_length)
 
     def drop_table(self, tbname):
-        pass
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to create table")
+        meta_handle = self._MM.open_meta(self.using_db)
+        meta_handle.drop_table(tbname)
+        self._RM.remove_file(str(self.get_table_path(tbname)) + settings.TABLE_FILE_SUFFIX)
+
+    def describe_table(self, tbname):
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to create table")
+        meta_handle = self._MM.open_meta(self.using_db)
+        tbInfo = meta_handle.get_table(tbname)
+        desc = f"Table {tbInfo._name} (\n"
+        for col in tbInfo._colMap.values():
+            desc += f"\t{col._name} {col._type} {col._size}\n"
+        desc += ")\n"
+        print(desc)
+            
 
     def add_column(self, tbname, colinfo: ColumnInfo):
-
         pass
 
     def drop_column(self, tbname, colname):
