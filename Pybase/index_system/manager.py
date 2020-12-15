@@ -2,7 +2,7 @@
 """
 
 from Pybase import settings
-from Pybase.file_system.filemanager import FileManager
+from Pybase.file_system.manager import FileManager
 from .indexhandler import IndexHandler
 from .fileindex import FileIndex
 

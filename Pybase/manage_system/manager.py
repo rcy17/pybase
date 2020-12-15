@@ -8,12 +8,12 @@ from pathlib import Path
 
 from antlr4 import FileStream, CommonTokenStream
 from Pybase import settings
-from Pybase.file_system import filemanager
+from Pybase.file_system import manager
 
 from Pybase.sql_parser.SQLLexer import SQLLexer
 from Pybase.sql_parser.SQLParser import SQLParser
 from Pybase.sql_parser.SQLVisitor import SQLVisitor
-from Pybase.file_system.filemanager import FileManager
+from Pybase.file_system.manager import FileManager
 from Pybase.record_system.manager import RecordManager
 from Pybase.index_system.manager import IndexManager
 from Pybase.meta_system.manager import MetaManager

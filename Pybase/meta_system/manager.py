@@ -3,7 +3,7 @@
 
 from Pybase import settings
 from .metahandler import MetaHandler
-from Pybase.file_system.filemanager import FileManager
+from Pybase.file_system.manager import FileManager
 
 class MetaManager:
     def __init__(self, homedir="./") -> None:
