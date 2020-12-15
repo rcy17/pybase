@@ -87,9 +87,9 @@ class TableInfo:
             else:
                 ba = None
                 if type_ == "INT":
-                    ba = int2bytes(value_)
+                    ba = int2bytes(int(value_))
                 elif type_ == "FLOAT":
-                    ba = float2bytes(value_)
+                    ba = float2bytes(float(value_))
                 elif type_ == "DATE":
                     ba = tuple(value_[i] for i in range(8))
                 else:

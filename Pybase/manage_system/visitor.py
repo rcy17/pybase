@@ -104,14 +104,22 @@ class SystemVisitor(SQLVisitor):
         return type_, size
     
     def visitDescribe_table(self, ctx: SQLParser.Describe_tableContext):
-        tbname = to_str(ctx.getChild(1))
-        self.manager.describe_table(tbname)
+        table_name = to_str(ctx.getChild(1))
+        self.manager.describe_table(table_name)
     
     def visitInsert_into_table(self, ctx: SQLParser.Insert_into_tableContext):
-        pass
+        table_name = to_str(ctx.getChild(2))
+        value_lists = self.visitValue_lists(ctx.value_lists())
+        for value_list in value_lists:
+            self.manager.insert_record(table_name, value_list)
 
     def visitValue_lists(self, ctx: SQLParser.Value_listsContext):
         return tuple(self.visitValue_list(each) for each in ctx.value_list())
     
     def visitValue_list(self, ctx: SQLParser.Value_listContext):
         return tuple(to_str(each) for each in ctx.value())
+    
+    def visitSelect_table(self, ctx: SQLParser.Select_tableContext):
+        # Only for debug
+        table_name = to_str(ctx.getChild(3))
+        self.manager.scan_record(table_name)

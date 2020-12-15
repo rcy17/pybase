@@ -36,7 +36,7 @@ class FileScan:
         return self.records()
 
     def records(self) -> Record:
-        for page_id in range(1, self._handle.header.page_number):
+        for page_id in range(1, self._handle.header['page_number']):
             page = self._handle.get_page(page_id)
             if page[settings.PAGE_FLAG_OFFSET] != settings.RECORD_PAGE_FLAG:
                 continue

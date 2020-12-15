@@ -58,6 +58,7 @@ class MetaHandler:
             return table._colIndex[colname]
     
     def get_table(self, tbname) -> TableInfo:
+        # print(tbname)
         return self._db_info._tbMap[tbname]
     
     def update_index_root(self, tbname, colname, new_root):

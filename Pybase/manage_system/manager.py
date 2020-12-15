@@ -3,6 +3,7 @@ Here defines SystemManger class
 
 Date: 2020/11/30
 """
+from Pybase.record_system.filescan import FileScan
 from pathlib import Path
 
 from antlr4 import FileStream, CommonTokenStream
@@ -43,6 +44,10 @@ class SystemManger:
     def get_table_path(self, table_name):
         assert self.using_db is not None
         return self._base_path / self.using_db / table_name
+    
+    def get_table_name(self, table_name):
+        assert self.using_db is not None
+        return str(self.get_table_path(table_name)) + settings.TABLE_FILE_SUFFIX
 
     def execute(self, filename):
         input_stream = FileStream(filename, encoding='utf-8')
@@ -100,14 +105,14 @@ class SystemManger:
             print(i._name, ":", tb_info._colindex[i])
         '''
         record_length = tb_info.get_size()
-        self._RM.create_file(str(self.get_table_path(tb_info._name)) + settings.TABLE_FILE_SUFFIX, record_length)
+        self._RM.create_file(self.get_table_name(tb_info._name), record_length)
 
     def drop_table(self, tbname):
         if self.using_db is None:
             raise DataBaseError(f"No using database to create table")
         meta_handle = self._MM.open_meta(self.using_db)
         meta_handle.drop_table(tbname)
-        self._RM.remove_file(str(self.get_table_path(tbname)) + settings.TABLE_FILE_SUFFIX)
+        self._RM.remove_file(self.get_table_name(tbname))
 
     def describe_table(self, tbname):
         if self.using_db is None:
@@ -137,8 +142,22 @@ class SystemManger:
             raise DataBaseError(f"No using database to insert record")
         meta_handle = self._MM.open_meta(self.using_db)
         tbInfo = meta_handle.get_table(tbname)
-        record_handle = self._RM.open_file(self.get_table_path(tbname))
+        record_handle = self._RM.open_file(self.get_table_name(tbname))
         # Build a record
-        size_list = tbInfo.get_size_list()
-        
-        # rid = record_handle.insert_record()
+        data = tbInfo.build_record(value_list)
+        rid = record_handle.insert_record(data)
+        # Insert to indexes
+        # Other
+        self._RM.close_file(self.get_table_name(tbname))
+    
+    def scan_record(self, tbname):
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to insert record")
+        meta_handle = self._MM.open_meta(self.using_db)
+        tbInfo = meta_handle.get_table(tbname)
+        record_handle = self._RM.open_file(self.get_table_name(tbname))
+        scan = FileScan(record_handle)
+        for record in scan.records():
+            print(record)
+            print(tbInfo.load_record(record))
+        self._RM.close_file(self.get_table_name(tbname))

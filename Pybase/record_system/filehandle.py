@@ -89,10 +89,10 @@ class FileHandle:
 
     def insert_record(self, data: np.ndarray) -> RID:
         header = self.header
-        page_id = header.next_vacancy_page
+        page_id = header['next_vacancy_page']
         if page_id == settings.HEADER_PAGE_ID:
             self.append_record_page()
-            page_id = header.next_vacancy_page
+            page_id = header['next_vacancy_page']
             assert page_id != settings.HEADER_PAGE_ID
         page = self._manger.file_manager.get_page(self._file_id, page_id)
         record_length = header['record_length']
@@ -118,7 +118,7 @@ class FileHandle:
 
         # check if this is the last valid slot
         if len(valid_slots) == 1:
-            header.next_vacancy_page = self._get_next_vacancy(page)
+            header['next_vacancy_page'] = self._get_next_vacancy(page)
             # make self-loop
             self._set_next_vacancy(page, page_id)
 
@@ -141,8 +141,8 @@ class FileHandle:
 
         # check to update first_vacancy_page
         if self._get_next_vacancy(page) == page_id:
-            self._set_next_vacancy(page, header.next_vacancy_page)
-            header.next_vacancy_page = page_id
+            self._set_next_vacancy(page, header['next_vacancy_page'])
+            header['next_vacancy_page'] = page_id
 
         # finish deletion
         self._manger.file_manager.put_page(self._file_id, page_id, page)
@@ -161,7 +161,7 @@ class FileHandle:
     def append_record_page(self):
         header = self.header
         # use link list method
-        next_page = header.next_vacancy_page
+        next_page = header['next_vacancy_page']
         data = np.full(settings.PAGE_SIZE, -1, dtype=np.uint8)
         data[settings.PAGE_FLAG_OFFSET] = settings.RECORD_PAGE_FLAG
         self._set_next_vacancy(data, next_page)
@@ -169,5 +169,5 @@ class FileHandle:
         # write data and update header
         page_id = self._manger.file_manager.new_page(self._file_id, data)
         header['page_number'] += 1
-        header.next_vacancy_page = page_id
+        header['next_vacancy_page'] = page_id
         self._header_modified = True
