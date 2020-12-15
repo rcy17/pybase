@@ -44,7 +44,7 @@ class LeafNode(TreeNode):
         return 32 + len(self._child_key) * (self._keylen + 16)
 
     def to_array(self) -> np.ndarray:
-        arr = np.zeros(int(settings.PAGE_SIZE/4), np.uint32)
+        arr = np.zeros(int(settings.PAGE_SIZE/4), np.int32)
         arr[0:5] = [1, self._parent_id, self._prev_id, self._next_id, len(self._child_key)]
         bytesize = math.ceil(self._keylen / 8)
         def transform_data(i:int) -> None:

@@ -20,6 +20,7 @@ from Pybase.exceptions.run_sql import DataBaseError
 from Pybase.settings import (INDEX_FILE_SUFFIX, TABLE_FILE_SUFFIX, META_FILE_NAME)
 from Pybase.meta_system.info import ColumnInfo, TableInfo, DbInfo
 
+import numpy as np
 
 class SystemManger:
     """Class to manage the whole system"""
@@ -93,6 +94,11 @@ class SystemManger:
             raise DataBaseError(f"No using database to create table")
         meta_handle = self._MM.open_meta(self.using_db)
         meta_handle.add_table(tb_info)
+        '''
+        # DEBUG INFO
+        for i in tb_info._colindex.keys():
+            print(i._name, ":", tb_info._colindex[i])
+        '''
         record_length = tb_info.get_size()
         self._RM.create_file(str(self.get_table_path(tb_info._name)) + settings.TABLE_FILE_SUFFIX, record_length)
 
@@ -125,10 +131,14 @@ class SystemManger:
         # Remember to get the size of colname
         pass
 
-    def insert_record(self, tbname, value):
-        '''
-        value is a dict like:
-        {key: 1, value: 2}
-        '''
+    def insert_record(self, tbname, value_list:list):
         # Remember to get the order in Record from meta
-        pass
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to insert record")
+        meta_handle = self._MM.open_meta(self.using_db)
+        tbInfo = meta_handle.get_table(tbname)
+        record_handle = self._RM.open_file(self.get_table_path(tbname))
+        # Build a record
+        size_list = tbInfo.get_size_list()
+        
+        # rid = record_handle.insert_record()

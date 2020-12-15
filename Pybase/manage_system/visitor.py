@@ -52,12 +52,17 @@ class SystemVisitor(SQLVisitor):
         columns = ctx.field_list().accept(self)
         table_name = to_str(ctx.Identifier())
         self.manager.create_table(TableInfo(table_name, columns))
+    
+    def visitDrop_table(self, ctx: SQLParser.Drop_tableContext):
+        table_name = to_str(ctx.Identifier())
+        self.manager.drop_table(table_name)
 
     def visitField_list(self, ctx: SQLParser.Field_listContext):
         name_to_column = {}
         foreign_keys = {}
         primary_key = None
-        for field in reversed(ctx.field()):
+        # Modified by Dong: remove reversed
+        for field in ctx.field():
             if isinstance(field, SQLParser.Normal_fieldContext):
                 name = to_str(field.Identifier())
                 type_, size = field.type_().accept(self)
@@ -101,3 +106,12 @@ class SystemVisitor(SQLVisitor):
     def visitDescribe_table(self, ctx: SQLParser.Describe_tableContext):
         tbname = to_str(ctx.getChild(1))
         self.manager.describe_table(tbname)
+    
+    def visitInsert_into_table(self, ctx: SQLParser.Insert_into_tableContext):
+        pass
+
+    def visitValue_lists(self, ctx: SQLParser.Value_listsContext):
+        return tuple(self.visitValue_list(each) for each in ctx.value_list())
+    
+    def visitValue_list(self, ctx: SQLParser.Value_listContext):
+        return tuple(to_str(each) for each in ctx.value())
