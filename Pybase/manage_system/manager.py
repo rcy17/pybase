@@ -123,6 +123,7 @@ class SystemManger:
         for col in tbInfo._colMap.values():
             desc += f"\t{col._name} {col._type} {col._size}\n"
         desc += ")\n"
+        desc += f"Size:{tbInfo.get_size()}\n"
         print(desc)
             
 
@@ -156,8 +157,7 @@ class SystemManger:
         meta_handle = self._MM.open_meta(self.using_db)
         tbInfo = meta_handle.get_table(tbname)
         record_handle = self._RM.open_file(self.get_table_name(tbname))
-        scan = FileScan(record_handle)
-        for record in scan.records():
-            print(record)
+        scanner = FileScan(record_handle)
+        for record in scanner:
             print(tbInfo.load_record(record))
         self._RM.close_file(self.get_table_name(tbname))
