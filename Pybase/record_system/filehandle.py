@@ -61,8 +61,7 @@ class FileHandle:
 
     def _get_record_offset(self, slot_id):
         header = self.header
-        return settings.RECORD_PAGE_FIXED_HEADER_SIZE + (header['record_length'] >> 3) + header[
-            'record_length'] * slot_id
+        return settings.RECORD_PAGE_FIXED_HEADER_SIZE + header['bitmap_length'] + header['record_length'] * slot_id
 
     def get_page(self, page_id) -> np.ndarray:
         return self._manger.file_manager.get_page(self._file_id, page_id)
