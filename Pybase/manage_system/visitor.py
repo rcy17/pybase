@@ -109,17 +109,41 @@ class SystemVisitor(SQLVisitor):
     
     def visitInsert_into_table(self, ctx: SQLParser.Insert_into_tableContext):
         table_name = to_str(ctx.getChild(2))
-        value_lists = self.visitValue_lists(ctx.value_lists())
+        value_lists = ctx.value_lists().accept(self)
         for value_list in value_lists:
             self.manager.insert_record(table_name, value_list)
 
     def visitValue_lists(self, ctx: SQLParser.Value_listsContext):
-        return tuple(self.visitValue_list(each) for each in ctx.value_list())
+        return tuple(each.accept(self) for each in ctx.value_list())
     
     def visitValue_list(self, ctx: SQLParser.Value_listContext):
         return tuple(to_str(each) for each in ctx.value())
     
     def visitSelect_table(self, ctx: SQLParser.Select_tableContext):
         # Only for debug
-        table_name = to_str(ctx.getChild(3))
-        self.manager.scan_record(table_name)
+        table_name_list:list = ctx.identifiers().accept(self)
+        # self.manager.scan_record(table_name_list[0])
+        conditions = ctx.where_and_clause().accept(self)
+        self.manager.cond_scan(table_name_list[0], conditions)
+    
+    def visitWhere_and_clause(self, ctx: SQLParser.Where_and_clauseContext):
+        return tuple(each.accept(self) for each in ctx.where_clause())
+
+    def visitWhere_clause(self, ctx: SQLParser.Where_clauseContext):
+        tbname, colname = ctx.column().accept(self)
+        oper = to_str(ctx.Operator())
+        val = ctx.expression().accept(self)
+        return (tbname, colname, oper, val)
+        
+    
+    def visitColumn(self, ctx: SQLParser.ColumnContext):
+        if len(ctx.Identifier()) == 1:
+            return (None, to_str(ctx.Identifier()))
+        else:
+            return (to_str(each) for each in ctx.Identifier())
+    
+    def visitExpression(self, ctx: SQLParser.ExpressionContext):
+        if ctx.value() is None:
+            return to_str(ctx.column())
+        else:
+            return to_str(ctx.value())

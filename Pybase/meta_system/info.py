@@ -33,9 +33,9 @@ class TableInfo:
         self.primary = []
         self.foreign = {}
         if orderList is None:
-            self._colindex = {col:i for i, col in enumerate(colList)}
+            self._colindex = {col._name:i for i, col in enumerate(colList)}
         else:
-            self._colindex = {col:i for i, col in zip(colList, orderList)}
+            self._colindex = {col._name:i for i, col in zip(colList, orderList)}
     
     def insert_column(self, column: ColumnInfo, colindex: int):
         if column._name not in self._colMap:
@@ -135,6 +135,12 @@ class TableInfo:
             pos += size_
         assert pos == size_total
         return res
+    
+    def get_col_index(self, colname):
+        if colname in self._colindex:
+            return self._colindex[colname]
+        else:
+            return None
 
 class DbInfo:
     def __init__(self, name, tbList) -> None:

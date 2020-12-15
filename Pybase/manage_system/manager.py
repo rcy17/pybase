@@ -3,6 +3,7 @@ Here defines SystemManger class
 
 Date: 2020/11/30
 """
+from numpy.core.records import record
 from Pybase.record_system.filescan import FileScan
 from pathlib import Path
 
@@ -153,7 +154,7 @@ class SystemManger:
     
     def scan_record(self, tbname):
         if self.using_db is None:
-            raise DataBaseError(f"No using database to insert record")
+            raise DataBaseError(f"No using database to scan")
         meta_handle = self._MM.open_meta(self.using_db)
         tbInfo = meta_handle.get_table(tbname)
         record_handle = self._RM.open_file(self.get_table_name(tbname))
@@ -161,3 +162,45 @@ class SystemManger:
         for record in scanner:
             print(tbInfo.load_record(record))
         self._RM.close_file(self.get_table_name(tbname))
+    
+    def cond_scan(self, tbname, conditions:tuple):
+        '''
+        condition is a list like:
+        (tbname, colname, operator, value)
+        '''
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to scan.")
+        func_list = []
+        def build_cond_func(condition):
+            if condition[0] is None:
+                condition[0] = tbname
+            meta_handle = self._MM.open_meta(self.using_db)
+            if condition[0] != tbname:
+                return None
+            tbInfo = meta_handle.get_table(condition[0])
+            cond_index = tbInfo.get_col_index(condition[1])
+            if cond_index is None:
+                return None
+            cond_func = eval(f"lambda x:x[{cond_index}] {condition[2]} {condition[3]}")
+            return cond_func
+        for condition in conditions:
+            cond_func = build_cond_func(condition)
+            if cond_func is not None:
+                func_list.append(build_cond_func(condition))
+        meta_handle = self._MM.open_meta(self.using_db)
+        tbInfo = meta_handle.get_table(tbname)
+        record_handle = self._RM.open_file(self.get_table_name(tbname))
+        scanner = FileScan(record_handle)
+        results = []
+        for record in scanner:
+            values = tbInfo.load_record(record)
+            is_satisfied = True
+            for cond_func in func_list:
+                if not cond_func(values):
+                    is_satisfied = False
+                    break
+            if is_satisfied:
+                results.append(values)
+        self._RM.close_file(self.get_table_name(tbname))
+        for result in results:
+            print(result)
