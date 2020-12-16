@@ -141,6 +141,9 @@ class TableInfo:
             return self._colindex[colname]
         else:
             return None
+    
+    def get_header(self):
+        return tuple(self._name + '.' + colname for colname in self._colMap.keys())
 
 class DbInfo:
     def __init__(self, name, tbList) -> None:

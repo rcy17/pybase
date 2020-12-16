@@ -18,6 +18,7 @@ class QueryResult:
             data = ((each, ) for each in data)
         self._headers = headers
         self._data = data
+        self._header_index = {h:i for i,h in enumerate(headers)}
 
     @property
     def headers(self) -> tuple:
@@ -26,3 +27,9 @@ class QueryResult:
     @property
     def data(self) -> tuple:
         return self._data
+    
+    def get_header_index(self, header) -> int:
+        if header in self._header_index:
+            return self._header_index[header]
+        else:
+            return None

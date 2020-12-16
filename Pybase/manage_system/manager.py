@@ -3,6 +3,7 @@ Here defines SystemManger class
 
 Date: 2020/11/30
 """
+from Pybase.manage_system.result import QueryResult
 from numpy.core.records import record
 from Pybase.record_system.filescan import FileScan
 from pathlib import Path
@@ -21,6 +22,7 @@ from Pybase.meta_system.manager import MetaManager
 from Pybase.exceptions.run_sql import DataBaseError
 from Pybase.settings import (INDEX_FILE_SUFFIX, TABLE_FILE_SUFFIX, META_FILE_NAME)
 from Pybase.meta_system.info import ColumnInfo, TableInfo, DbInfo
+from Pybase.printer.table import TablePrinter
 
 from .join import nested_loops_join
 
@@ -33,6 +35,7 @@ class SystemManger:
         self._RM = RecordManager(self._FM)
         self._IM = IndexManager(self._FM, base_path)
         self._MM = MetaManager(base_path)
+        self._printer = TablePrinter()
         self._base_path = base_path
         base_path.mkdir(exist_ok=True, parents=True)
         self.dbs = {path.name for path in base_path.iterdir()}
@@ -165,6 +168,9 @@ class SystemManger:
             print(tbInfo.load_record(record))
         self._RM.close_file(self.get_table_name(tbname))
 
+    def print_results(self, result:QueryResult):
+        self._printer.print(result)
+
     def cond_scan(self, tbname, conditions: tuple):
         '''
         condition is a list like:
@@ -215,7 +221,8 @@ class SystemManger:
             if is_satisfied:
                 results.append(values)
         self._RM.close_file(self.get_table_name(tbname))
-        return results
+        headers = tbInfo.get_header()
+        return QueryResult(headers, results)
     
     def cond_join(self, results_map:dict, conditions):
         if self.using_db is None:
@@ -227,19 +234,19 @@ class SystemManger:
                 return None
             if condition[0] == condition[3]:
                 return None
-            col_index_1 = meta_handle.get_column_index(condition[0], condition[1])
-            col_index_2 = meta_handle.get_column_index(condition[3], condition[4])
+            assert condition[2] == '=='
             if condition[0] < condition[3]:
-                return (condition[0], condition[3]), (col_index_1, col_index_2)
+                return (condition[0], condition[3]), (condition[1], condition[4])
             else:
-                return (condition[3], condition[0]), (col_index_2, col_index_1)
+                return (condition[3], condition[0]), (condition[4], condition[1])
         for condition in conditions:
             if build_join_pair(condition) is None:
                 continue
             join_pair_key, join_pair_col = build_join_pair(condition)
             if join_pair_key in join_pair_map:
-                join_pair_key[join_pair_key][0].append(join_pair_col[0])
-                join_pair_key[join_pair_key][1].append(join_pair_col[1])
+                join_pair_map[join_pair_key][0].append(join_pair_col[0])
+                join_pair_map[join_pair_key][1].append(join_pair_col[1])
             else:
                 join_pair_map[join_pair_key] = ([join_pair_col[0]],[join_pair_col[1]])
         print(join_pair_map)
+        
