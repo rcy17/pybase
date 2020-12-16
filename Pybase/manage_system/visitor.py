@@ -127,8 +127,14 @@ class SystemVisitor(SQLVisitor):
         result_map = {}
         for table_name in table_name_list:
             result_map[table_name] = self.manager.cond_scan(table_name, conditions)
-            self.manager.print_results(result_map[table_name])
-        self.manager.cond_join(result_map, conditions)
+        if len(table_name_list) == 1:
+            self.manager.print_results(result_map[table_name_list[0]])
+        else:
+            for table_name in table_name_list:
+                self.manager.print_results(result_map[table_name])
+            self.manager.cond_join(result_map, conditions)
+
+
     
     def visitWhere_and_clause(self, ctx: SQLParser.Where_and_clauseContext):
         return tuple(each.accept(self) for each in ctx.where_clause())

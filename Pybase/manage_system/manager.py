@@ -248,5 +248,7 @@ class SystemManger:
                 join_pair_map[join_pair_key][1].append(join_pair_col[1])
             else:
                 join_pair_map[join_pair_key] = ([join_pair_col[0]],[join_pair_col[1]])
-        print(join_pair_map)
+        assert len(join_pair_map) > 0
+        # TODO: build join graph
+        # 
         

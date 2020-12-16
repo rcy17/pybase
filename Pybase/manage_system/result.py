@@ -19,6 +19,7 @@ class QueryResult:
         self._headers = headers
         self._data = data
         self._header_index = {h:i for i,h in enumerate(headers)}
+        self._alias_map = {}
 
     @property
     def headers(self) -> tuple:
@@ -28,8 +29,20 @@ class QueryResult:
     def data(self) -> tuple:
         return self._data
     
+    @property
+    def alais_map(self) -> dict:
+        return self._alias_map
+    
+    def get_size(self) -> int:
+        return len(self._data)
+    
     def get_header_index(self, header) -> int:
+        if header in self._alias_map:
+            header = self._alias_map[header]
         if header in self._header_index:
             return self._header_index[header]
         else:
             return None
+    
+    def add_alias(self, alias, header):
+        self._alias_map[alias] = header
