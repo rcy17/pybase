@@ -52,7 +52,7 @@ class SystemVisitor(SQLVisitor):
         columns = ctx.field_list().accept(self)
         table_name = to_str(ctx.Identifier())
         self.manager.create_table(TableInfo(table_name, columns))
-    
+
     def visitDrop_table(self, ctx: SQLParser.Drop_tableContext):
         table_name = to_str(ctx.Identifier())
         self.manager.drop_table(table_name)
@@ -102,11 +102,11 @@ class SystemVisitor(SQLVisitor):
         type_ = to_str(ctx.getChild(0))
         size = to_int(ctx.Integer()) if ctx.Integer() else 0
         return type_, size
-    
+
     def visitDescribe_table(self, ctx: SQLParser.Describe_tableContext):
         table_name = to_str(ctx.getChild(1))
         self.manager.describe_table(table_name)
-    
+
     def visitInsert_into_table(self, ctx: SQLParser.Insert_into_tableContext):
         table_name = to_str(ctx.getChild(2))
         value_lists = ctx.value_lists().accept(self)
@@ -115,13 +115,13 @@ class SystemVisitor(SQLVisitor):
 
     def visitValue_lists(self, ctx: SQLParser.Value_listsContext):
         return tuple(each.accept(self) for each in ctx.value_list())
-    
+
     def visitValue_list(self, ctx: SQLParser.Value_listContext):
         return tuple(to_str(each) for each in ctx.value())
-    
+
     def visitSelect_table(self, ctx: SQLParser.Select_tableContext):
         # Only for debug
-        table_name_list:list = ctx.identifiers().accept(self)
+        table_name_list: list = ctx.identifiers().accept(self)
         # self.manager.scan_record(table_name_list[0])
         conditions = ctx.where_and_clause().accept(self)
         result_map = {}
@@ -134,7 +134,9 @@ class SystemVisitor(SQLVisitor):
 
     def visitWhere_clause(self, ctx: SQLParser.Where_clauseContext):
         tbname, colname = ctx.column().accept(self)
-        oper = to_str(ctx.Operator())
+        oper = to_str(ctx.operator())
+        if oper == '=':
+            oper = '=='
         val = ctx.expression().accept(self)
         if isinstance(val, tuple):
             return (tbname, colname, oper, val[0], val[1])
@@ -144,10 +146,10 @@ class SystemVisitor(SQLVisitor):
     
     def visitColumn(self, ctx: SQLParser.ColumnContext):
         if len(ctx.Identifier()) == 1:
-            return (None, to_str(ctx.Identifier()))
+            return None, to_str(ctx.Identifier(0))
         else:
-            return (to_str(each) for each in ctx.Identifier())
-    
+            return to_str(ctx.Identifier(0)), to_str(ctx.Identifier(1))
+
     def visitExpression(self, ctx: SQLParser.ExpressionContext):
         if ctx.value() is None:
             return ctx.column().accept(self)

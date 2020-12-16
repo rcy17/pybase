@@ -16,10 +16,8 @@ class FileScan:
     Class to define method of scan the file
     """
 
-    def __init__(self, handle: FileHandle, condition: Condition = None):
-        self._condition = condition
+    def __init__(self, handle: FileHandle):
         self._handle = handle
-        pass
 
     def __iter__(self):
         """
@@ -43,5 +41,4 @@ class FileScan:
             bitmap = self._handle.get_bitmap(page)
             for slot_id in np.where(bitmap == 0)[0]:
                 record = self._handle.get_record(RID(page_id, slot_id), page)
-                if self._condition is None or self._condition.is_satisfied(record):
-                    yield record
+                yield record
