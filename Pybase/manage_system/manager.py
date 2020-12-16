@@ -24,6 +24,7 @@ from Pybase.meta_system.info import ColumnInfo, TableInfo, DbInfo
 
 import numpy as np
 
+
 class SystemManger:
     """Class to manage the whole system"""
 
@@ -45,7 +46,7 @@ class SystemManger:
     def get_table_path(self, table_name):
         assert self.using_db is not None
         return self._base_path / self.using_db / table_name
-    
+
     def get_table_name(self, table_name):
         assert self.using_db is not None
         return str(self.get_table_path(table_name)) + settings.TABLE_FILE_SUFFIX
@@ -55,6 +56,8 @@ class SystemManger:
         lexer = SQLLexer(input_stream)
         tokens = CommonTokenStream(lexer)
         parser = SQLParser(tokens)
+        from antlr4 import BailErrorStrategy
+        parser._errHandler = BailErrorStrategy()
         tree = parser.program()
         try:
             return self.visitor.visit(tree)
@@ -126,7 +129,6 @@ class SystemManger:
         desc += ")\n"
         desc += f"Size:{tbInfo.get_size()}\n"
         print(desc)
-            
 
     def add_column(self, tbname, colinfo: ColumnInfo):
         pass
@@ -138,7 +140,7 @@ class SystemManger:
         # Remember to get the size of colname
         pass
 
-    def insert_record(self, tbname, value_list:list):
+    def insert_record(self, tbname, value_list: list):
         # Remember to get the order in Record from meta
         if self.using_db is None:
             raise DataBaseError(f"No using database to insert record")
@@ -151,7 +153,7 @@ class SystemManger:
         # Insert to indexes
         # Other
         self._RM.close_file(self.get_table_name(tbname))
-    
+
     def scan_record(self, tbname):
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan")
@@ -162,8 +164,8 @@ class SystemManger:
         for record in scanner:
             print(tbInfo.load_record(record))
         self._RM.close_file(self.get_table_name(tbname))
-    
-    def cond_scan(self, tbname, conditions:tuple):
+
+    def cond_scan(self, tbname, conditions: tuple):
         '''
         condition is a list like:
         (tbname, colname, operator, value)
@@ -171,6 +173,7 @@ class SystemManger:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         func_list = []
+
         def build_cond_func(condition):
             if condition[0] is None:
                 condition[0] = tbname
@@ -183,6 +186,7 @@ class SystemManger:
                 return None
             cond_func = eval(f"lambda x:x[{cond_index}] {condition[2]} {condition[3]}")
             return cond_func
+
         for condition in conditions:
             cond_func = build_cond_func(condition)
             if cond_func is not None:

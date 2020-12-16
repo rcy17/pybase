@@ -1,6 +1,12 @@
 grammar SQL;
 
-Operator: '=' | '<>' | '<=' | '>=' | '<' | '>' ;
+EqualOrAssign: '=';
+Less: '<';
+LessEqual: '<=';
+Greater: '>';
+GreaterEqual: '>=';
+NotEqual: '<>';
+
 Identifier: [a-zA-Z_] [a-zA-Z_0-9]*;
 Integer: [0-9]+;
 String:  '\'' (~'\'')* '\'';
@@ -95,7 +101,7 @@ where_and_clause
     ;
 
 where_clause
-    : column Operator expression
+    : column operator expression
     | column 'IS' ('NOT')? 'NULL'
     ;
 
@@ -110,8 +116,7 @@ expression
     ;
 
 set_clause
-    : Identifier '=' value
-    | set_clause ',' Identifier '=' value
+    : Identifier EqualOrAssign value (',' Identifier EqualOrAssign value)*
     ;
 
 selector
@@ -119,6 +124,15 @@ selector
     | column (',' column)*
     ;
 
-identifiers:
-    Identifier (',' Identifier)*
+identifiers
+    : Identifier (',' Identifier)*
+    ;
+
+operator
+    : EqualOrAssign
+    | Less
+    | LessEqual
+    | Greater
+    | GreaterEqual
+    | NotEqual
     ;
