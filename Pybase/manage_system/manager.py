@@ -22,7 +22,7 @@ from Pybase.exceptions.run_sql import DataBaseError
 from Pybase.settings import (INDEX_FILE_SUFFIX, TABLE_FILE_SUFFIX, META_FILE_NAME)
 from Pybase.meta_system.info import ColumnInfo, TableInfo, DbInfo
 
-import numpy as np
+from .join import nested_loops_join
 
 class SystemManger:
     """Class to manage the whole system"""
@@ -167,22 +167,33 @@ class SystemManger:
         '''
         condition is a list like:
         (tbname, colname, operator, value)
+        or
+        (tbname, colname, operator, )
         '''
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         func_list = []
+        meta_handle = self._MM.open_meta(self.using_db)
         def build_cond_func(condition):
             if condition[0] is None:
                 condition[0] = tbname
-            meta_handle = self._MM.open_meta(self.using_db)
             if condition[0] != tbname:
                 return None
             tbInfo = meta_handle.get_table(condition[0])
             cond_index = tbInfo.get_col_index(condition[1])
             if cond_index is None:
                 return None
-            cond_func = eval(f"lambda x:x[{cond_index}] {condition[2]} {condition[3]}")
-            return cond_func
+            if len(condition) == 4:
+                cond_func = eval(f"lambda x:x[{cond_index}] {condition[2]} {condition[3]}")
+                return cond_func
+            elif len(condition) == 5:
+                if condition[3] != tbname:
+                    return None
+                cond_index_2 = tbInfo.get_col_index(condition[4])
+                cond_func = eval(f"lambda x:x[{cond_index}] {condition[2]} x[{cond_index_2}]")
+                return cond_func
+            else:
+                return None
         for condition in conditions:
             cond_func = build_cond_func(condition)
             if cond_func is not None:
@@ -202,5 +213,31 @@ class SystemManger:
             if is_satisfied:
                 results.append(values)
         self._RM.close_file(self.get_table_name(tbname))
-        for result in results:
-            print(result)
+        return results
+    
+    def cond_join(self, results_map:dict, conditions):
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to scan.")
+        meta_handle = self._MM.open_meta(self.using_db)
+        join_pair_map = {}
+        def build_join_pair(condition):
+            if len(condition) != 5:
+                return None
+            if condition[0] == condition[3]:
+                return None
+            col_index_1 = meta_handle.get_column_index(condition[0], condition[1])
+            col_index_2 = meta_handle.get_column_index(condition[3], condition[4])
+            if condition[0] < condition[3]:
+                return (condition[0], condition[3]), (col_index_1, col_index_2)
+            else:
+                return (condition[3], condition[0]), (col_index_2, col_index_1)
+        for condition in conditions:
+            if build_join_pair(condition) is None:
+                continue
+            join_pair_key, join_pair_col = build_join_pair(condition)
+            if join_pair_key in join_pair_map:
+                join_pair_key[join_pair_key][0].append(join_pair_col[0])
+                join_pair_key[join_pair_key][1].append(join_pair_col[1])
+            else:
+                join_pair_map[join_pair_key] = ([join_pair_col[0]],[join_pair_col[1]])
+        print(join_pair_map)

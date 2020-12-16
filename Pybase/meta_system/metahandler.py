@@ -55,7 +55,7 @@ class MetaHandler:
         if table is None:
             return None
         else:
-            return table._colIndex[colname]
+            return table._colindex[colname]
     
     def get_table(self, tbname) -> TableInfo:
         # print(tbname)

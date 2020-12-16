@@ -124,7 +124,10 @@ class SystemVisitor(SQLVisitor):
         table_name_list:list = ctx.identifiers().accept(self)
         # self.manager.scan_record(table_name_list[0])
         conditions = ctx.where_and_clause().accept(self)
-        self.manager.cond_scan(table_name_list[0], conditions)
+        result_map = {}
+        for table_name in table_name_list:
+            result_map[table_name] = self.manager.cond_scan(table_name, conditions)
+        self.manager.cond_join(result_map, conditions)
     
     def visitWhere_and_clause(self, ctx: SQLParser.Where_and_clauseContext):
         return tuple(each.accept(self) for each in ctx.where_clause())
@@ -133,7 +136,10 @@ class SystemVisitor(SQLVisitor):
         tbname, colname = ctx.column().accept(self)
         oper = to_str(ctx.Operator())
         val = ctx.expression().accept(self)
-        return (tbname, colname, oper, val)
+        if isinstance(val, tuple):
+            return (tbname, colname, oper, val[0], val[1])
+        else:
+            return (tbname, colname, oper, val)
         
     
     def visitColumn(self, ctx: SQLParser.ColumnContext):
@@ -144,6 +150,6 @@ class SystemVisitor(SQLVisitor):
     
     def visitExpression(self, ctx: SQLParser.ExpressionContext):
         if ctx.value() is None:
-            return to_str(ctx.column())
+            return ctx.column().accept(self)
         else:
             return to_str(ctx.value())
