@@ -7,7 +7,7 @@ import numpy as np
 
 from Pybase import settings
 # from .manager import FileManager, RecordManager
-from Pybase.utils.header import header_deserialize, header_serialize
+from Pybase.utils.header import header_deserialize, header_serialize, get_bitmap_length
 from .record import Record
 from .rid import RID
 
@@ -49,7 +49,7 @@ class FileHandle:
 
     def get_bitmap(self, data: np.ndarray):
         offset = settings.RECORD_PAGE_FIXED_HEADER_SIZE
-        return np.unpackbits(data[offset: offset + (self.header['record_per_page'] >> 3)])
+        return np.unpackbits(data[offset: offset + get_bitmap_length(self.header['record_per_page'])])
 
     def _get_next_vacancy(self, data: np.ndarray) -> int:
         offset = settings.RECORD_PAGE_NEXT_OFFSET
@@ -109,7 +109,7 @@ class FileHandle:
 
         # set new bitmap
         offset = settings.RECORD_PAGE_FIXED_HEADER_SIZE
-        page[offset: offset + (header['record_per_page'] >> 3)] = np.packbits(bitmap)
+        page[offset: offset + get_bitmap_length(self.header['record_per_page'])] = np.packbits(bitmap)
 
         # update header
         header['record_number'] += 1
@@ -137,6 +137,10 @@ class FileHandle:
         bitmap[slot_id] = True
         header['record_number'] -= 1
         self._header_modified = True
+
+        # set new bitmap
+        offset = settings.RECORD_PAGE_FIXED_HEADER_SIZE
+        page[offset: offset + get_bitmap_length(self.header['record_per_page'])] = np.packbits(bitmap)
 
         # check to update first_vacancy_page
         if self._get_next_vacancy(page) == page_id:
