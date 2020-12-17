@@ -1,3 +1,4 @@
+from numpy.lib.function_base import select
 from Pybase.exceptions.run_sql import DataBaseError
 from Pybase.record_system.record import Record
 from Pybase.exceptions.meta import TableExistenceError, ColumnExistenceError
@@ -141,6 +142,17 @@ class TableInfo:
             return self._colindex[colname]
         else:
             return None
+    
+    def get_value(self, colname, value):
+        col:ColumnInfo = self._colMap[colname]
+        if col._type == "VARCHAR":
+            return value
+        elif col._type == "INT":
+            return int(value)
+        elif col._type == "FLOAT":
+            return float(value)
+        elif col._type == "DATE":
+            return value
     
     def get_header(self):
         return tuple(self._name + '.' + colname for colname in self._colMap.keys())

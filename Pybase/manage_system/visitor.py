@@ -134,7 +134,17 @@ class SystemVisitor(SQLVisitor):
                 self.manager.print_results(result_map[table_name])
             result = self.manager.cond_join(result_map, conditions)
             self.manager.print_results(result)
-
+    
+    def visitDelete_from_table(self, ctx: SQLParser.Delete_from_tableContext):
+        table_name = to_str(ctx.Identifier())
+        conditions = ctx.where_and_clause().accept(self)
+        self.manager.delete_records(table_name, conditions)
+    
+    def visitUpdate_table(self, ctx: SQLParser.Update_tableContext):
+        table_name = to_str(ctx.Identifier())
+        conditions = ctx.where_and_clause().accept(self)
+        set_value_map = ctx.set_clause().accept(self)
+        self.manager.update_records(table_name, conditions, set_value_map)
     
     def visitWhere_and_clause(self, ctx: SQLParser.Where_and_clauseContext):
         return tuple(each.accept(self) for each in ctx.where_clause())
@@ -162,3 +172,9 @@ class SystemVisitor(SQLVisitor):
             return ctx.column().accept(self)
         else:
             return to_str(ctx.value())
+    
+    def visitSet_clause(self, ctx: SQLParser.Set_clauseContext):
+        set_value_map = {}
+        for identifier, value in zip(ctx.Identifier(), ctx.value()):
+            set_value_map[to_str(identifier)] = to_str(value)
+        return set_value_map

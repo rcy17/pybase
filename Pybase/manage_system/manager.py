@@ -3,6 +3,7 @@ Here defines SystemManger class
 
 Date: 2020/11/30
 """
+from Pybase.record_system.record import Record
 from pathlib import Path
 import traceback
 
@@ -273,4 +274,106 @@ class SystemManger:
             results_map[new_key] = new_result
             results = new_result
         return results
-        
+    
+    def delete_records(self, tbname, conditions: tuple):
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to scan.")
+        func_list = []
+        meta_handle = self._MM.open_meta(self.using_db)
+        def build_cond_func(condition):
+            if condition[0] is None:
+                condition[0] = tbname
+            if condition[0] != tbname:
+                return None
+            tbInfo = meta_handle.get_table(condition[0])
+            cond_index = tbInfo.get_col_index(condition[1])
+            if cond_index is None:
+                return None
+            if len(condition) == 4:
+                cond_func = eval(f"lambda x:x[{cond_index}] {condition[2]} {condition[3]}")
+                return cond_func
+            elif len(condition) == 5:
+                if condition[3] != tbname:
+                    return None
+                cond_index_2 = tbInfo.get_col_index(condition[4])
+                cond_func = eval(f"lambda x:x[{cond_index}] {condition[2]} x[{cond_index_2}]")
+                return cond_func
+            else:
+                return None
+        for condition in conditions:
+            cond_func = build_cond_func(condition)
+            if cond_func is not None:
+                func_list.append(build_cond_func(condition))
+        meta_handle = self._MM.open_meta(self.using_db)
+        tbInfo = meta_handle.get_table(tbname)
+        record_handle = self._RM.open_file(self.get_table_name(tbname))
+        scanner = FileScan(record_handle)
+        results = []
+        for record in scanner:
+            values = tbInfo.load_record(record)
+            is_satisfied = True
+            for cond_func in func_list:
+                if not cond_func(values):
+                    is_satisfied = False
+                    break
+            if is_satisfied:
+                results.append(record.rid)
+        for rid in results:
+            record_handle.delete_record(rid)
+        self._RM.close_file(self.get_table_name(tbname))
+    
+    def update_records(self, tbname, conditions: tuple, set_value_map: list):
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to scan.")
+        func_list = []
+        meta_handle = self._MM.open_meta(self.using_db)
+        def build_cond_func(condition):
+            if condition[0] is None:
+                condition[0] = tbname
+            if condition[0] != tbname:
+                return None
+            tbInfo = meta_handle.get_table(condition[0])
+            cond_index = tbInfo.get_col_index(condition[1])
+            if cond_index is None:
+                return None
+            if len(condition) == 4:
+                cond_func = eval(f"lambda x:x[{cond_index}] {condition[2]} {condition[3]}")
+                return cond_func
+            elif len(condition) == 5:
+                if condition[3] != tbname:
+                    return None
+                cond_index_2 = tbInfo.get_col_index(condition[4])
+                cond_func = eval(f"lambda x:x[{cond_index}] {condition[2]} x[{cond_index_2}]")
+                return cond_func
+            else:
+                return None
+        for condition in conditions:
+            cond_func = build_cond_func(condition)
+            if cond_func is not None:
+                func_list.append(build_cond_func(condition))
+        meta_handle = self._MM.open_meta(self.using_db)
+        tbInfo = meta_handle.get_table(tbname)
+        record_handle = self._RM.open_file(self.get_table_name(tbname))
+        scanner = FileScan(record_handle)
+        results = []
+        for record in scanner:
+            values = tbInfo.load_record(record)
+            is_satisfied = True
+            for cond_func in func_list:
+                if not cond_func(values):
+                    is_satisfied = False
+                    break
+            if is_satisfied:
+                results.append((record, values))
+        for record_and_values in results:
+            record = record_and_values[0]
+            values = record_and_values[1]
+            for pair in set_value_map:
+                colname = pair[0]
+                value = pair[1]
+                real = tbInfo.get_value(colname, value)
+                index = tbInfo.get_col_index(colname)
+                values[index] = real
+            record.data = tbInfo.build_record(values)
+            record_handle.update_record(record)
+        self._RM.close_file(self.get_table_name(tbname))
