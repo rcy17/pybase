@@ -289,7 +289,6 @@ class SystemManger:
             results_map[new_key] = new_result
             results = new_result
         return results
-<<<<<<< HEAD
     
     def delete_records(self, tbname, conditions: tuple):
         if self.using_db is None:
@@ -393,5 +392,3 @@ class SystemManger:
             record.data = tbInfo.build_record(values)
             record_handle.update_record(record)
         self._RM.close_file(self.get_table_name(tbname))
-=======
->>>>>>> 9df662bdd2885ab15ae9304cfb149618eba40259

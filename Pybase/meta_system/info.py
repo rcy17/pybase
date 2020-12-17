@@ -157,7 +157,6 @@ class TableInfo:
             return self._colindex[colname]
         else:
             return None
-<<<<<<< HEAD
     
     def get_value(self, colname, value):
         col:ColumnInfo = self._colMap[colname]
@@ -170,9 +169,6 @@ class TableInfo:
         elif col._type == "DATE":
             return value
     
-=======
-
->>>>>>> 9df662bdd2885ab15ae9304cfb149618eba40259
     def get_header(self):
         return tuple(self._name + '.' + colname for colname in self._colMap.keys())
 
