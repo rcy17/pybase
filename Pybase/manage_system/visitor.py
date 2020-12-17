@@ -132,8 +132,8 @@ class SystemVisitor(SQLVisitor):
         else:
             for table_name in table_name_list:
                 self.manager.print_results(result_map[table_name])
-            self.manager.cond_join(result_map, conditions)
-
+            result = self.manager.cond_join(result_map, conditions)
+            self.manager.print_results(result)
 
     
     def visitWhere_and_clause(self, ctx: SQLParser.Where_and_clauseContext):

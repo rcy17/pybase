@@ -224,10 +224,9 @@ class SystemManger:
         headers = tbInfo.get_header()
         return QueryResult(headers, results)
     
-    def cond_join(self, results_map:dict, conditions):
+    def cond_join(self, results_map:dict, conditions) -> QueryResult:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
-        meta_handle = self._MM.open_meta(self.using_db)
         join_pair_map = {}
         def build_join_pair(condition):
             if len(condition) != 5:
@@ -248,7 +247,27 @@ class SystemManger:
                 join_pair_map[join_pair_key][1].append(join_pair_col[1])
             else:
                 join_pair_map[join_pair_key] = ([join_pair_col[0]],[join_pair_col[1]])
-        assert len(join_pair_map) > 0
-        # TODO: build join graph
+        # assert len(join_pair_map) > 0
         # 
+        union_set = {key:key for key in results_map.keys()}
+        def union_set_find(x):
+            if x != union_set[x]:
+                union_set[x] = union_set_find(union_set[x])
+            return union_set[x]
+        def union_set_union(x, y):
+            x = union_set_find(x)
+            y = union_set_find(y)
+            union_set[x] = y
+        results = None
+        for join_pair in join_pair_map:
+            outer:QueryResult = results_map[join_pair[0]]
+            inner:QueryResult = results_map[join_pair[1]]
+            outer_joined = tuple(join_pair[0] + "." + col for col in join_pair_map[join_pair][0])
+            inner_joined = tuple(join_pair[1] + "." + col for col in join_pair_map[join_pair][1])
+            new_result = nested_loops_join(outer, inner, outer_joined, inner_joined)
+            union_set_union(join_pair[0], join_pair[1])
+            new_key = union_set_find(join_pair[0])
+            results_map[new_key] = new_result
+            results = new_result
+        return results
         
