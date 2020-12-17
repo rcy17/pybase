@@ -133,7 +133,7 @@ class FileHandle:
         bitmap = self.get_bitmap(page)
 
         # just use lazy deletion
-        assert bitmap[slot_id] is False
+        assert bitmap[slot_id] == 0
         bitmap[slot_id] = True
         header['record_number'] -= 1
         self._header_modified = True
@@ -149,7 +149,7 @@ class FileHandle:
     def update_record(self, record: Record):
         header = self.header
         rid = record.rid
-        data = self._manger.file_manager.get_page(rid.page_id, rid.slot_id)
+        data = self._manger.file_manager.get_page(self._file_id, rid.page_id)
         offset = self._get_record_offset(rid.slot_id)
         data[offset: offset + header['record_length']] = record.data
         self._manger.file_manager.put_page(self._file_id, rid.page_id, data)
