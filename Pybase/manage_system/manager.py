@@ -139,6 +139,10 @@ class SystemManger:
         desc += ")\n"
         desc += f"Size:{tbInfo.get_size()}\n"
         print(desc)
+        header = ('Field', 'Type', 'Null', 'Key', 'Default', 'Extra')
+        data = tuple((column.get_description()) for column in tbInfo._colMap.values())
+        return QueryResult(header, data)
+
 
     def add_column(self, tbname, colinfo: ColumnInfo):
         pass

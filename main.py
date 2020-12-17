@@ -6,7 +6,6 @@ Data: 2020/10/30
 import os
 import stat
 import sys
-import tempfile
 from pathlib import Path
 
 from Pybase.manage_system.manager import SystemManger
@@ -34,7 +33,7 @@ def main():
                 break
             if sql.lower() in ('quit', 'exit', '.quit', '.exit'):
                 break
-            if sql[-1] == ';':
+            if sql and sql[-1] == ';':
                 printer.print(manager.execute(sql))
                 sql = ''
     else:
