@@ -1,3 +1,3 @@
-numpy>=1.17.3
+numpy
 antlr4-python3-runtime==4.9
 prettytable
