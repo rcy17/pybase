@@ -5,15 +5,14 @@ Date: 2020/11/30
 """
 from Pybase.record_system.record import Record
 from pathlib import Path
-import traceback
 
-from antlr4 import FileStream, InputStream, CommonTokenStream
+from antlr4 import InputStream, CommonTokenStream
 from antlr4.error.Errors import ParseCancellationException
+from antlr4.error.ErrorStrategy import BailErrorStrategy
 
 from Pybase import settings
 from Pybase.manage_system.result import QueryResult
 from Pybase.record_system.filescan import FileScan
-from Pybase.file_system import manager
 from Pybase.sql_parser.SQLLexer import SQLLexer
 from Pybase.sql_parser.SQLParser import SQLParser
 from Pybase.sql_parser.SQLVisitor import SQLVisitor
@@ -57,14 +56,19 @@ class SystemManger:
         return str(self.get_table_path(table_name)) + settings.TABLE_FILE_SUFFIX
 
     def execute(self, sql):
-        # input_stream = FileStream(filename, encoding='utf-8')
+        class Strategy(BailErrorStrategy):
+            def recover(self, recognizer, e):
+                recognizer._errHandler.reportError(recognizer, e)
+                super().recover(recognizer, e)
+
         input_stream = InputStream(sql)
         lexer = SQLLexer(input_stream)
         tokens = CommonTokenStream(lexer)
         parser = SQLParser(tokens)
-        # parser._errHandler = BailErrorStrategy()
-        tree = parser.program()
-        if tree.exception:
+        parser._errHandler = Strategy()
+        try:
+            tree = parser.program()
+        except ParseCancellationException:
             return
         try:
             return self.visitor.visit(tree)
@@ -136,6 +140,10 @@ class SystemManger:
         desc += ")\n"
         desc += f"Size:{tbInfo.get_size()}\n"
         print(desc)
+        header = ('Field', 'Type', 'Null', 'Key', 'Default', 'Extra')
+        data = tuple((column.get_description()) for column in tbInfo._colMap.values())
+        return QueryResult(header, data)
+
 
     def add_column(self, tbname, colinfo: ColumnInfo):
         pass
@@ -172,7 +180,7 @@ class SystemManger:
             print(tbInfo.load_record(record))
         self._RM.close_file(self.get_table_name(tbname))
 
-    def print_results(self, result:QueryResult):
+    def print_results(self, result: QueryResult):
         self._printer.print(result)
 
     def cond_scan(self, tbname, conditions: tuple):
@@ -186,6 +194,7 @@ class SystemManger:
             raise DataBaseError(f"No using database to scan.")
         func_list = []
         meta_handle = self._MM.open_meta(self.using_db)
+
         def build_cond_func(condition):
             if condition[0] is None:
                 condition[0] = tbname
@@ -206,6 +215,7 @@ class SystemManger:
                 return cond_func
             else:
                 return None
+
         for condition in conditions:
             cond_func = build_cond_func(condition)
             if cond_func is not None:
@@ -227,11 +237,12 @@ class SystemManger:
         self._RM.close_file(self.get_table_name(tbname))
         headers = tbInfo.get_header()
         return QueryResult(headers, results)
-    
-    def cond_join(self, results_map:dict, conditions) -> QueryResult:
+
+    def cond_join(self, results_map: dict, conditions) -> QueryResult:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         join_pair_map = {}
+
         def build_join_pair(condition):
             if len(condition) != 5:
                 return None
@@ -242,6 +253,7 @@ class SystemManger:
                 return (condition[0], condition[3]), (condition[1], condition[4])
             else:
                 return (condition[3], condition[0]), (condition[4], condition[1])
+
         for condition in conditions:
             if build_join_pair(condition) is None:
                 continue
@@ -250,22 +262,25 @@ class SystemManger:
                 join_pair_map[join_pair_key][0].append(join_pair_col[0])
                 join_pair_map[join_pair_key][1].append(join_pair_col[1])
             else:
-                join_pair_map[join_pair_key] = ([join_pair_col[0]],[join_pair_col[1]])
+                join_pair_map[join_pair_key] = ([join_pair_col[0]], [join_pair_col[1]])
         # assert len(join_pair_map) > 0
         # 
-        union_set = {key:key for key in results_map.keys()}
+        union_set = {key: key for key in results_map.keys()}
+
         def union_set_find(x):
             if x != union_set[x]:
                 union_set[x] = union_set_find(union_set[x])
             return union_set[x]
+
         def union_set_union(x, y):
             x = union_set_find(x)
             y = union_set_find(y)
             union_set[x] = y
+
         results = None
         for join_pair in join_pair_map:
-            outer:QueryResult = results_map[join_pair[0]]
-            inner:QueryResult = results_map[join_pair[1]]
+            outer: QueryResult = results_map[join_pair[0]]
+            inner: QueryResult = results_map[join_pair[1]]
             outer_joined = tuple(join_pair[0] + "." + col for col in join_pair_map[join_pair][0])
             inner_joined = tuple(join_pair[1] + "." + col for col in join_pair_map[join_pair][1])
             new_result = nested_loops_join(outer, inner, outer_joined, inner_joined)
@@ -274,6 +289,7 @@ class SystemManger:
             results_map[new_key] = new_result
             results = new_result
         return results
+<<<<<<< HEAD
     
     def delete_records(self, tbname, conditions: tuple):
         if self.using_db is None:
@@ -377,3 +393,5 @@ class SystemManger:
             record.data = tbInfo.build_record(values)
             record_handle.update_record(record)
         self._RM.close_file(self.get_table_name(tbname))
+=======
+>>>>>>> 9df662bdd2885ab15ae9304cfb149618eba40259

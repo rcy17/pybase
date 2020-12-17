@@ -6,8 +6,9 @@ from Pybase.utils.tools import int2bytes, bytes2int, float2bytes, bytes2float
 
 import numpy as np
 
+
 class ColumnInfo:
-    def __init__(self, type, name, size, default = None, is_index=False, root_id = None, foreign = None) -> None:
+    def __init__(self, type, name, size, default=None, is_index=False, root_id=None, foreign=None) -> None:
         self._type = type
         self._name = name
         self._size = size
@@ -15,7 +16,7 @@ class ColumnInfo:
         self._is_index = is_index
         self._root_id = root_id
         self._foreign = foreign
-    
+
     def get_size(self) -> int:
         if self._type == "INT":
             return 8
@@ -26,48 +27,62 @@ class ColumnInfo:
         elif self._type == "VARCHAR":
             return self._size
 
+    def get_description(self):
+        """
+        Get description of column
+        :return: (name, type, null, key, default, extra)
+        """
+        return (
+            self._name,
+            f'{self._type}{("(%d)" % self._size) if self._size else ""}',
+            "NO",
+            "MUL" if self._foreign else "",
+            self._default,
+            "",
+        )
+
 
 class TableInfo:
-    def __init__(self, name, colList, orderList = None) -> None:
+    def __init__(self, name, colList, orderList=None) -> None:
         self._name = name
         self._colMap = {col._name: col for col in colList}
         self.primary = []
         self.foreign = {}
         if orderList is None:
-            self._colindex = {col._name:i for i, col in enumerate(colList)}
+            self._colindex = {col._name: i for i, col in enumerate(colList)}
         else:
-            self._colindex = {col._name:i for i, col in zip(colList, orderList)}
-    
+            self._colindex = {col._name: i for i, col in zip(colList, orderList)}
+
     def insert_column(self, column: ColumnInfo, colindex: int):
         if column._name not in self._colMap:
             self._colMap[column._name] = column
             self._colindex[column._name] = colindex
         else:
             raise ColumnExistenceError(f"Column {column._name} should not exists.")
-    
+
     def remove_column(self, colname):
         if colname not in self._colMap:
             raise ColumnExistenceError(f"Column {colname} should exists.")
         else:
             self._colindex.pop(colname)
             self._colMap.pop(colname)
-    
+
     def get_size(self) -> int:
         return sum([col.get_size() for col in self._colMap.values()])
-    
+
     def set_primary(self, cols):
         self.primary = cols
-    
+
     def set_foriegn(self, col, foreign_col):
         self.foreign[col] = foreign_col
-    
+
     def get_size_list(self):
         return [col.get_size() for col in self._colMap.values()]
-    
+
     def get_type_list(self):
         return [col._type for col in self._colMap.values()]
-        
-    def build_record(self, value_list:list) -> np.ndarray:
+
+    def build_record(self, value_list: list) -> np.ndarray:
         size_list = self.get_size_list()
         type_list = self.get_type_list()
         size_total = self.get_size()
@@ -100,7 +115,7 @@ class TableInfo:
                 pos += size_
         assert pos == size_total
         return record_data
-    
+
     def load_record(self, record: Record):
         data = record.data
         size_list = self.get_size_list()
@@ -136,12 +151,13 @@ class TableInfo:
             pos += size_
         assert pos == size_total
         return res
-    
+
     def get_col_index(self, colname):
         if colname in self._colindex:
             return self._colindex[colname]
         else:
             return None
+<<<<<<< HEAD
     
     def get_value(self, colname, value):
         col:ColumnInfo = self._colMap[colname]
@@ -154,27 +170,31 @@ class TableInfo:
         elif col._type == "DATE":
             return value
     
+=======
+
+>>>>>>> 9df662bdd2885ab15ae9304cfb149618eba40259
     def get_header(self):
         return tuple(self._name + '.' + colname for colname in self._colMap.keys())
+
 
 class DbInfo:
     def __init__(self, name, tbList) -> None:
         self._name = name
         self._tbMap = {tb._name: tb for tb in tbList}
-    
+
     def insert_table(self, table: TableInfo):
         if table._name not in self._tbMap:
             self._tbMap[table._name] = table
         else:
             raise TableExistenceError(f"Table {table._name} should not exists.")
-    
+
     def insert_column(self, tbname, column: ColumnInfo, colindex: int):
         if tbname not in self._tbMap:
             raise TableExistenceError(f"Table {tbname} should exists.")
         else:
-            table : TableInfo = self._tbMap[tbname]
+            table: TableInfo = self._tbMap[tbname]
             table.insert_column(column, colindex)
-    
+
     def remove_table(self, tbname):
         if tbname not in self._tbMap:
             raise TableExistenceError(f"Table {tbname} should exists.")

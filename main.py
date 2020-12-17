@@ -6,7 +6,6 @@ Data: 2020/10/30
 import os
 import stat
 import sys
-import tempfile
 from pathlib import Path
 
 from Pybase.manage_system.manager import SystemManger
@@ -19,27 +18,27 @@ def main():
     bath_path = Path('data')
     manager = SystemManger(visitor, bath_path)
     printer = TablePrinter()
+    sql = ''
     if len(sys.argv) < 2:
         # python main.py
         mode = os.fstat(0).st_mode
         while True:
             if not stat.S_ISREG(mode):
                 # if stdin is redirected, do not print
-                print(f'pybase({manager.using_db})> ', end='')
+                prefix = f'pybase({manager.using_db})'
+                print(('-'.rjust(len(prefix)) if sql else prefix) + '> ', end='')
             try:
-                line = input()
+                sql += input().strip()
             except (KeyboardInterrupt, EOFError):
                 break
-            if line.strip().lower() in ('quit', 'exit', '.quit', '.exit'):
+            if sql.lower() in ('quit', 'exit', '.quit', '.exit'):
                 break
-            file = tempfile.NamedTemporaryFile('w', delete=False, encoding='utf-8')
-            file.write(line)
-            file.close()
-            printer.print(manager.execute(file.name))
-            os.unlink(file.name)
+            if sql and sql[-1] == ';':
+                printer.print(manager.execute(sql))
+                sql = ''
     else:
         # python main.py <in.sql>
-        manager.execute(sys.argv[1])
+        manager.execute(open(sys.argv[1], encoding='utf-8').read())
 
 
 if __name__ == '__main__':

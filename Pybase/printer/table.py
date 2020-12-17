@@ -15,7 +15,6 @@ class TablePrinter(BasePrinter):
         table = PrettyTable()
         table.field_names = result.headers
         table.add_rows(result.data)
-        print('here')
         print(table.get_string())
 
     def _error_report(self, msg):
