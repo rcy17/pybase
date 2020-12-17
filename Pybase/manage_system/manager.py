@@ -337,7 +337,7 @@ class SystemManger:
             record_handle.delete_record(rid)
         self._RM.close_file(self.get_table_name(tbname))
     
-    def update_records(self, tbname, conditions: tuple, set_value_map: list):
+    def update_records(self, tbname, conditions: tuple, set_value_map: dict):
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         func_list = []
@@ -383,12 +383,12 @@ class SystemManger:
         for record_and_values in results:
             record = record_and_values[0]
             values = record_and_values[1]
-            for pair in set_value_map:
+            for pair in set_value_map.items():
                 colname = pair[0]
                 value = pair[1]
                 real = tbInfo.get_value(colname, value)
                 index = tbInfo.get_col_index(colname)
                 values[index] = real
-            record.data = tbInfo.build_record(values)
+            record.update_data(tbInfo.build_record(values))
             record_handle.update_record(record)
         self._RM.close_file(self.get_table_name(tbname))

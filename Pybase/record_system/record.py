@@ -24,6 +24,9 @@ class Record:
     @property
     def data(self) -> np.ndarray:
         return self._data
+    
+    def update_data(self, data):
+        self._data = data
 
     def partial_serialize(self, attr_type, attr_length, attr_offset):
         attr_type.from_bytes(self._data[attr_offset: attr_offset + attr_length].tobytes(), 'big')
