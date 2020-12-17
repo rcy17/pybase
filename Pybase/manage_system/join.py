@@ -46,8 +46,8 @@ def nested_loops_join(outer:QueryResult, inner:QueryResult, outer_joined:tuple, 
     result = QueryResult(take(outer_head, outer_left) + take(inner_head, inner_left) + outer_joined, joined_data)
     for outer_header, inner_header in zip(outer_joined, inner_joined):
         result.add_alias(inner_header, outer_header)
-    for alias in outer.alais_map:
-        result.add_alias(alias, outer.alais_map[alias])
-    for alias in inner.alais_map:
-        result.add_alias(alias, inner.alais_map[alias])
+    for alias in outer.alias_map:
+        result.add_alias(alias, outer.alias_map[alias])
+    for alias in inner.alias_map:
+        result.add_alias(alias, inner.alias_map[alias])
     return result

@@ -6,9 +6,8 @@ Date: 2020/11/30
 from pathlib import Path
 import traceback
 
-from antlr4 import FileStream, CommonTokenStream
+from antlr4 import FileStream, InputStream, CommonTokenStream
 from antlr4.error.Errors import ParseCancellationException
-from antlr4 import BailErrorStrategy
 
 from Pybase import settings
 from Pybase.manage_system.result import QueryResult
@@ -56,21 +55,20 @@ class SystemManger:
         assert self.using_db is not None
         return str(self.get_table_path(table_name)) + settings.TABLE_FILE_SUFFIX
 
-    def execute(self, filename):
-        input_stream = FileStream(filename, encoding='utf-8')
+    def execute(self, sql):
+        # input_stream = FileStream(filename, encoding='utf-8')
+        input_stream = InputStream(sql)
         lexer = SQLLexer(input_stream)
         tokens = CommonTokenStream(lexer)
         parser = SQLParser(tokens)
-        parser._errHandler = BailErrorStrategy()
-        try:
-            tree = parser.program()
-        except ParseCancellationException:
-            traceback.print_exc()
+        # parser._errHandler = BailErrorStrategy()
+        tree = parser.program()
+        if tree.exception:
             return
         try:
             return self.visitor.visit(tree)
-        except DataBaseError:
-            traceback.print_exc()
+        except DataBaseError as e:
+            return QueryResult(None, None, str(e))
 
     def create_db(self, name):
         if name in self.dbs:
@@ -82,7 +80,7 @@ class SystemManger:
 
     def drop_db(self, name):
         if name not in self.dbs:
-            raise DataBaseError(f"Can't drop not existing database {name}")
+            raise DataBaseError(f"Can't drop non-existing database {name}")
         db_path = self.get_db_path(name)
         assert db_path.exists()
         for each in db_path.iterdir():

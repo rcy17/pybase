@@ -22,7 +22,7 @@ class SystemVisitor(SQLVisitor):
         if nextResult is None:
             return aggregate
         if aggregate is None:
-            return aggregate
+            return nextResult
         if isinstance(nextResult, QueryResult):
             return nextResult
         if not isinstance(aggregate, tuple):
