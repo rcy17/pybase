@@ -3,15 +3,17 @@ Here defines SystemManger class
 
 Date: 2020/11/30
 """
-from Pybase.manage_system.result import QueryResult
-from numpy.core.records import record
-from Pybase.record_system.filescan import FileScan
 from pathlib import Path
+import traceback
 
 from antlr4 import FileStream, CommonTokenStream
-from Pybase import settings
-from Pybase.file_system import manager
+from antlr4.error.Errors import ParseCancellationException
+from antlr4 import BailErrorStrategy
 
+from Pybase import settings
+from Pybase.manage_system.result import QueryResult
+from Pybase.record_system.filescan import FileScan
+from Pybase.file_system import manager
 from Pybase.sql_parser.SQLLexer import SQLLexer
 from Pybase.sql_parser.SQLParser import SQLParser
 from Pybase.sql_parser.SQLVisitor import SQLVisitor
@@ -59,13 +61,16 @@ class SystemManger:
         lexer = SQLLexer(input_stream)
         tokens = CommonTokenStream(lexer)
         parser = SQLParser(tokens)
-        from antlr4 import BailErrorStrategy
         parser._errHandler = BailErrorStrategy()
-        tree = parser.program()
+        try:
+            tree = parser.program()
+        except ParseCancellationException:
+            traceback.print_exc()
+            return
         try:
             return self.visitor.visit(tree)
-        except DataBaseError as e:
-            print(e)
+        except DataBaseError:
+            traceback.print_exc()
 
     def create_db(self, name):
         if name in self.dbs:
