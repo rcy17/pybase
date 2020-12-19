@@ -260,22 +260,10 @@ class SystemManger:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         meta_handle = self._MM.open_meta(self.using_db)
-        func_list = self.build_cond_func(tbname, conditions, meta_handle)
         tbInfo = meta_handle.get_table(tbname)
-        record_handle = self._RM.open_file(self.get_table_name(tbname))
-        scanner = FileScan(record_handle)
-        results = []
-        for record in scanner:
-            values = tbInfo.load_record(record)
-            is_satisfied = True
-            for cond_func in func_list:
-                if not cond_func(values):
-                    is_satisfied = False
-                    break
-            if is_satisfied:
-                results.append(values)
-        self._RM.close_file(self.get_table_name(tbname))
+        records = self.search_records(tbname, conditions)
         headers = tbInfo.get_header()
+        results = tuple(tbInfo.load_record(record) for record in records)
         return QueryResult(headers, results)
 
     def cond_join(self, results_map: dict, conditions) -> QueryResult:
@@ -337,19 +325,10 @@ class SystemManger:
         func_list = self.build_cond_func(tbname, conditions, meta_handle)
         meta_handle = self._MM.open_meta(self.using_db)
         tbInfo = meta_handle.get_table(tbname)
+        # TODO:
+        records = self.search_records(tbname, conditions)
         record_handle = self._RM.open_file(self.get_table_name(tbname))
-        scanner = FileScan(record_handle)
-        results = []
-        for record in scanner:
-            values = tbInfo.load_record(record)
-            is_satisfied = True
-            for cond_func in func_list:
-                if not cond_func(values):
-                    is_satisfied = False
-                    break
-            if is_satisfied:
-                results.append(record)
-        for record in results:
+        for record in records:
             # TODO:Check Constraint
 
             rid:RID = record.rid
@@ -365,23 +344,13 @@ class SystemManger:
         meta_handle = self._MM.open_meta(self.using_db)
         func_list = self.build_cond_func(tbname, conditions, meta_handle)
         tbInfo = meta_handle.get_table(tbname)
+        # TODO:
+        records = self.search_records(tbname, conditions)
         record_handle = self._RM.open_file(self.get_table_name(tbname))
-        scanner = FileScan(record_handle)
-        results = []
-        for record in scanner:
-            values = tbInfo.load_record(record)
-            is_satisfied = True
-            for cond_func in func_list:
-                if not cond_func(values):
-                    is_satisfied = False
-                    break
-            if is_satisfied:
-                results.append((record, values))
-        for record_and_values in results:
+        for record in records:
             # TODO:Check Constraint
 
-            record:Record = record_and_values[0]
-            values = record_and_values[1]
+            values = tbInfo.load_record(record)
             # Handle indexes
             self.handle_remove_indexes(tbInfo, self.using_db, values, record.rid)
             # Modify values
@@ -464,6 +433,38 @@ class SystemManger:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         meta_handle = self._MM.open_meta(self.using_db)
+        records = self.search_records_indexes(tbname, conditions)
+        tbInfo = meta_handle.get_table(tbname)
+        headers = tbInfo.get_header()
+        results = tuple(tbInfo.load_record(record) for record in records)
+        return QueryResult(headers, results)    
+    
+    
+    def search_records(self, tbname, conditions: tuple):
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to scan.")
+        meta_handle = self._MM.open_meta(self.using_db)
+        func_list = self.build_cond_func(tbname, conditions, meta_handle)
+        tbInfo = meta_handle.get_table(tbname)
+        record_handle = self._RM.open_file(self.get_table_name(tbname))
+        results = []
+        scanner = FileScan(record_handle)
+        for record in scanner:
+            values = tbInfo.load_record(record)
+            is_satisfied = True
+            for cond_func in func_list:
+                if not cond_func(values):
+                    is_satisfied = False
+                    break
+            if is_satisfied:
+                results.append(record)
+        self._RM.close_file(self.get_table_name(tbname))
+        return results
+    
+    def search_records_indexes(self, tbname, conditions: tuple):
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to scan.")
+        meta_handle = self._MM.open_meta(self.using_db)
         func_list = self.build_cond_func(tbname, conditions, meta_handle)
         tbInfo = meta_handle.get_table(tbname)
         index_filter_rids = self.index_filter(tbname, conditions)
@@ -479,7 +480,7 @@ class SystemManger:
                         is_satisfied = False
                         break
                 if is_satisfied:
-                    results.append(values)
+                    results.append(record)
         else:
             for rid in index_filter_rids:
                 record = record_handle.get_record(rid)
@@ -490,11 +491,9 @@ class SystemManger:
                         is_satisfied = False
                         break
                 if is_satisfied:
-                    results.append(values)
+                    results.append(record)
         self._RM.close_file(self.get_table_name(tbname))
-        headers = tbInfo.get_header()
-        return QueryResult(headers, results)    
-
+        return results
 
     def check_insert_constraints(self):
         pass
