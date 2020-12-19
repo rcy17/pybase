@@ -87,9 +87,6 @@ class InterNode(TreeNode):
         pos_low = self.lower_bound(low)
         pos_high = self.upper_bound(high)
         records = []
-        print("Range:", low, high)
-        print("Page range:",pos_low, pos_high)
-        print(self._child_key)
         for i in range(pos_low, pos_high):
             records += self._child_val[i].range(low, high)
         return records

@@ -454,7 +454,6 @@ class SystemManger:
             lower = cond_index_map[colname][0]
             upper = cond_index_map[colname][1]
             index: FileIndex = self._IM.open_index(self.using_db, tbname, colname, tbInfo.indexes[colname])
-            print(lower, upper, index.range(lower, upper))
             if results is None:
                 results = set(index.range(lower, upper))
             else:
