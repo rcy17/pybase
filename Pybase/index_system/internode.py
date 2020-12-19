@@ -8,7 +8,7 @@ import numpy as np
 import math
 
 class InterNode(TreeNode):
-    def __init__(self, page_id, parent_id, child_keys, child_nodes, handle:IndexHandler, keylen:int = 8) -> None:
+    def __init__(self, page_id, parent_id, child_keys, child_nodes, handle:IndexHandler) -> None:
         super(InterNode, self).__init__()
         self._page_id = page_id
         self._parent_id = parent_id
@@ -16,7 +16,6 @@ class InterNode(TreeNode):
         self._child_val = child_nodes
         self._type = 0
         self._handle = handle
-        self._keylen = keylen
 
     def insert(self, key, val):
         pos = self.lower_bound(key)
@@ -26,7 +25,7 @@ class InterNode(TreeNode):
             self._child_key.append(key)
             # DEBUG: Get new Page Here
             new_page_id = self._handle.new_page()
-            node = LeafNode(new_page_id, self._page_id, 0, 0, [], [], self._handle, self._keylen)
+            node = LeafNode(new_page_id, self._page_id, 0, 0, [], [], self._handle)
             self._child_val.append(node)
             node.insert(key, val)
         else:
@@ -42,10 +41,10 @@ class InterNode(TreeNode):
                 new_page_id = self._handle.new_page()
                 new_node = None
                 if node._type == 0:
-                    new_node = InterNode(new_page_id, self._page_id, new_keys, new_vals, self._handle, self._keylen)
+                    new_node = InterNode(new_page_id, self._page_id, new_keys, new_vals, self._handle)
                 elif node._type == 1:
                     node._next_id = new_page_id
-                    new_node = LeafNode(new_page_id, self._page_id, node._page_id, node._next_id, new_keys, new_vals, self._handle, self._keylen)
+                    new_node = LeafNode(new_page_id, self._page_id, node._page_id, node._next_id, new_keys, new_vals, self._handle)
                 assert (isinstance(new_node, TreeNode))
                 self._child_val.insert(pos + 1, new_node)
 
@@ -59,20 +58,14 @@ class InterNode(TreeNode):
             self._child_val.pop(pos)
 
     def page_size(self):
-        return 16 + len(self._child_key) * (self._keylen + 8)
+        return 16 + len(self._child_key) * (8 + 8)
 
     def to_array(self) -> np.ndarray:
         arr = np.zeros(int(settings.PAGE_SIZE/4), np.int32)
         arr[0:3] = [0, self._parent_id, len(self._child_key)]
-        bytesize = math.ceil(self._keylen / 8)
-        def transform_data(i:int) -> None:
-            res = self._child_key[i]
-            for j in range(bytesize):
-                arr[3 + (bytesize + 1) * i + j] =  res & 0xFFFFFFFF
-                res >>= 32
         for i in range(len(self._child_key)):
-            transform_data(i)
-            arr[3 + bytesize + (bytesize + 1) * i] = self._child_val[i]._page_id
+            node: TreeNode = self._child_val[i]
+            arr[3 + 2 * i: 5 + 2 * i] = [self._child_key[i], node._page_id]
         arr.dtype = np.uint8
         assert arr.size == settings.PAGE_SIZE
         return arr

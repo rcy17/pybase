@@ -16,9 +16,9 @@ class IndexManager:
     def file_manager(self) -> FileManager:
         return self._FM
     
-    def create_index(self, dbname, colname, keylen) -> FileIndex:
+    def create_index(self, dbname, colname) -> FileIndex:
         handle = IndexHandler(self._FM, dbname, self._home_dir)
-        fileindex = FileIndex(handle, handle.new_page(), keylen)
+        fileindex = FileIndex(handle, handle.new_page())
         fileindex.dump()
         self._open_indexes[(dbname, colname)] = fileindex
         return fileindex
@@ -26,11 +26,11 @@ class IndexManager:
     def remove_all(self, dbname):
         self._FM.remove_file(dbname + settings.INDEX_FILE_SUFFIX)
     
-    def open_index(self, dbname, colname, root_id, keylen:int = 8) -> FileIndex:
+    def open_index(self, dbname, colname, root_id) -> FileIndex:
         if self._open_indexes.get((dbname, colname)) is not None:
             return self._open_indexes.get((dbname, colname))
         handle = IndexHandler(self._FM, dbname)
-        fileindex = FileIndex(handle, root_id, keylen)
+        fileindex = FileIndex(handle, root_id)
         fileindex.load()
         self._open_indexes[(dbname, colname)] = fileindex
         return fileindex
