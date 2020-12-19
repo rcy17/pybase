@@ -28,3 +28,6 @@ class RID:
     
     def __eq__(self, rid) -> bool:
         return self._page == rid._page and self._slot == rid._slot
+    
+    def __hash__(self) -> int:
+        return (self._page, self._slot).__hash__()

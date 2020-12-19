@@ -121,10 +121,13 @@ class SystemVisitor(SQLVisitor):
         # self.manager.scan_record(table_name_list[0])
         conditions = ctx.where_and_clause().accept(self)
         result_map = {}
+        compare_map = {}
         for table_name in table_name_list:
             result_map[table_name] = self.manager.cond_scan(table_name, conditions)
+            compare_map[table_name] = self.manager.cond_scan_index(table_name, conditions)
         if len(table_name_list) == 1:
             self.manager.print_results(result_map[table_name_list[0]])
+            self.manager.print_results(compare_map[table_name_list[0]])
         else:
             for table_name in table_name_list:
                 self.manager.print_results(result_map[table_name])

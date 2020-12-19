@@ -23,7 +23,7 @@ class TreeNode:
         if len(self._child_key) == 0:
             return None
         low, high = 0, len(self._child_key) - 1
-        pos = len(self._child_key)
+        pos = len(self._child_key) - 1
         while low < high:
             mid = int((low + high) / 2)
             if self._child_key[mid] < key:

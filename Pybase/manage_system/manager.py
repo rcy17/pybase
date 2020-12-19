@@ -250,7 +250,7 @@ class SystemManger:
         
         return func_list
 
-    def cond_scan(self, tbname, conditions: tuple):
+    def cond_scan(self, tbname, conditions: tuple) -> QueryResult:
         '''
         condition is a list like:
         (tbname, colname, operator, value)
@@ -433,7 +433,7 @@ class SystemManger:
                         lower = cond_index_map[condition[1]][0]
                         val = int(condition[3]) + 1
                         if lower < val:
-                            cond_index_map[condition[1]][1] = val
+                            cond_index_map[condition[1]][0] = val
                     elif condition[2] == "<=":
                         upper = cond_index_map[condition[1]][1]
                         val = int(condition[3])
@@ -443,19 +443,58 @@ class SystemManger:
                         lower = cond_index_map[condition[1]][0]
                         val = int(condition[3]) + 1
                         if lower < val:
-                            cond_index_map[condition[1]][1] = val
+                            cond_index_map[condition[1]][0] = val
                     else:
                         raise DataBaseError("No such operate.")
         for condition in conditions:
             build_cond_index(condition)
         tbInfo = meta_handle.get_table(tbname)
-        results = []
+        results = None
         for colname in cond_index_map:
             lower = cond_index_map[colname][0]
             upper = cond_index_map[colname][1]
             index: FileIndex = self._IM.open_index(self.using_db, tbname, colname, tbInfo.indexes[colname])
-            results += index.range(lower, upper)
+            print(lower, upper, index.range(lower, upper))
+            if results is None:
+                results = set(index.range(lower, upper))
+            else:
+                results = results & (index.range(lower, upper))
         return results
+    
+    def cond_scan_index(self, tbname, conditions: tuple) -> QueryResult:
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to scan.")
+        meta_handle = self._MM.open_meta(self.using_db)
+        func_list = self.build_cond_func(tbname, conditions, meta_handle)
+        tbInfo = meta_handle.get_table(tbname)
+        index_filter_rids = self.index_filter(tbname, conditions)
+        record_handle = self._RM.open_file(self.get_table_name(tbname))
+        results = []
+        if index_filter_rids is None:
+            scanner = FileScan(record_handle)
+            for record in scanner:
+                values = tbInfo.load_record(record)
+                is_satisfied = True
+                for cond_func in func_list:
+                    if not cond_func(values):
+                        is_satisfied = False
+                        break
+                if is_satisfied:
+                    results.append(values)
+        else:
+            for rid in index_filter_rids:
+                record = record_handle.get_record(rid)
+                values = tbInfo.load_record(record)
+                is_satisfied = True
+                for cond_func in func_list:
+                    if not cond_func(values):
+                        is_satisfied = False
+                        break
+                if is_satisfied:
+                    results.append(values)
+        self._RM.close_file(self.get_table_name(tbname))
+        headers = tbInfo.get_header()
+        return QueryResult(headers, results)    
 
 
     def check_insert_constraints(self):
