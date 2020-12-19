@@ -18,6 +18,10 @@ class FileIndex:
         self._root_id = root_id
         self._handle = handle
         self._root = InterNode(root_id, root_id, [], [], self._handle)
+    
+    @property
+    def root_id(self):
+        return self._root_id
 
     def build_node(self, page_id) -> TreeNode:
         data = self._handle.get_page(page_id)

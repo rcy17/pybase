@@ -18,11 +18,11 @@ class IndexHandler:
     def __init__(self, manager: FileManager, dbname=".", home_dir="./") -> None:
         self._manager = manager
         self._is_modified = False
-        if self._manager.exists_file(dbname + INDEX_FILE):
-            self._file_id = self._manager.open_file(home_dir / (dbname + INDEX_FILE))
+        if self._manager.exists_file(home_dir / dbname / (dbname + INDEX_FILE)):
+            self._file_id = self._manager.open_file(home_dir / dbname / (dbname + INDEX_FILE))
         else:
-            self._manager.create_file(dbname + INDEX_FILE)
-            self._file_id = self._manager.open_file(home_dir / (dbname + INDEX_FILE))
+            self._manager.create_file(home_dir / dbname / (dbname + INDEX_FILE))
+            self._file_id = self._manager.open_file(home_dir / dbname / (dbname + INDEX_FILE))
 
     def get_page(self, page_id) -> np.ndarray:
         return self._manager.get_page(self._file_id, page_id)

@@ -174,3 +174,14 @@ class SystemVisitor(SQLVisitor):
         for identifier, value in zip(ctx.Identifier(), ctx.value()):
             set_value_map[to_str(identifier)] = to_str(value)
         return set_value_map
+    
+    def visitCreate_index(self, ctx: SQLParser.Create_indexContext):
+        index_name = to_str(ctx.getChild(2))
+        table_name = to_str(ctx.getChild(4))
+        col_list = ctx.identifiers().accept(self)
+        for colname in col_list:
+            self.manager.create_index(index_name, table_name, colname)
+
+    def visitDrop_index(self, ctx: SQLParser.Drop_indexContext):
+        index_name = to_str(ctx.Identifier())
+        self.manager.drop_index(index_name)

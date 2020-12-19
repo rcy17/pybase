@@ -1,6 +1,7 @@
 """
 """
 
+from Pybase.exceptions.run_sql import DataBaseError
 from Pybase import settings
 from .metahandler import MetaHandler
 from Pybase.file_system.manager import FileManager
@@ -19,7 +20,9 @@ class MetaManager:
 
     def close_meta(self, dbname):
         if self._meta_list.get(dbname) is None:
-            return
+            raise DataBaseError("Never open this database")
+        meta_handler:MetaHandler = self._meta_list[dbname]
+        meta_handler.close()
         self._meta_list.pop(dbname)
 
     def remove_all(self, dbname):

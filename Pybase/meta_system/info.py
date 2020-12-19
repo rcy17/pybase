@@ -1,4 +1,3 @@
-from numpy.lib.function_base import select
 from Pybase.exceptions.run_sql import DataBaseError
 from Pybase.record_system.record import Record
 from Pybase.exceptions.meta import TableExistenceError, ColumnExistenceError
@@ -48,6 +47,7 @@ class TableInfo:
         self._colMap = {col._name: col for col in colList}
         self.primary = []
         self.foreign = {}
+        self.indexes = {}
         if orderList is None:
             self._colindex = {col._name: i for i, col in enumerate(colList)}
         else:
@@ -172,11 +172,22 @@ class TableInfo:
     def get_header(self):
         return tuple(self._name + '.' + colname for colname in self._colMap.keys())
 
+    def exists_index(self, colname):
+        return colname in self.indexes
+
+    def create_index(self, colname, root_id):
+        assert not self.exists_index(colname)
+        self.indexes[colname] = root_id
+    
+    def drop_index(self, colname):
+        self.indexes.pop(colname)
+
 
 class DbInfo:
     def __init__(self, name, tbList) -> None:
         self._name = name
         self._tbMap = {tb._name: tb for tb in tbList}
+        self._index_map = {}
 
     def insert_table(self, table: TableInfo):
         if table._name not in self._tbMap:
@@ -203,3 +214,18 @@ class DbInfo:
         else:
             table: TableInfo = self._tbMap[tbname]
             table.remove_column(colname)
+    
+    def create_index(self, index_name, tbname, colname):
+        if index_name in self._index_map:
+            raise DataBaseError("Index name already exists.")
+        self._index_map[index_name] = (tbname, colname)
+    
+    def drop_index(self, index_name):
+        if index_name not in self._index_map:
+            raise DataBaseError("Index name not exists.")
+        self._index_map.pop(index_name)
+    
+    def get_index_info(self, index_name):
+        if index_name not in self._index_map:
+            raise DataBaseError("Index name not exists.")
+        return self._index_map[index_name]

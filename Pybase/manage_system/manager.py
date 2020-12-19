@@ -3,6 +3,7 @@ Here defines SystemManger class
 
 Date: 2020/11/30
 """
+from Pybase.index_system.fileindex import FileIndex
 from Pybase.record_system.record import Record
 from pathlib import Path
 
@@ -151,9 +152,39 @@ class SystemManger:
     def drop_column(self, tbname, colname):
         pass
 
-    def create_index(self, tbname, colname):
-        # Remember to get the size of colname
-        pass
+    def create_index(self, index_name, tbname, colname):
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to create index")
+        meta_handle = self._MM.open_meta(self.using_db)
+        tbInfo = meta_handle.get_table(tbname)
+        if tbInfo.exists_index(colname):
+            raise DataBaseError(f"Indexes already exists.")
+        index = self._IM.create_index(self.using_db, tbname, colname)
+        tbInfo.create_index(colname, index.root_id)
+        col_id = tbInfo.get_col_index(colname)
+        if col_id is None:
+            raise DataBaseError(f"Column not exists.")
+        record_handle = self._RM.open_file(self.get_table_name(tbname))
+        scanner = FileScan(record_handle)
+        for record in scanner:
+            data = tbInfo.load_record(record)
+            key = data[col_id]
+            index.insert(key, record.rid)
+        meta_handle.create_index(index_name, tbname, colname)
+        self._IM.close_index(tbname, colname)
+        self._RM.close_file(self.get_table_name(tbname))
+    
+    def drop_index(self, index_name):
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to create index")
+        meta_handle = self._MM.open_meta(self.using_db)
+        tbname, colname = meta_handle.get_index_info(index_name)
+        tbInfo = meta_handle.get_table(tbname)
+        if not tbInfo.exists_index(colname):
+            raise DataBaseError(f"Indexes already exists.")
+        tbInfo.drop_index(colname)
+        meta_handle.drop_index(index_name)
+        self._MM.close_meta(self.using_db)
 
     def insert_record(self, tbname, value_list: list):
         # Remember to get the order in Record from meta
@@ -166,6 +197,11 @@ class SystemManger:
         data = tbInfo.build_record(value_list)
         rid = record_handle.insert_record(data)
         # Insert to indexes
+        for colname in tbInfo.indexes:
+            index:FileIndex = self._IM.open_index(self.using_db, tbname, colname, tbInfo.indexes[colname])
+            col_id = tbInfo.get_col_index(colname)
+            index.insert(data[col_id], rid)
+            self._IM.close_index(tbname, colname)
         # Other
         self._RM.close_file(self.get_table_name(tbname))
 

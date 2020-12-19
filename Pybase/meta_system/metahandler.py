@@ -44,7 +44,7 @@ class MetaHandler:
         self._dump()
 
     def get_column(self, tbname, colname) -> ColumnInfo:
-        table = self._db_info._tbMap.get(tbname)
+        table:TableInfo = self._db_info._tbMap[tbname]
         if table is None:
             return None
         else:
@@ -67,9 +67,23 @@ class MetaHandler:
         table: TableInfo = self._db_info._tbMap[tbname]
         if table._colMap.get(colname) is None:
             raise ColumnExistenceError(f"Column {colname} should exists.")
-        column = table._colMap[colname]
+        column:ColumnInfo = table._colMap[colname]
         assert column._is_index == True
         column._root_id = new_root
+    
+    def create_index(self, index_name, tbname, colname):
+        self._db_info.create_index(index_name, tbname, colname)
+        self._dump()
+    
+    def drop_index(self, index_name):
+        self._db_info.drop_index(index_name)
+        self._dump()
+    
+    def get_index_info(self, index_name):
+        return self._db_info.get_index_info(index_name)
+
+    def close(self):
+        self._dump()
 
     def _dump(self):
         outfile = open(self._home_dir / self._db_name / (self._db_name + META_FILE), "wb")

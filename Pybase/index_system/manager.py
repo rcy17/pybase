@@ -16,31 +16,28 @@ class IndexManager:
     def file_manager(self) -> FileManager:
         return self._FM
     
-    def create_index(self, dbname, colname) -> FileIndex:
+    def create_index(self, dbname, tbname, colname) -> FileIndex:
         handle = IndexHandler(self._FM, dbname, self._home_dir)
         fileindex = FileIndex(handle, handle.new_page())
         fileindex.dump()
-        self._open_indexes[(dbname, colname)] = fileindex
+        self._open_indexes[(tbname, colname)] = fileindex
         return fileindex
-
-    def remove_all(self, dbname):
-        self._FM.remove_file(dbname + settings.INDEX_FILE_SUFFIX)
     
-    def open_index(self, dbname, colname, root_id) -> FileIndex:
-        if self._open_indexes.get((dbname, colname)) is not None:
-            return self._open_indexes.get((dbname, colname))
-        handle = IndexHandler(self._FM, dbname)
+    def open_index(self, dbname, tbname, colname, root_id) -> FileIndex:
+        if self._open_indexes.get((tbname, colname)) is not None:
+            return self._open_indexes.get((tbname, colname))
+        handle = IndexHandler(self._FM, dbname, self._home_dir)
         fileindex = FileIndex(handle, root_id)
         fileindex.load()
-        self._open_indexes[(dbname, colname)] = fileindex
+        self._open_indexes[(tbname, colname)] = fileindex
         return fileindex
     
-    def close_index(self, dbname, colname):
-        if self._open_indexes.get((dbname, colname)) == None:
+    def close_index(self, tbname, colname):
+        if self._open_indexes.get((tbname, colname)) == None:
             return None
-        fileindex: FileIndex = self._open_indexes.get((dbname, colname))
+        fileindex: FileIndex = self._open_indexes[(tbname, colname)]
         handle: IndexHandler = fileindex._handle
-        self._open_indexes.pop((dbname, colname))
+        self._open_indexes.pop((tbname, colname))
         if not handle._is_modified:
             self._FM.close_file(handle._file_id)
             return None
