@@ -25,3 +25,6 @@ class RID:
     def slot_id(self):
         """Number in [0, record_per_page)"""
         return self._slot
+    
+    def __eq__(self, rid) -> bool:
+        return self._page == rid._page and self._slot == rid._slot

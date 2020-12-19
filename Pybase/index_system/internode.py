@@ -31,6 +31,8 @@ class InterNode(TreeNode):
         else:
             node: TreeNode = self._child_val[pos]
             node.insert(key, val)
+            if key < self._child_key[pos]:
+                self._child_key[pos] = key
             # Check need split or not
             if node.page_size() > settings.PAGE_SIZE:
                 new_keys, new_vals, mid_val = node.split()
@@ -49,13 +51,17 @@ class InterNode(TreeNode):
                 self._child_val.insert(pos + 1, new_node)
 
     def remove(self, key, val):
-        pos = self.lower_bound(key)
-        node: TreeNode = self._child_val[pos]
-        node.remove(key, val)
-        # Check need merge of not
-        if len(node._child_key) == 0:
-            self._child_key.pop(pos)
-            self._child_val.pop(pos)
+        pos_low = self.lower_bound(key)
+        pos_high = self.upper_bound(key)
+        for pos in range(pos_low, pos_high):
+            node: TreeNode = self._child_val[pos]
+            next_val = node.remove(key, val)
+            if next_val is not None:
+                self._child_key[pos] = next_val
+            # Check need merge of not
+            if len(node._child_key) == 0:
+                self._child_key.pop(pos)
+                self._child_val.pop(pos)
 
     def page_size(self):
         return 16 + len(self._child_key) * (8 + 8)
@@ -81,6 +87,8 @@ class InterNode(TreeNode):
         pos_low = self.lower_bound(low)
         pos_high = self.upper_bound(high)
         records = []
-        for i in range(pos_low, pos_high + 1):
+        # print("Page range:",pos_low, pos_high)
+        # print(self._child_key)
+        for i in range(pos_low, pos_high):
             records += self._child_val[i].range(low, high)
         return records

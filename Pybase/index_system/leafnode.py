@@ -1,3 +1,4 @@
+from Pybase.exceptions.run_sql import DataBaseError
 from Pybase.record_system.rid import RID
 from Pybase import settings
 from .treenode import TreeNode
@@ -20,6 +21,7 @@ class LeafNode(TreeNode):
 
     def insert(self, key, val):
         high = self.upper_bound(key)
+        # print("Insert:", high, key, val.slot_id)
         if high is None:
             high = 0
         self._child_key.insert(high, key)
@@ -31,14 +33,18 @@ class LeafNode(TreeNode):
         pos = high
         # DEBUG: Maybe is high + 1
         for i in range(low, high):
-            if self._child_val[pos] == val:
+            if self._child_val[i] == val:
                 pos = i
                 break
         if pos == high:
-            # Exception Here: Remove non-exists record
-            return
+            return None
         self._child_key.pop(pos)
         self._child_val.pop(pos)
+        if pos == 0 and len(self._child_key) > 0:
+            return self._child_key[0]
+        else:
+            return None
+            
 
     def page_size(self) -> int:
         return 32 + len(self._child_key) * (8 + 16)

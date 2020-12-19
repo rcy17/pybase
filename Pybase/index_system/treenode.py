@@ -46,7 +46,7 @@ class TreeNode:
             else:
                 high = mid
                 pos = high
-        if self._child_key[low] >= key:
+        if self._child_key[low] > key:
             pos = low
         return pos
 
