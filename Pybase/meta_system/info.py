@@ -52,6 +52,10 @@ class TableInfo:
             self._colindex = {col._name: i for i, col in enumerate(colList)}
         else:
             self._colindex = {col._name: i for i, col in zip(colList, orderList)}
+    
+    @property
+    def name(self):
+        return self._name
 
     def insert_column(self, column: ColumnInfo, colindex: int):
         if column._name not in self._colMap:

@@ -61,7 +61,7 @@ class InterNode(TreeNode):
         return 16 + len(self._child_key) * (8 + 8)
 
     def to_array(self) -> np.ndarray:
-        arr = np.zeros(int(settings.PAGE_SIZE/4), np.int32)
+        arr = np.zeros(int(settings.PAGE_SIZE/8), np.int64)
         arr[0:3] = [0, self._parent_id, len(self._child_key)]
         for i in range(len(self._child_key)):
             node: TreeNode = self._child_val[i]

@@ -25,7 +25,7 @@ class FileIndex:
 
     def build_node(self, page_id) -> TreeNode:
         data = self._handle.get_page(page_id)
-        data.dtype = np.int32
+        data.dtype = np.int64
         node = None
         parent_id = data[1]
         if data[0] == 1:
@@ -55,7 +55,7 @@ class FileIndex:
         | Node Type | Parent PID | Prev PID | Next PID | Key 1 | RID 1 | ... |
         """
         data = self._handle.get_page(self._root_id)
-        data.dtype = np.int32
+        data.dtype = np.int64
         node_type = data[0]
         parent_id = data[1]
         assert (node_type == 0)

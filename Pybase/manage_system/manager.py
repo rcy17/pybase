@@ -3,6 +3,7 @@ Here defines SystemManger class
 
 Date: 2020/11/30
 """
+from Pybase.record_system.rid import RID
 from Pybase.index_system.fileindex import FileIndex
 from Pybase.record_system.record import Record
 from pathlib import Path
@@ -140,6 +141,7 @@ class SystemManger:
             desc += f"\t{col._name} {col._type} {col._size}\n"
         desc += ")\n"
         desc += f"Size:{tbInfo.get_size()}\n"
+        desc += f"Indexes:{tbInfo.indexes.__str__()}\n"
         print(desc)
         header = ('Field', 'Type', 'Null', 'Key', 'Default', 'Extra')
         data = tuple((column.get_description()) for column in tbInfo._colMap.values())
@@ -196,12 +198,10 @@ class SystemManger:
         # Build a record
         data = tbInfo.build_record(value_list)
         rid = record_handle.insert_record(data)
-        # Insert to indexes
-        for colname in tbInfo.indexes:
-            index:FileIndex = self._IM.open_index(self.using_db, tbname, colname, tbInfo.indexes[colname])
-            col_id = tbInfo.get_col_index(colname)
-            index.insert(data[col_id], rid)
-            self._IM.close_index(tbname, colname)
+        # TODO:Check constraints
+
+        # Handle indexes
+        self.handle_insert_indexes(tbInfo, self.using_db, data, rid)
         # Other
         self._RM.close_file(self.get_table_name(tbname))
 
@@ -368,9 +368,15 @@ class SystemManger:
                     is_satisfied = False
                     break
             if is_satisfied:
-                results.append(record.rid)
-        for rid in results:
+                results.append(record)
+        for record in results:
+            # TODO:Check Constraint
+
+            rid:RID = record.rid
+            data = tbInfo.load_record(record.data)
             record_handle.delete_record(rid)
+            # Handle Index
+            self.handle_remove_indexes(tbInfo, self.using_db, data, rid)
         self._RM.close_file(self.get_table_name(tbname))
     
     def update_records(self, tbname, conditions: tuple, set_value_map: dict):
@@ -417,8 +423,13 @@ class SystemManger:
             if is_satisfied:
                 results.append((record, values))
         for record_and_values in results:
-            record = record_and_values[0]
+            # TODO:Check Constraint
+
+            record:Record = record_and_values[0]
             values = record_and_values[1]
+            # Handle indexes
+            self.handle_remove_indexes(tbInfo, self.using_db, values, record.rid)
+            # Modify values
             for pair in set_value_map.items():
                 colname = pair[0]
                 value = pair[1]
@@ -427,4 +438,29 @@ class SystemManger:
                 values[index] = real
             record.update_data(tbInfo.build_record(values))
             record_handle.update_record(record)
+            # Handle indexes
+            self.handle_insert_indexes(tbInfo, self.using_db, values, record.rid)
         self._RM.close_file(self.get_table_name(tbname))
+
+
+    def check_insert_constraints(self):
+        pass
+    
+    def check_remove_constraints(self):
+        pass
+
+    def handle_insert_indexes(self, tbInfo:TableInfo, dbname, data, rid:RID):
+        tbname = tbInfo.name
+        for colname in tbInfo.indexes:
+            index:FileIndex = self._IM.open_index(dbname, tbname, colname, tbInfo.indexes[colname])
+            col_id = tbInfo.get_col_index(colname)
+            index.insert(data[col_id], rid)
+            self._IM.close_index(tbname, colname)
+
+    def handle_remove_indexes(self, tbInfo:TableInfo, dbname, data, rid:RID):
+        tbname = tbInfo.name
+        for colname in tbInfo.indexes:
+            index:FileIndex = self._IM.open_index(dbname, tbname, colname, tbInfo.indexes[colname])
+            col_id = tbInfo.get_col_index(colname)
+            index.remove(data[col_id], rid)
+            self._IM.close_index(tbname, colname)

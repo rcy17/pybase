@@ -44,18 +44,16 @@ class MetaHandler:
         self._dump()
 
     def get_column(self, tbname, colname) -> ColumnInfo:
-        table:TableInfo = self._db_info._tbMap[tbname]
-        if table is None:
+        if tbname not in self._db_info._tbMap:
             return None
-        else:
-            return table._colMap[colname]
+        table:TableInfo = self._db_info._tbMap[tbname]
+        return table._colMap[colname]
     
     def get_column_index(self, tbname, colname) -> int:
-        table = self._db_info._tbMap.get(tbname)
-        if table is None:
+        if tbname not in self._db_info._tbMap:
             return None
-        else:
-            return table._colindex[colname]
+        table:TableInfo = self._db_info._tbMap[tbname]
+        return table._colindex[colname]
     
     def get_table(self, tbname) -> TableInfo:
         # print(tbname)
