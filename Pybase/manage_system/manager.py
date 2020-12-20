@@ -202,7 +202,7 @@ class SystemManger:
         # TODO:Check constraints
 
         # Handle indexes
-        self.handle_insert_indexes(tbInfo, self.using_db, data, rid)
+        self.handle_insert_indexes(tbInfo, self.using_db, value_list, rid)
         # Other
         self._RM.close_file(self.get_table_name(tbname))
 

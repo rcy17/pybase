@@ -19,11 +19,8 @@ class InterNode(TreeNode):
 
     def insert(self, key, val):
         pos = self.lower_bound(key)
-        if pos == len(self._child_key):
-            pos -= 1
         if pos is None:
             self._child_key.append(key)
-            # DEBUG: Get new Page Here
             new_page_id = self._handle.new_page()
             node = LeafNode(new_page_id, self._page_id, 0, 0, [], [], self._handle)
             self._child_val.append(node)
@@ -87,6 +84,8 @@ class InterNode(TreeNode):
         pos_low = self.lower_bound(low)
         pos_high = self.upper_bound(high)
         records = []
+        if pos_low is None:
+            return []
         for i in range(pos_low, pos_high):
             records += self._child_val[i].range(low, high)
         return records
