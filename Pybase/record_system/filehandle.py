@@ -49,7 +49,8 @@ class FileHandle:
 
     def get_bitmap(self, data: np.ndarray):
         offset = settings.RECORD_PAGE_FIXED_HEADER_SIZE
-        return np.unpackbits(data[offset: offset + get_bitmap_length(self.header['record_per_page'])])
+        total = self.header['record_per_page']
+        return np.unpackbits(data[offset: offset + get_bitmap_length(total)])[:total]
 
     def _get_next_vacancy(self, data: np.ndarray) -> int:
         offset = settings.RECORD_PAGE_NEXT_OFFSET
@@ -99,7 +100,7 @@ class FileHandle:
         bitmap = self.get_bitmap(page)
 
         # get first valid slot
-        valid_slots = np.where(bitmap)[0]
+        valid_slots, = np.where(bitmap)
         slot_id = valid_slots[0]
 
         # insert record

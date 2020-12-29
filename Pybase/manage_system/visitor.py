@@ -128,11 +128,13 @@ class SystemVisitor(SQLVisitor):
         if len(table_name_list) == 1:
             self.manager.print_results(result_map[table_name_list[0]])
             self.manager.print_results(compare_map[table_name_list[0]])
+            return result_map[table_name_list[0]]
         else:
             for table_name in table_name_list:
                 self.manager.print_results(result_map[table_name])
             result = self.manager.cond_join(result_map, conditions)
             self.manager.print_results(result)
+            return result
     
     def visitDelete_from_table(self, ctx: SQLParser.Delete_from_tableContext):
         table_name = to_str(ctx.Identifier())

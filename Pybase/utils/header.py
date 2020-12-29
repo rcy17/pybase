@@ -33,7 +33,7 @@ def get_record_capacity(record_length: int) -> int:
     # x + x * record_length * 8 <= total_size * 8
     # x < total_size * 8 / (1 + record_length * 8)
     x = (total_size << 3) // (1 + (record_length << 3)) + 1
-    while (x + 7) >> 3 + x * record_length > total_size:
+    while ((x + 7) >> 3) + x * record_length > total_size:
         x -= 1
     if x <= 0:
         raise RecordTooLongError(f'Record size {record_length} is TOO LONG')

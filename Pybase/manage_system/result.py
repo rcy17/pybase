@@ -46,9 +46,6 @@ class QueryResult:
             header = self._alias_map[header]
         if header in self._header_index:
             return self._header_index[header]
-        else:
-            return None
 
-    
     def add_alias(self, alias, header):
         self._alias_map[alias] = header

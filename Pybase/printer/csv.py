@@ -10,7 +10,7 @@ from .base import QueryResult, BasePrinter
 
 
 class CSVPrinter(BasePrinter):
-    def _print(self, result: QueryResult):
+    def _print(self, result: QueryResult, cost):
         writer = csv.writer(stdout)
         writer.writerow(result.headers)
         writer.writerows(result.data)

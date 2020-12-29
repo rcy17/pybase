@@ -7,6 +7,7 @@ import os
 import stat
 from pathlib import Path
 from argparse import ArgumentParser, Namespace
+from datetime import datetime
 
 from Pybase.manage_system.manager import SystemManger
 from Pybase.manage_system.visitor import SystemVisitor
@@ -60,7 +61,10 @@ def main(args: Namespace):
             if sql.lower() in ('quit', 'exit', '.quit', '.exit'):
                 break
             if sql and sql[-1] == ';':
-                printer.print(manager.execute(sql))
+                start = datetime.now()
+                result = manager.execute(sql)
+                stop = datetime.now()
+                printer.print(result, stop - start)
                 sql = ''
 
 

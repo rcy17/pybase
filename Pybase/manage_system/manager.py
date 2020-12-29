@@ -220,13 +220,14 @@ class SystemManger:
         self._RM.close_file(self.get_table_name(tbname))
 
     def print_results(self, result: QueryResult):
-        self._printer.print(result)
+        from datetime import timedelta
+        # self._printer.print(result, timedelta(0))
 
     def build_cond_func(self, tbname, conditions, meta_handle:MetaHandler) -> list:
         func_list = []
         def build_cond_func(condition):
             if condition[0] is None:
-                condition[0] = tbname
+                condition = (tbname, *condition[1:])
             if condition[0] != tbname:
                 return None
             tbInfo = meta_handle.get_table(condition[0])
@@ -376,7 +377,7 @@ class SystemManger:
         meta_handle = self._MM.open_meta(self.using_db)
         def build_cond_index(condition):
             if condition[0] is None:
-                condition[0] = tbname
+                condition = (tbname, *condition[1:])
             if condition[0] != tbname:
                 return None
             tbInfo = meta_handle.get_table(condition[0])
