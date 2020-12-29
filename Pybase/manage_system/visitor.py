@@ -76,8 +76,8 @@ class SystemVisitor(SQLVisitor):
             else:
                 assert isinstance(field, SQLParser.Primary_key_fieldContext)
                 names = field.identifiers().accept(self)
-                assert len(names) == 1
-                name, = names
+                # assert len(names) == 1
+                name = names[0]
                 assert name in name_to_column
                 primary_key = name
         return list(name_to_column.values())

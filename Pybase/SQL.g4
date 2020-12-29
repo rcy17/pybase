@@ -12,6 +12,7 @@ Integer: [0-9]+;
 String:  '\'' (~'\'')* '\'';
 Float: ('-')? [0-9]+ '.' [0-9]*;
 Whitespace: [ \t\n\r]+ -> skip;
+Annotation: '-' '-' (~';')+;
 
 program
     : statement* EOF
@@ -23,6 +24,7 @@ statement
     | table_statement ';'
     | index_statement ';'
     | alter_statement ';'
+    | Annotation ';'
     ;
 
 system_statement

@@ -5,13 +5,13 @@ Data: 2020/12/27
 """
 import os
 import stat
-import sys
 from pathlib import Path
 from argparse import ArgumentParser, Namespace
 
 from Pybase.manage_system.manager import SystemManger
 from Pybase.manage_system.visitor import SystemVisitor
 from Pybase.printer import TablePrinter, CSVPrinter
+from Pybase.utils.file_executor import FileExecutor
 
 NAME_TO_PRINTER = {
     'table': TablePrinter,
@@ -28,22 +28,9 @@ def get_parser() -> ArgumentParser:
     parser.add_argument('-f', '--file', type=Path,
                         help='input file, support some different formats')
     parser.add_argument('-t', '--table', type=str, help='table to insert rows from given file')
+    parser.add_argument('--bar', action='store_true', help='show progress bar when insert from file')
     parser.add_argument('database', nargs='?', type=str, help='database name')
     return parser
-
-
-class FileExecutor:
-    @staticmethod
-    def exec_csv(manager: SystemManger, path: Path):
-        pass
-
-    @staticmethod
-    def exec_tbl(manager: SystemManger, path: Path):
-        pass
-
-    @staticmethod
-    def exec_sql(manager: SystemManger, path: Path):
-        manager.execute(open(sys.argv[1], encoding='utf-8').read())
 
 
 def main(args: Namespace):
@@ -53,16 +40,12 @@ def main(args: Namespace):
     printer = NAME_TO_PRINTER[args.printer]()
     if args.database:
         manager.use_db(args.database)
-    if args.table:
-        manager.target_table = args.table
+    manager.target_table = args.table
+    manager.bar = args.bar
     sql = ''
     if args.file:
-        suffix = args.file.suffix.lstrip('.')
-        func = getattr(FileExecutor, 'exec_' + suffix)
-        if func:
-            func(manager, args.file)
-        else:
-            raise NotImplementedError("unsupported format " + suffix)
+        executor = FileExecutor(args.bar)
+        executor.execute(manager, args.file)
     else:
         mode = os.fstat(0).st_mode
         while True:
