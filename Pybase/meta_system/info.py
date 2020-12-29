@@ -102,7 +102,7 @@ class TableInfo:
                 if l > size_:
                     raise DataBaseError("Varchar length exceeds.")
                 for i in range(l):
-                    record_data[pos + i] = value_[i]
+                    record_data[pos + i] = ord(value_[i])
                 pos += size_
             else:
                 ba = None
@@ -111,7 +111,7 @@ class TableInfo:
                 elif type_ == "FLOAT":
                     ba = float2bytes(float(value_))
                 elif type_ == "DATE":
-                    ba = tuple(value_[i] for i in range(8))
+                    ba = tuple(ord(value_[i]) for i in range(8))
                 else:
                     raise DataBaseError("Unsupported type.")
                 for i in range(size_):
