@@ -33,13 +33,13 @@ class SystemVisitor(SQLVisitor):
         return QueryResult('databases', tuple(self.manager.dbs))
 
     def visitCreate_db(self, ctx: SQLParser.Create_dbContext):
-        self.manager.create_db(to_str(ctx.Identifier()))
+        return self.manager.create_db(to_str(ctx.Identifier()))
 
     def visitDrop_db(self, ctx: SQLParser.Drop_dbContext):
-        self.manager.drop_db(to_str(ctx.Identifier()))
+        return self.manager.drop_db(to_str(ctx.Identifier()))
 
     def visitUse_db(self, ctx: SQLParser.Use_dbContext):
-        self.manager.use_db(to_str(ctx.Identifier()))
+        return self.manager.use_db(to_str(ctx.Identifier()))
 
     def visitShow_tables(self, ctx: SQLParser.Show_tablesContext):
         return QueryResult('tables', self.manager.show_tables())
@@ -47,11 +47,11 @@ class SystemVisitor(SQLVisitor):
     def visitCreate_table(self, ctx: SQLParser.Create_tableContext):
         columns = ctx.field_list().accept(self)
         table_name = to_str(ctx.Identifier())
-        self.manager.create_table(TableInfo(table_name, columns))
+        return self.manager.create_table(TableInfo(table_name, columns))
 
     def visitDrop_table(self, ctx: SQLParser.Drop_tableContext):
         table_name = to_str(ctx.Identifier())
-        self.manager.drop_table(table_name)
+        return self.manager.drop_table(table_name)
 
     def visitField_list(self, ctx: SQLParser.Field_listContext):
         name_to_column = {}
@@ -139,13 +139,13 @@ class SystemVisitor(SQLVisitor):
     def visitDelete_from_table(self, ctx: SQLParser.Delete_from_tableContext):
         table_name = to_str(ctx.Identifier())
         conditions = ctx.where_and_clause().accept(self)
-        self.manager.delete_records(table_name, conditions)
+        return self.manager.delete_records(table_name, conditions)
     
     def visitUpdate_table(self, ctx: SQLParser.Update_tableContext):
         table_name = to_str(ctx.Identifier())
         conditions = ctx.where_and_clause().accept(self)
         set_value_map = ctx.set_clause().accept(self)
-        self.manager.update_records(table_name, conditions, set_value_map)
+        return self.manager.update_records(table_name, conditions, set_value_map)
     
     def visitWhere_and_clause(self, ctx: SQLParser.Where_and_clauseContext):
         return tuple(each.accept(self) for each in ctx.where_clause())
@@ -189,4 +189,4 @@ class SystemVisitor(SQLVisitor):
 
     def visitDrop_index(self, ctx: SQLParser.Drop_indexContext):
         index_name = to_str(ctx.Identifier())
-        self.manager.drop_index(index_name)
+        return self.manager.drop_index(index_name)

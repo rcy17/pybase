@@ -340,6 +340,7 @@ class SystemManger:
             # Handle Index
             self.handle_remove_indexes(tbInfo, self.using_db, data, rid)
         self._RM.close_file(self.get_table_name(tbname))
+        return QueryResult('delete_items', (len(records), ))
     
     def update_records(self, tbname, conditions: tuple, set_value_map: dict):
         if self.using_db is None:
@@ -368,6 +369,7 @@ class SystemManger:
             # Handle indexes
             self.handle_insert_indexes(tbInfo, self.using_db, values, record.rid)
         self._RM.close_file(self.get_table_name(tbname))
+        return QueryResult('delete_items', (len(records), ))
 
 
     def index_filter(self, tbname, conditions) -> QueryResult:

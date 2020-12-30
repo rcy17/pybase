@@ -29,6 +29,8 @@ class FileExecutor:
             manager.insert_record(manager.target_table, row)
 
     def exec_tbl(self, manager: SystemManger, path: Path):
+        if not manager.target_table:
+            manager.target_table = path.stem.upper()
         self.insert_check(manager)
         for line in self.iterate(open(path, encoding='utf-8')):
             row = line.rstrip('\n').split('|')

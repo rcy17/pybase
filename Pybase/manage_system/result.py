@@ -15,7 +15,7 @@ class QueryResult:
         if not isinstance(headers, (list, tuple)):
             headers = (headers, )
         if data and not isinstance(data[0], (list, tuple)):
-            data = ((each, ) for each in data)
+            data = tuple((each, ) for each in data)
         self._headers = headers
         self._data = data
         self._header_index = {h:i for i,h in enumerate(headers)}
