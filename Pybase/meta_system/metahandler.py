@@ -69,6 +69,9 @@ class MetaHandler:
         assert column._is_index == True
         column._root_id = new_root
     
+    def exists_index(self, index_name):
+        return index_name in self._db_info._index_map
+
     def create_index(self, index_name, tbname, colname):
         self._db_info.create_index(index_name, tbname, colname)
         self._dump()
@@ -79,6 +82,21 @@ class MetaHandler:
     
     def get_index_info(self, index_name):
         return self._db_info.get_index_info(index_name)
+    
+    def set_primary(self, tbname, primary):
+        table: TableInfo = self._db_info._tbMap[tbname]
+        table.set_primary(primary)
+        self._dump()
+    
+    def add_foreign(self, tbname, col, foreign):
+        table: TableInfo = self._db_info._tbMap[tbname]
+        table.add_foreign(col, foreign)
+        self._dump()
+    
+    def remove_foreign(self, tbname, col):
+        table: TableInfo = self._db_info._tbMap[tbname]
+        table.remove_foreign(col)
+        self._dump()
 
     def close(self):
         self._dump()

@@ -13,7 +13,7 @@ class MetaManager:
         self._home_dir = homedir
     
     def open_meta(self, dbname) -> MetaHandler:
-        if self._meta_list.get(dbname) is None:
+        if dbname not in self._meta_list:
             handle = MetaHandler(dbname, homedir=self._home_dir)
             self._meta_list[dbname] = handle
         return self._meta_list[dbname]

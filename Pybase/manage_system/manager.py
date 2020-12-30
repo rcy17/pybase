@@ -3,6 +3,9 @@ Here defines SystemManger class
 
 Date: 2020/11/30
 """
+from numpy.core.arrayprint import printoptions
+from numpy.core.numeric import flatnonzero
+from numpy.lib.function_base import insert
 from Pybase.meta_system.metahandler import MetaHandler
 from Pybase.record_system.rid import RID
 from Pybase.index_system.fileindex import FileIndex
@@ -154,11 +157,30 @@ class SystemManger:
         desc += ")\n"
         desc += f"Size:{tbInfo.get_size()}\n"
         desc += f"Indexes:{tbInfo.indexes.__str__()}\n"
-        print(desc)
         header = ('Field', 'Type', 'Null', 'Key', 'Default', 'Extra')
         data = tuple((column.get_description()) for column in tbInfo._colMap.values())
         return QueryResult(header, data)
 
+    def add_foreign(self, tbname, col, foreign):
+        meta_handle = self._MM.open_meta(self.using_db)
+        meta_handle.add_foreign(tbname, col, foreign)
+        if not meta_handle.exists_index(foreign[0] + "." + foreign[1]):
+            self.create_index(foreign[0] + "." + foreign[1], foreign[0], foreign[1])
+    
+    def remove_foreign(self, tbname, col):
+        meta_handle = self._MM.open_meta(self.using_db)
+        meta_handle.remove_foreign(tbname, col)
+        foreign = meta_handle.get_table(tbname).foreign[col]
+        self.drop_index(foreign[0] + "." + foreign[1])
+
+    def set_primary(self, tbname, primary):
+        meta_handle = self._MM.open_meta(self.using_db)
+        meta_handle.set_primary(tbname, primary)
+        if primary is None:
+            return
+        for col in primary:
+            if not meta_handle.exists_index(tbname + "." + col):
+                self.create_index(tbname + "." + col, tbname, col)
 
     def add_column(self, tbname, colinfo: ColumnInfo):
         pass
@@ -209,11 +231,13 @@ class SystemManger:
         record_handle = self._RM.open_file(self.get_table_name(tbname))
         # Build a record
         data = tbInfo.build_record(value_list)
+        values = tbInfo.load_record(Record(RID(0,0), data))
         rid = record_handle.insert_record(data)
         # TODO:Check constraints
-
+        if not self.check_insert_constraints(tbname, values):
+            raise DataBaseError("This record can not be inserted.")
         # Handle indexes
-        self.handle_insert_indexes(tbInfo, self.using_db, value_list, rid)
+        self.handle_insert_indexes(tbInfo, self.using_db, values, rid)
         # Other
         self._RM.close_file(self.get_table_name(tbname))
 
@@ -230,7 +254,7 @@ class SystemManger:
 
     def print_results(self, result: QueryResult):
         from datetime import timedelta
-        # self._printer.print(result, timedelta(0))
+        self._printer.print(result, timedelta(0))
 
     def build_cond_func(self, tbname, conditions, meta_handle:MetaHandler) -> list:
         func_list = []
@@ -334,20 +358,19 @@ class SystemManger:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         meta_handle = self._MM.open_meta(self.using_db)
-        func_list = self.build_cond_func(tbname, conditions, meta_handle)
-        meta_handle = self._MM.open_meta(self.using_db)
         tbInfo = meta_handle.get_table(tbname)
         # TODO:
-        records = self.search_records(tbname, conditions)
+        records = self.search_records_indexes(tbname, conditions)
         record_handle = self._RM.open_file(self.get_table_name(tbname))
         for record in records:
-            # TODO:Check Constraint
-
             rid:RID = record.rid
-            data = tbInfo.load_record(record.data)
+            values = tbInfo.load_record(record.data)
+            # TODO:Check Constraint
+            if not self.check_insert_constraints(tbname, values):
+                raise DataBaseError("This record can not be inserted.")
             record_handle.delete_record(rid)
             # Handle Index
-            self.handle_remove_indexes(tbInfo, self.using_db, data, rid)
+            self.handle_remove_indexes(tbInfo, self.using_db, values, rid)
         self._RM.close_file(self.get_table_name(tbname))
         return QueryResult('delete_items', (len(records), ))
     
@@ -355,28 +378,33 @@ class SystemManger:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         meta_handle = self._MM.open_meta(self.using_db)
-        func_list = self.build_cond_func(tbname, conditions, meta_handle)
         tbInfo = meta_handle.get_table(tbname)
         # TODO:
-        records = self.search_records(tbname, conditions)
+        records = self.search_records_indexes(tbname, conditions)
         record_handle = self._RM.open_file(self.get_table_name(tbname))
         for record in records:
-            # TODO:Check Constraint
-
-            values = tbInfo.load_record(record)
-            # Handle indexes
-            self.handle_remove_indexes(tbInfo, self.using_db, values, record.rid)
+            old_values = tbInfo.load_record(record)
+            new_values = old_values
             # Modify values
             for pair in set_value_map.items():
                 colname = pair[0]
                 value = pair[1]
                 real = tbInfo.get_value(colname, value)
                 index = tbInfo.get_col_index(colname)
-                values[index] = real
-            record.update_data(tbInfo.build_record(values))
+                new_values[index] = real
+            # TODO:Check Constraint
+            if not self.check_insert_constraints(tbname, old_values):
+                raise DataBaseError("This record can not be deleted.")
+            if not self.check_insert_constraints(tbname, new_values):
+                raise DataBaseError("This record can not be inserted.")
+
+            # Handle indexes
+            self.handle_remove_indexes(tbInfo, self.using_db, old_values, record.rid)
+            
+            record.update_data(tbInfo.build_record(new_values))
             record_handle.update_record(record)
             # Handle indexes
-            self.handle_insert_indexes(tbInfo, self.using_db, values, record.rid)
+            self.handle_insert_indexes(tbInfo, self.using_db, new_values, record.rid)
         self._RM.close_file(self.get_table_name(tbname))
         return QueryResult('delete_items', (len(records), ))
 
@@ -509,11 +537,55 @@ class SystemManger:
         self._RM.close_file(self.get_table_name(tbname))
         return results
 
-    def check_insert_constraints(self):
-        pass
+    def check_primary(self, tbname, values):
+        meta_handle = self._MM.open_meta(self.using_db)
+        tbInfo: TableInfo = meta_handle.get_table(tbname)
+        if tbInfo.primary is None:
+            return True
+        results = None
+        for col in tbInfo.primary:
+            val = values[tbInfo.get_col_index(col)]
+            index: FileIndex = self._IM.open_index(self.using_db, tbname, col, tbInfo.indexes[col])
+            if results is None:
+                results = set(index.range(val, val))
+            else:
+                results = results & (index.range(val, val))
+        return len(results) == 0
     
-    def check_remove_constraints(self):
-        pass
+    def check_foreign(self, tbname, values):
+        meta_handle = self._MM.open_meta(self.using_db)
+        tbInfo: TableInfo = meta_handle.get_table(tbname)
+        if len(tbInfo.foreign) == 0:
+            return True
+        results = None
+        for col in tbInfo.foreign:
+            val = values[tbInfo.get_col_index(col)]
+            foreign_tbname = tbInfo.foreign[col][0]
+            foreign_colname = tbInfo.foreign[col][1]
+            foreign_tbInfo:TableInfo = meta_handle.get_table(foreign_tbname)
+            root_id = foreign_tbInfo.indexes[foreign_tbname]
+            index: FileIndex = self._IM.open_index(self.using_db, foreign_tbname, foreign_colname, root_id)
+            if results is None:
+                results = set(index.range(val, val))
+            else:
+                results = results & (index.range(val, val))
+        return len(results) > 0
+
+    def check_insert_constraints(self, tbname, values):
+        # PRIMARY CONSTRAINT
+        if not self.check_primary(tbname, values):
+            return False
+        # UNIQUE CONSTRAINT
+
+        # FOREIGN CONSTRAINT
+        if not self.check_foreign(tbname, values):
+            return False
+        return True
+    
+    def check_remove_constraints(self, tbname, values):
+        # FOERIGN CONSTRAINT
+
+        return True
 
     def handle_insert_indexes(self, tbInfo:TableInfo, dbname, data, rid:RID):
         tbname = tbInfo.name

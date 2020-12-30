@@ -79,6 +79,7 @@ class FileIndex:
             self._handle.put_page(page_id, node.to_array())
 
     def insert(self, key, rid: RID):
+        self._handle._is_modified = True
         self._root.insert(key, rid)
         # Check if root need change
         if self._root.page_size() > settings.PAGE_SIZE:
@@ -97,6 +98,7 @@ class FileIndex:
             self._root._child_val = [old_node, new_node]
 
     def remove(self, key, rid: RID):
+        self._handle._is_modified = True
         self._root.remove(key, rid)
 
     def search(self, key):

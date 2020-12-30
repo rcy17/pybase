@@ -45,9 +45,13 @@ class SystemVisitor(SQLVisitor):
         return QueryResult('tables', self.manager.show_tables())
 
     def visitCreate_table(self, ctx: SQLParser.Create_tableContext):
-        columns = ctx.field_list().accept(self)
+        columns, foreign_keys, primary = ctx.field_list().accept(self)
         table_name = to_str(ctx.Identifier())
-        return self.manager.create_table(TableInfo(table_name, columns))
+        res = self.manager.create_table(TableInfo(table_name, columns))
+        for col in foreign_keys:
+            self.manager.add_foreign(table_name, col, foreign_keys[col])
+        self.manager.set_primary(table_name, primary)
+        return res
 
     def visitDrop_table(self, ctx: SQLParser.Drop_tableContext):
         table_name = to_str(ctx.Identifier())
@@ -77,10 +81,10 @@ class SystemVisitor(SQLVisitor):
                 assert isinstance(field, SQLParser.Primary_key_fieldContext)
                 names = field.identifiers().accept(self)
                 # assert len(names) == 1
-                name = names[0]
-                assert name in name_to_column
-                primary_key = name
-        return list(name_to_column.values())
+                for name in names:
+                    assert name in name_to_column
+                primary_key = names
+        return list(name_to_column.values()), foreign_keys, primary_key 
 
     def visitNormal_field(self, ctx: SQLParser.Normal_fieldContext):
         pass
@@ -121,19 +125,16 @@ class SystemVisitor(SQLVisitor):
         # self.manager.scan_record(table_name_list[0])
         conditions = ctx.where_and_clause().accept(self) if ctx.where_and_clause() else []
         result_map = {}
-        compare_map = {}
+        # compare_map = {}
         for table_name in table_name_list:
-            result_map[table_name] = self.manager.cond_scan(table_name, conditions)
-            compare_map[table_name] = self.manager.cond_scan_index(table_name, conditions)
+            result_map[table_name] = self.manager.cond_scan_index(table_name, conditions)
+            # compare_map[table_name] = self.manager.cond_scan_index(table_name, conditions)
         if len(table_name_list) == 1:
-            self.manager.print_results(result_map[table_name_list[0]])
-            self.manager.print_results(compare_map[table_name_list[0]])
             return result_map[table_name_list[0]]
         else:
-            for table_name in table_name_list:
-                self.manager.print_results(result_map[table_name])
+            # for table_name in table_name_list:
+            #    self.manager.print_results(result_map[table_name])
             result = self.manager.cond_join(result_map, conditions)
-            self.manager.print_results(result)
             return result
     
     def visitDelete_from_table(self, ctx: SQLParser.Delete_from_tableContext):

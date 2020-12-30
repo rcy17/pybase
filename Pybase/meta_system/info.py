@@ -45,7 +45,7 @@ class TableInfo:
     def __init__(self, name, colList, orderList=None) -> None:
         self._name = name
         self._colMap = {col._name: col for col in colList}
-        self.primary = []
+        self.primary = None
         self.foreign = {}
         self.indexes = {}
         if orderList is None:
@@ -74,11 +74,15 @@ class TableInfo:
     def get_size(self) -> int:
         return sum([col.get_size() for col in self._colMap.values()])
 
-    def set_primary(self, cols):
-        self.primary = cols
-
-    def set_foriegn(self, col, foreign_col):
-        self.foreign[col] = foreign_col
+    def set_primary(self, primary):
+        self.primary = primary
+    
+    def add_foreign(self, col, foreign):
+        self.foreign[col] = foreign
+    
+    def remove_foreign(self, col):
+        if col in self.foreign:
+            self.foreign.pop(col)
 
     def get_size_list(self):
         return [col.get_size() for col in self._colMap.values()]
