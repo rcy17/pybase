@@ -22,5 +22,5 @@ class TablePrinter(BasePrinter):
         else:
             print(f'Empty set in {cost.total_seconds():.3f} seconds')
 
-    def _error_report(self, msg):
+    def _message_report(self, msg):
         print(msg, file=stderr)

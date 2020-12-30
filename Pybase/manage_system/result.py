@@ -11,7 +11,7 @@ class QueryResult:
     headers are supposed to be tuple of string
     data are supposed to be tuple of tuple of string
     """
-    def __init__(self, headers, data, error=None):
+    def __init__(self, headers, data, message=None):
         if not isinstance(headers, (list, tuple)):
             headers = (headers, )
         if data and not isinstance(data[0], (list, tuple)):
@@ -20,7 +20,7 @@ class QueryResult:
         self._data = data
         self._header_index = {h:i for i,h in enumerate(headers)}
         self._alias_map = {}
-        self._error = error
+        self._message = message
 
     @property
     def headers(self) -> tuple:
@@ -35,8 +35,8 @@ class QueryResult:
         return self._alias_map
 
     @property
-    def error(self) -> str:
-        return self._error
+    def message(self) -> str:
+        return self._message
     
     def get_size(self) -> int:
         return len(self._data)

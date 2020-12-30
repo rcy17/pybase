@@ -12,13 +12,13 @@ class BasePrinter(object):
     def _print(self, result: QueryResult, cost: timedelta):
         raise NotImplementedError
 
-    def _error_report(self, msg):
+    def _message_report(self, msg):
         raise NotImplementedError
 
     def print(self, result: QueryResult, cost: timedelta):
         if result is None:
             return
-        if result.error:
-            self._error_report(result.error)
+        if result.message:
+            self._message_report(result.message)
         else:
             self._print(result, cost)

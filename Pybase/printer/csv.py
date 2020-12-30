@@ -15,5 +15,5 @@ class CSVPrinter(BasePrinter):
         writer.writerow(result.headers)
         writer.writerows(result.data)
 
-    def _error_report(self, msg):
+    def _message_report(self, msg):
         print(msg, file=stderr)
