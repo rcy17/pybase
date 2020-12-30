@@ -4,8 +4,6 @@ Here defines backend's process
 Date: 2020/12/30
 """
 from multiprocessing.connection import Connection
-import os
-import stat
 from pathlib import Path
 
 from Pybase.manage_system.manager import SystemManger
@@ -29,11 +27,3 @@ def backend(args, connection: Connection):
             sql = connection.recv()
             result = manager.execute(sql)
             connection.send(result)
-
-
-
-
-
-
-
-

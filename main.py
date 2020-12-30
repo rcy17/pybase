@@ -1,7 +1,7 @@
 """
 This is entry file for this project
 
-Data: 2020/10/30
+Date: 2020/10/30
 """
 
 if __name__ == '__main__':

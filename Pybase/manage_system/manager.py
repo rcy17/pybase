@@ -12,6 +12,7 @@ from pathlib import Path
 from antlr4 import InputStream, CommonTokenStream
 from antlr4.error.Errors import ParseCancellationException
 from antlr4.error.ErrorStrategy import BailErrorStrategy
+from antlr4.error.ErrorListener import ErrorListener
 
 from Pybase import settings
 from Pybase.manage_system.result import QueryResult
@@ -66,15 +67,23 @@ class SystemManger:
                 recognizer._errHandler.reportError(recognizer, e)
                 super().recover(recognizer, e)
 
+        class StringErrorListener(ErrorListener):
+            def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
+                raise ParseCancellationException("line " + str(line) + ":" + str(column) + " " + msg)
+
         input_stream = InputStream(sql)
         lexer = SQLLexer(input_stream)
+        lexer.removeErrorListeners()
+        lexer.addErrorListener(StringErrorListener())
         tokens = CommonTokenStream(lexer)
         parser = SQLParser(tokens)
-        parser._errHandler = Strategy()
+        parser.removeErrorListeners()
+        parser.addErrorListener(StringErrorListener())
+        # parser._errHandler = Strategy()
         try:
             tree = parser.program()
-        except ParseCancellationException:
-            return
+        except ParseCancellationException as e:
+            return QueryResult(None, None, str(e))
         try:
             return self.visitor.visit(tree)
         except DataBaseError as e:
