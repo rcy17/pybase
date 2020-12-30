@@ -119,7 +119,7 @@ class SystemVisitor(SQLVisitor):
         # Only for debug
         table_name_list: list = ctx.identifiers().accept(self)
         # self.manager.scan_record(table_name_list[0])
-        conditions = ctx.where_and_clause().accept(self)
+        conditions = ctx.where_and_clause().accept(self) if ctx.where_and_clause() else []
         result_map = {}
         compare_map = {}
         for table_name in table_name_list:

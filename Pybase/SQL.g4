@@ -45,7 +45,7 @@ table_statement
     | 'INSERT' 'INTO' Identifier 'VALUES' value_lists                   # insert_into_table
     | 'DELETE' 'FROM' Identifier 'WHERE' where_and_clause               # delete_from_table
     | 'UPDATE' Identifier 'SET' set_clause 'WHERE' where_and_clause     # update_table
-    | 'SELECT' selector 'FROM' identifiers 'WHERE' where_and_clause     # select_table
+    | 'SELECT' selector 'FROM' identifiers ('WHERE' where_and_clause)?  # select_table
     ;
 
 index_statement

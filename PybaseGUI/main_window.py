@@ -85,9 +85,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def on_tree_file_doubleClicked(self, index: QModelIndex):
         if index.parent().data() == 'table':
-            # sql = f'USE {index.parent().parent().data()};SELECT * FROM {index.data()};'
-            # self.run_sql(sql)
-            # TODO: Permit SELECT * FROM table; to show all rows
+            sql = f'USE {index.parent().parent().data()};SELECT * FROM {index.data()};'
+            self.run_sql(sql)
             print('show table', index.data())
         elif index.parent().data() == 'schema':
             sql = f'USE {index.parent().parent().data()};DESC {index.data()};'
