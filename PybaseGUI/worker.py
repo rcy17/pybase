@@ -3,7 +3,7 @@ Worker is a thread to interactive with SQL processing
 
 Date: 2020/12/31
 """
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 from datetime import datetime, timedelta
 from multiprocessing.connection import Connection
 from queue import Queue
@@ -32,23 +32,24 @@ class Worker(QThread):
         self.queue = queue
 
     @staticmethod
-    def make_model(result: QueryResult) -> Union[None, str, QStandardItemModel]:
-        if result is None:
-            return
-        if result.message:
-            return result.message
-        model = QStandardItemModel()
-        model.setHorizontalHeaderLabels(result.headers)
-        for row in result.data:
-            model.appendRow(ReadOnlyItem(str(item)) for item in row)
-        return model
+    def make_models(results: List[QueryResult]) -> Tuple[Tuple[Union[str, QStandardItemModel], timedelta]]:
+        def make_model(result) -> Union[str, QStandardItemModel]:
+            if result is None:
+                return ''
+            if result.message:
+                return result.message
+            if result.database:
+                return '#' + result.database
+            model = QStandardItemModel()
+            model.setHorizontalHeaderLabels(result.headers)
+            for row in result.data:
+                model.appendRow(ReadOnlyItem(str(item)) for item in row)
+            return model
+        return tuple((make_model(each), each.cost) for each in results)
 
-    def work(self, sql) -> Tuple[QueryResult, timedelta]:
+    def work(self, sql) -> List[QueryResult]:
         self.connection.send(sql)
-        start = datetime.now()
-        result: QueryResult = self.connection.recv()
-        stop = datetime.now()
-        return result, stop - start
+        return self.connection.recv()
 
     def wait_task(self):
         self.mutex.lock()
@@ -60,7 +61,7 @@ class Worker(QThread):
     def run(self) -> None:
         while True:
             task = self.wait_task()
-            result, cost = self.work(task)
+            results = self.work(task)
             self.executed.emit()
-            model = self.make_model(result)
-            self.finished.emit((model, cost))
+            models = self.make_models(results)
+            self.finished.emit(models)
