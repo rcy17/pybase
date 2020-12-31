@@ -6,20 +6,15 @@ Date: 2020/12/30
 from pathlib import Path
 from multiprocessing.connection import Connection
 from datetime import timedelta, datetime
-from enum import Enum, auto
+from enum import Enum
 
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
-from PyQt5.QtGui import QStandardItem, QStandardItemModel, QKeyEvent
+from PyQt5.QtGui import QStandardItemModel, QKeyEvent
 from PyQt5.QtCore import QModelIndex, QTimer, Qt
 
 from .ui.main_window import Ui_MainWindow
+from .worker import ReadOnlyItem
 from Pybase.manage_system.result import QueryResult
-
-
-class ReadOnlyItem(QStandardItem):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.setEditable(False)
 
 
 class Status(Enum):
@@ -38,12 +33,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tree_file.setModel(QStandardItemModel())
         self.table_result.setModel(QStandardItemModel())
         self.load_tree_file()
+
         self.timer = QTimer(self)
         self.timer.setInterval(10)
         self.timer.timeout.connect(self.check_result)
+
         self.last_start = None
         self.status = None
+        self.cost = None
+        self.models = []
+
         self.set_status(Status.Waiting)
+        self.set_result_report()
 
     def set_status(self, status: Status, cost=None):
         self.status = status
@@ -51,6 +52,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if cost:
             msg += '，已进行%.2fs' % cost.total_seconds()
         self.statusbar.showMessage(msg)
+
+    def set_result_report(self, size: int = 0, cost: timedelta = timedelta(0)):
+        self.label_result.setText(f'用时{cost.total_seconds():.2f}秒，共{size}个结果')
 
     def load_tree_file(self):
         model: QStandardItemModel = self.tree_file.model()
@@ -70,8 +74,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def show_result(self, result: QueryResult, cost: timedelta):
         if result is None:
+            self.set_result_report(0, cost)
             return
         if result.message:
+            self.set_result_report(0, cost)
             QMessageBox.critical(self, 'error', result.message)
             return
         model: QStandardItemModel = self.table_result.model()
@@ -79,7 +85,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         model.setHorizontalHeaderLabels(result.headers)
         for row in result.data:
             model.appendRow(ReadOnlyItem(str(item)) for item in row)
-        self.label_result.setText(f'用时{cost.total_seconds():.2f}秒，共{len(result.data)}个结果')
+        self.set_result_report(len(result.data), cost)
 
     def run_sql(self, sql):
         if self.status != Status.Waiting:
@@ -89,6 +95,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.timer.start()
         self.last_start = datetime.now()
         self.set_status(Status.Running)
+        self.check_result()
 
     def check_result(self):
         cost = datetime.now() - self.last_start
@@ -96,7 +103,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.timer.stop()
             result = self.connection.recv()
             self.set_status(Status.Rendering)
-            self.statusbar.repaint()    # Force to show rendering status
+            self.statusbar.repaint()  # Force to show rendering status
             self.show_result(result, cost)
             self.set_status(Status.Waiting)
         else:
@@ -114,3 +121,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if event.key() == Qt.Key_Return and event.modifiers() == Qt.ControlModifier:  # ctrl + enter
             if self.focusWidget() == self.text_code:
                 self.run_sql(self.text_code.toPlainText())
+
+    def on_button_clear_clicked(self):
+        self.table_result.model().clear()
+        self.set_result_report()
