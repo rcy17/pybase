@@ -9,7 +9,7 @@ from numpy.lib.function_base import insert
 from Pybase.meta_system.metahandler import MetaHandler
 from Pybase.record_system.rid import RID
 from Pybase.index_system.fileindex import FileIndex
-from Pybase.record_system.record import Record
+from datetime import datetime
 from pathlib import Path
 
 from antlr4 import InputStream, CommonTokenStream
@@ -20,9 +20,7 @@ from antlr4.error.ErrorListener import ErrorListener
 from Pybase import settings
 from Pybase.manage_system.result import QueryResult
 from Pybase.record_system.filescan import FileScan
-from Pybase.sql_parser.SQLLexer import SQLLexer
-from Pybase.sql_parser.SQLParser import SQLParser
-from Pybase.sql_parser.SQLVisitor import SQLVisitor
+from Pybase.sql_parser import SQLLexer, SQLParser, SQLVisitor
 from Pybase.file_system.manager import FileManager
 from Pybase.record_system.manager import RecordManager
 from Pybase.index_system.manager import IndexManager
@@ -38,7 +36,7 @@ from .join import nested_loops_join
 class SystemManger:
     """Class to manage the whole system"""
 
-    def __init__(self, visitor: SQLVisitor, base_path: Path):
+    def __init__(self, visitor, base_path: Path):
         self._FM = FileManager()
         self._RM = RecordManager(self._FM)
         self._IM = IndexManager(self._FM, base_path)
@@ -73,7 +71,7 @@ class SystemManger:
         class StringErrorListener(ErrorListener):
             def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
                 raise ParseCancellationException("line " + str(line) + ":" + str(column) + " " + msg)
-
+        self.visitor.time_cost()
         input_stream = InputStream(sql)
         lexer = SQLLexer(input_stream)
         lexer.removeErrorListeners()
@@ -86,11 +84,8 @@ class SystemManger:
         try:
             tree = parser.program()
         except ParseCancellationException as e:
-            return QueryResult(None, None, str(e))
-        try:
-            return self.visitor.visit(tree)
-        except DataBaseError as e:
-            return QueryResult(None, None, str(e))
+            return [QueryResult(None, None, str(e), cost=self.visitor.time_cost())]
+        return self.visitor.visit(tree)
 
     def create_db(self, name):
         if name in self.dbs:
@@ -120,6 +115,7 @@ class SystemManger:
         if name not in self.dbs:
             raise DataBaseError(f"Can't use not existing database {name}")
         self.using_db = name
+        return QueryResult(change_db=name)
 
     def show_tables(self):
         if self.using_db is None:

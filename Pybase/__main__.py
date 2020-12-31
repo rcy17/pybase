@@ -67,10 +67,8 @@ def main(args: Namespace):
                 break
             if sql.endswith(';'):
                 parent_conn.send(sql)
-                start = datetime.now()
-                result = parent_conn.recv()
-                stop = datetime.now()
-                printer.print(result, stop - start)
+                results = parent_conn.recv()
+                printer.print(results)
                 sql = ''
         p.terminate()
 

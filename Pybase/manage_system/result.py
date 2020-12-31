@@ -3,6 +3,7 @@ Here defines QueryResult class, each sql query returns such object
 
 Date: 2020/12/03
 """
+from datetime import timedelta
 
 
 class QueryResult:
@@ -11,7 +12,7 @@ class QueryResult:
     headers are supposed to be tuple of string
     data are supposed to be tuple of tuple of string
     """
-    def __init__(self, headers, data, message=None):
+    def __init__(self, headers=None, data=None, message=None, change_db=None, cost=None):
         if not isinstance(headers, (list, tuple)):
             headers = (headers, )
         if data and not isinstance(data[0], (list, tuple)):
@@ -21,6 +22,8 @@ class QueryResult:
         self._header_index = {h:i for i,h in enumerate(headers)}
         self._alias_map = {}
         self._message = message
+        self._database = change_db
+        self._cost = cost
 
     @property
     def headers(self) -> tuple:
@@ -37,6 +40,18 @@ class QueryResult:
     @property
     def message(self) -> str:
         return self._message
+
+    @property
+    def database(self) -> str:
+        return self._database
+
+    @property
+    def cost(self) -> timedelta:
+        return self._cost
+
+    @cost.setter
+    def cost(self, value: timedelta):
+        self._cost = value
     
     def get_size(self) -> int:
         return len(self._data)
