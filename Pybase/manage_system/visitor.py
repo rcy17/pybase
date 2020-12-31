@@ -41,7 +41,7 @@ class SystemVisitor(SQLVisitor):
                     results.append(result)
             except DataBaseError as e:
                 # Once meet error, record result and stop visiting
-                results.append(QueryResult(message=e, cost=self.time_cost()))
+                results.append(QueryResult(message=str(e), cost=self.time_cost()))
                 break
         return results
 

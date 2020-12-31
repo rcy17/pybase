@@ -4,7 +4,6 @@ It shows a table like mysql
 @Date: 2020/12/03
 """
 from sys import stderr
-from datetime import timedelta
 
 from prettytable import PrettyTable
 

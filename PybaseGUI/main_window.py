@@ -10,12 +10,13 @@ from datetime import timedelta, datetime
 from enum import Enum
 from queue import Queue
 
-from PyQt5.QtWidgets import QMainWindow, QMessageBox
-from PyQt5.QtGui import QStandardItemModel, QKeyEvent, QDragEnterEvent, QDropEvent
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QFileDialog
+from PyQt5.QtGui import QStandardItemModel, QKeyEvent, QDragEnterEvent, QDropEvent, QTextDocument
 from PyQt5.QtCore import QModelIndex, QTimer, Qt, QMutex, QWaitCondition, pyqtSlot, pyqtSignal
 
 from .ui.main_window import Ui_MainWindow
 from .worker import ReadOnlyItem, Worker
+from .syntax_highlighter import sql as SQLHighlighter
 
 
 class Status(Enum):
@@ -28,11 +29,13 @@ class Status(Enum):
 class MainWindow(QMainWindow, Ui_MainWindow):
     page_added = pyqtSignal
     page_changed = pyqtSignal(int)
+    sql_chosen = pyqtSignal(Path)
+    data_chosen = pyqtSignal(Path)
+    table_chosen = pyqtSignal(Path)
 
     def __init__(self, connection: Connection, base: Path, *args, obj=None, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.setupUi(self)
-        self.showMaximized()
         self.connection = connection
         self.base_path = base
         self.tree_file.setModel(QStandardItemModel())
@@ -49,6 +52,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.worker.executed.connect(self.worker_execute)
         self.worker.finished.connect(self.worker_finish)
         self.worker.start()
+
+        self.document = QTextDocument(self)
+        self.processing_highlight = False
+        self.document.setDefaultStyleSheet(SQLHighlighter.style())
+        self.text_code.setDocument(self.document)
 
         self.last_start = None
         self.status = None
@@ -89,7 +97,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.page_changed.emit(-1)
         self.timer.stop()
         if error:
-            QMessageBox.critical(self, 'error', error)
+            self.error_report('执行错误', error)
         self.set_status(Status.Waiting)
 
     def set_status(self, status: Status, cost=None):
@@ -146,7 +154,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def run_sql(self, sql):
         if self.status != Status.Waiting:
-            QMessageBox.critical(self, 'error', '请等待当前SQL运行、渲染完成后再执行新的SQL')
+            self.error_report('系统忙碌', '请等待当前SQL运行、渲染完成后再执行新的SQL')
             return
         self.mutex.lock()
         self.queue.put(sql)
@@ -161,6 +169,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         cost = datetime.now() - self.last_start
         self.set_status(self.status, cost)
 
+    def load_sql(self, path):
+        try:
+            self.text_code.setText(open(path, encoding='utf-8').read())
+        except Exception as e:
+            self.error_report(type(e).__name__, str(e))
+
+    def error_report(self, title, content):
+        QMessageBox.critical(self, title, content)
+
     @pyqtSlot(QModelIndex)
     def on_tree_file_doubleClicked(self, index: QModelIndex):
         if index.parent().data() == 'table':
@@ -169,6 +186,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         elif index.parent().data() == 'schema':
             sql = f'USE {index.parent().parent().data()};DESC {index.data()};'
             self.run_sql(sql)
+
+    @pyqtSlot()
+    def on_text_code_textChanged(self):
+        if self.processing_highlight:
+            self.processing_highlight = False
+        else:
+            self.processing_highlight = True
+            sql = self.text_code.toPlainText()
+            highlighted = SQLHighlighter.highlight(sql)
+            cursor = self.text_code.textCursor()
+            cursor_position = cursor.position()
+            self.document.setHtml(highlighted)
+            cursor.setPosition(cursor_position)
+            self.text_code.setTextCursor(cursor)
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.key() == Qt.Key_Return:    # enter
@@ -196,6 +227,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def open_action(self):
+        file, _ = QFileDialog.getOpenFileName(self, '选择sql文件', '.', 'SQL (*.sql);;All files (*)')
+        if file:
+            self.load_sql(Path(file))
+
+    @pyqtSlot()
+    def insert_action(self):
         pass
 
     @pyqtSlot()
@@ -216,10 +253,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def dragEnterEvent(self, e: QDragEnterEvent) -> None:
         if e.mimeData().hasUrls():
-            urls = list(e.mimeData().urls)
-            print(urls)
-            # if urls and len(urls) == 1 and urls[0].endswith(('.sql', '.tbl'))
+            urls = e.mimeData().urls()
+            if urls and len(urls) == 1 and urls[0].path().endswith(('.sql', '.tbl')):
+                e.accept()
 
     def dropEvent(self, e: QDropEvent) -> None:
-        pass
+        path = Path(e.mimeData().urls()[0].path())
+        if path.suffix == '.sql':
+            pass
+        elif path.suffix == '.tbl':
+            pass
+
 

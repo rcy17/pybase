@@ -46,6 +46,7 @@ def main(args: Namespace):
         app = QtWidgets.QApplication(sys.argv)
         window = MainWindow(parent_conn, args.base)
         window.show()
+        window.showMaximized()
         app.exec()
     elif args.file:
         parent_conn.send((args.file, args.table))
@@ -56,9 +57,8 @@ def main(args: Namespace):
         mode = os.fstat(0).st_mode
         while True:
             if not stat.S_ISREG(mode):
-                # if stdin is redirected, do not print
+                # if stdin is redirected, do not print prefix
                 prefix = f'pybase({printer.using_db})'
-                # prefix = f'pybase'
                 print(('-'.rjust(len(prefix)) if sql else prefix) + '> ', end='')
             try:
                 sql += input().strip()
