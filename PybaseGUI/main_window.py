@@ -15,6 +15,7 @@ from PyQt5.QtGui import QStandardItemModel, QKeyEvent, QDragEnterEvent, QDropEve
 from PyQt5.QtCore import QModelIndex, QTimer, Qt, QMutex, QWaitCondition, pyqtSlot, pyqtSignal
 
 from .ui.main_window import Ui_MainWindow
+from .table_choose_window import TableChooseWindow
 from .worker import ReadOnlyItem, Worker
 from .syntax_highlighter import sql as SQLHighlighter
 
@@ -171,9 +172,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def load_sql(self, path):
         try:
-            self.text_code.setText(open(path, encoding='utf-8').read())
+            self.document.setPlainText(open(path, encoding='utf-8').read())
         except Exception as e:
             self.error_report(type(e).__name__, str(e))
+
+    def load_data(self, path):
+        table = path.stem.upper()
+        # TODO: Add dialog to choose table
+        db = self.using_db
+        window = TableChooseWindow(db, table, self.tree_file.model(), parent=self, )
+        if window.exec():
+            self.run_sql((path, table))
 
     def error_report(self, title, content):
         QMessageBox.critical(self, title, content)
@@ -202,8 +211,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.text_code.setTextCursor(cursor)
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
-        if event.key() == Qt.Key_Return:    # enter
-            if event.modifiers() in (Qt.ControlModifier, Qt.AltModifier):   # alt + enter or ctrl + enter
+        if event.key() == Qt.Key_Return:  # enter
+            if event.modifiers() in (Qt.ControlModifier, Qt.AltModifier):  # alt + enter or ctrl + enter
                 self.run_sql(self.text_code.toPlainText())
 
     @pyqtSlot()
@@ -233,7 +242,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def insert_action(self):
-        pass
+        file, _ = QFileDialog.getOpenFileName(self, '选择tbl文件', '.', 'TBL (*.tbl);;All files (*)')
+        if file:
+            self.load_data(Path(file))
 
     @pyqtSlot()
     def exit_action(self):
@@ -260,8 +271,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def dropEvent(self, e: QDropEvent) -> None:
         path = Path(e.mimeData().urls()[0].path())
         if path.suffix == '.sql':
-            pass
+            self.load_sql(path)
         elif path.suffix == '.tbl':
-            pass
-
-
+            self.load_data(path)
