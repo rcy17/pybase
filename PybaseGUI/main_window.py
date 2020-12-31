@@ -218,7 +218,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if e.mimeData().hasUrls():
             urls = list(e.mimeData().urls)
             print(urls)
-            if urls and len(urls) == 1 and urls[0].endswith(('.sql', '.tbl'))
+            # if urls and len(urls) == 1 and urls[0].endswith(('.sql', '.tbl'))
 
     def dropEvent(self, e: QDropEvent) -> None:
         pass

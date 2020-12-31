@@ -47,9 +47,10 @@ def main(args: Namespace):
         window = MainWindow(parent_conn, args.base)
         window.show()
         app.exec()
-        p.terminate()
     elif args.file:
-        p.join()
+        parent_conn.send((args.file, args.table))
+        results = parent_conn.recv()
+        printer.print(results)
     else:
         sql = ''
         mode = os.fstat(0).st_mode
@@ -70,7 +71,7 @@ def main(args: Namespace):
                 results = parent_conn.recv()
                 printer.print(results)
                 sql = ''
-        p.terminate()
+    p.terminate()
 
 
 if __name__ == '__main__':

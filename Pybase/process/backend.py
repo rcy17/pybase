@@ -17,19 +17,16 @@ def backend(args, connection: Connection):
     manager = SystemManger(visitor, bath_path)
     if args.database:
         manager.use_db(args.database)
-    manager.target_table = args.table
     manager.bar = args.bar
-    if args.file:
-        executor = FileExecutor(args.bar)
-        connection.send(executor.execute(manager, args.file))
-    else:
-        while True:
-            sql = connection.recv()
-            if isinstance(sql, str):
-                result = manager.execute(sql)
-            elif isinstance(sql, tuple):
-                file, table, bar = sql
-            else:
-                print('Unknown message', sql)
-                break
-            connection.send(result)
+    while True:
+        sql = connection.recv()
+        if isinstance(sql, str):
+            result = manager.execute(sql)
+        elif isinstance(sql, tuple):
+            file, table = sql
+            executor = FileExecutor(args.bar)
+            result = executor.execute(manager, file, table)
+        else:
+            print('Unknown message', sql)
+            break
+        connection.send(result)

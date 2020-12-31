@@ -26,6 +26,7 @@ from Pybase.record_system.manager import RecordManager
 from Pybase.index_system.manager import IndexManager
 from Pybase.meta_system.manager import MetaManager
 from Pybase.exceptions.run_sql import DataBaseError
+from Pybase.exceptions.base import Error
 from Pybase.settings import (INDEX_FILE_SUFFIX, TABLE_FILE_SUFFIX, META_FILE_NAME)
 from Pybase.meta_system.info import ColumnInfo, TableInfo, DbInfo
 from Pybase.printer.table import TablePrinter
@@ -48,7 +49,7 @@ class SystemManger:
         self.using_db = None
         self.visitor = visitor
         self.visitor.manager = self
-        self.target_table = None    # Only for file input
+        # self.target_table = None    # Only for file input
         self.bar = None             # Only for file input
 
     def get_db_path(self, db_name):
@@ -85,7 +86,10 @@ class SystemManger:
             tree = parser.program()
         except ParseCancellationException as e:
             return [QueryResult(None, None, str(e), cost=self.visitor.time_cost())]
-        return self.visitor.visit(tree)
+        try:
+            return self.visitor.visit(tree)
+        except Error as e:
+            return [QueryResult(message=str(e), cost=self.visitor.time_cost())]
 
     def create_db(self, name):
         if name in self.dbs:
@@ -368,7 +372,7 @@ class SystemManger:
             # Handle Index
             self.handle_remove_indexes(tbInfo, self.using_db, values, rid)
         self._RM.close_file(self.get_table_name(tbname))
-        return QueryResult('delete_items', (len(records), ))
+        return QueryResult('deleted_items', (len(records), ))
     
     def update_records(self, tbname, conditions: tuple, set_value_map: dict):
         if self.using_db is None:
@@ -402,7 +406,7 @@ class SystemManger:
             # Handle indexes
             self.handle_insert_indexes(tbInfo, self.using_db, new_values, record.rid)
         self._RM.close_file(self.get_table_name(tbname))
-        return QueryResult('delete_items', (len(records), ))
+        return QueryResult('updated_items', (len(records), ))
 
 
     def index_filter(self, tbname, conditions) -> QueryResult:

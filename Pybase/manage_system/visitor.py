@@ -128,6 +128,7 @@ class SystemVisitor(SQLVisitor):
         value_lists = ctx.value_lists().accept(self)
         for value_list in value_lists:
             self.manager.insert_record(table_name, value_list)
+        return QueryResult('inserted_items', (len(value_lists),))
 
     def visitValue_lists(self, ctx: SQLParser.Value_listsContext):
         return tuple(each.accept(self) for each in ctx.value_list())
