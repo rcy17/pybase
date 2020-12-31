@@ -25,5 +25,11 @@ def backend(args, connection: Connection):
     else:
         while True:
             sql = connection.recv()
-            result = manager.execute(sql)
+            if isinstance(sql, str):
+                result = manager.execute(sql)
+            elif isinstance(sql, tuple):
+                file, table, bar = sql
+            else:
+                print('Unknown message', sql)
+                break
             connection.send(result)

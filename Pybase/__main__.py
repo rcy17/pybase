@@ -56,8 +56,8 @@ def main(args: Namespace):
         while True:
             if not stat.S_ISREG(mode):
                 # if stdin is redirected, do not print
-                # prefix = f'pybase({manager.using_db})'
-                prefix = f'pybase'
+                prefix = f'pybase({printer.using_db})'
+                # prefix = f'pybase'
                 print(('-'.rjust(len(prefix)) if sql else prefix) + '> ', end='')
             try:
                 sql += input().strip()
