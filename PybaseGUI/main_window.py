@@ -67,6 +67,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.processing_highlight = False
         self.document.setDefaultStyleSheet(SQLHighlighter.style())
         self.text_code.setDocument(self.document)
+        self.text_code.setFocus()
 
         self.set_status(Status.Waiting)
         self.set_result_report()
@@ -125,6 +126,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.label_page.setText(f'{self.current_page + 1}/{pages}')
 
     def update_buttons(self, page: int = -1):
+        if page < 0:
+            page += len(self.results)
         self.button_next.setEnabled(page < len(self.results) - 1)
         self.button_last.setEnabled(bool(page and self.results))
         self.button_clear.setEnabled(bool(self.results))
@@ -210,7 +213,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         table = path.stem.upper()
         window = TableChooseWindow(self.using_db, self.tables, table, parent=self)
         if window.exec():
-            self.run_sql((path, table))
+            database = window.combo_db.currentText()
+            table = window.combo_table.currentText()
+            self.run_sql((path, database, table))
+            self.change_db(database)
 
     def error_report(self, title, content):
         QMessageBox.critical(self, title, content)

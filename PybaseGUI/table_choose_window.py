@@ -22,6 +22,7 @@ class TableChooseWindow(QDialog, Ui_TableChooseWindow):
         index = self.combo_db.findData(using_db)
         if index != -1:
             self.combo_db.setCurrentIndex(index)
+            # self.on_combo_db_currentTextChanged(using_db)
         index = self.combo_table.findData(table)
         if index != -1:
             self.combo_table.setCurrentIndex(index)
@@ -29,7 +30,9 @@ class TableChooseWindow(QDialog, Ui_TableChooseWindow):
     @pyqtSlot(str)
     def on_combo_db_currentTextChanged(self, text):
         self.combo_table.clear()
-        self.combo_table.addItems(self.tables[text])
+        for table in self.tables[text]:
+            self.combo_table.addItem(table, table)
+        # self.combo_table.addItems(self.tables[text])
 
     @pyqtSlot(str)
     def on_combo_table_currentTextChanged(self, text):
