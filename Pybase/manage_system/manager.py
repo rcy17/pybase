@@ -49,7 +49,6 @@ class SystemManger:
         self.using_db = None
         self.visitor = visitor
         self.visitor.manager = self
-        # self.target_table = None    # Only for file input
         self.bar = None             # Only for file input
 
     def get_db_path(self, db_name):

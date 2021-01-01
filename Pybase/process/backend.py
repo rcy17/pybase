@@ -23,9 +23,9 @@ def backend(args, connection: Connection):
         if isinstance(sql, str):
             result = manager.execute(sql)
         elif isinstance(sql, tuple):
-            file, table = sql
+            file, database, table = sql
             executor = FileExecutor(args.bar)
-            result = executor.execute(manager, file, table)
+            result = executor.execute(manager, file, database, table)
         else:
             print('Unknown message', sql)
             break

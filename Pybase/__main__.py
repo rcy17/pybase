@@ -49,7 +49,7 @@ def main(args: Namespace):
         window.showMaximized()
         app.exec()
     elif args.file:
-        parent_conn.send((args.file, args.table))
+        parent_conn.send((args.file, args.database, args.table))
         results = parent_conn.recv()
         printer.print(results)
     else:

@@ -208,9 +208,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def load_data(self, path):
         table = path.stem.upper()
-        # TODO: Add dialog to choose table
-        db = self.using_db
-        window = TableChooseWindow(db, table, self.tree_file.model(), parent=self, )
+        window = TableChooseWindow(self.using_db, self.tables, table, parent=self)
         if window.exec():
             self.run_sql((path, table))
 
