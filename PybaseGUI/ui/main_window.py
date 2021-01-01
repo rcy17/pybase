@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(680, 453)
+        MainWindow.resize(721, 447)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -69,7 +69,7 @@ class Ui_MainWindow(object):
         self.label_db.setObjectName("label_db")
         self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_db)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setSpacing(10)
+        self.horizontalLayout.setSpacing(6)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.label_result = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
@@ -118,7 +118,7 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 680, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 721, 22))
         self.menubar.setObjectName("menubar")
         self.menuasd = QtWidgets.QMenu(self.menubar)
         self.menuasd.setObjectName("menuasd")

@@ -212,6 +212,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def load_data(self, path):
         table = path.stem.upper()
         window = TableChooseWindow(self.using_db, self.tables, table, parent=self)
+        # window.setWindowFlag(Qt.FramelessWindowHint)
         if window.exec():
             database = window.combo_db.currentText()
             table = window.combo_table.currentText()

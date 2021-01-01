@@ -86,7 +86,7 @@ class Ui_TableChooseWindow(object):
 
     def retranslateUi(self, TableChooseWindow):
         _translate = QtCore.QCoreApplication.translate
-        TableChooseWindow.setWindowTitle(_translate("TableChooseWindow", "Dialog"))
+        TableChooseWindow.setWindowTitle(_translate("TableChooseWindow", "选择数据表"))
         self.label_3.setText(_translate("TableChooseWindow", "你想将文件载入哪张表？"))
         self.label.setText(_translate("TableChooseWindow", "数据库"))
         self.label_2.setText(_translate("TableChooseWindow", "数据表"))

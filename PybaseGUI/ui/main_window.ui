@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>680</width>
-    <height>453</height>
+    <width>721</width>
+    <height>447</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -110,7 +110,7 @@
     <item row="1" column="1">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="spacing">
-       <number>10</number>
+       <number>6</number>
       </property>
       <item>
        <widget class="QLabel" name="label_result">
@@ -190,7 +190,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>680</width>
+     <width>721</width>
      <height>22</height>
     </rect>
    </property>

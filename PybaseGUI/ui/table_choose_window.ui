@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>选择数据表</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
