@@ -2,3 +2,4 @@
 pyqt5
 pyqt5-tools
 pygments
+qdarkstyle

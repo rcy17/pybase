@@ -12,7 +12,7 @@ from queue import Queue
 
 from PyQt5.QtWidgets import QMainWindow, QMessageBox, QFileDialog
 from PyQt5.QtGui import QStandardItemModel, QKeyEvent, QDragEnterEvent, QDropEvent, QTextDocument
-from PyQt5.QtCore import QModelIndex, QTimer, Qt, QMutex, QWaitCondition, pyqtSlot, pyqtSignal
+from PyQt5.QtCore import QModelIndex, QTimer, Qt, QMutex, QWaitCondition, pyqtSlot, pyqtSignal, QAbstractItemModel
 
 from .ui.main_window import Ui_MainWindow
 from .table_choose_window import TableChooseWindow
@@ -85,13 +85,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.set_status(Status.Building)
 
     @pyqtSlot(tuple)
-    def worker_finish(self, args: Tuple[Tuple[Union[QStandardItemModel, str], timedelta]]):
+    def worker_finish(self, args: Tuple[Tuple[Union[QAbstractItemModel, str], timedelta]]):
         self.set_status(Status.Rendering)
         error = None
         for model, cost in args:
             if not model:
                 continue
-            elif isinstance(model, QStandardItemModel):
+            elif isinstance(model, QAbstractItemModel):
                 self.results.append((model, cost))
             elif model.startswith('#'):
                 self.change_db(model[1:])
@@ -252,7 +252,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot()
     def on_button_clear_clicked(self):
         if self.table_result.model():
-            self.table_result.model().clear()
+            self.table_result.setModel(None)
         self.results.clear()
         self.change_page()
         self.update_buttons()

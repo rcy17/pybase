@@ -12,6 +12,7 @@ from PyQt5.QtCore import QThread, pyqtSignal, QMutex, QWaitCondition
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
 
 from Pybase.manage_system.result import QueryResult
+from .table_model import TableModel
 
 
 class ReadOnlyItem(QStandardItem):
@@ -40,11 +41,7 @@ class Worker(QThread):
                 return result.message
             if result.database:
                 return '#' + result.database
-            model = QStandardItemModel()
-            model.setHorizontalHeaderLabels(result.headers)
-            for row in result.data:
-                model.appendRow(ReadOnlyItem(str(item)) for item in row)
-            return model
+            return TableModel(result)
         return tuple((make_model(each), each.cost) for each in results)
 
     def work(self, sql) -> List[QueryResult]:

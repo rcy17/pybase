@@ -43,10 +43,12 @@ def main(args: Namespace):
     if args.gui:
         from PybaseGUI.main_window import MainWindow
         from PyQt5 import QtWidgets
+        import qdarkstyle
         app = QtWidgets.QApplication(sys.argv)
         window = MainWindow(parent_conn, args.base)
         window.show()
         window.showMaximized()
+        app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
         app.exec()
     elif args.file:
         parent_conn.send((args.file, args.database, args.table))
