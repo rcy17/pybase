@@ -26,10 +26,10 @@ class BasePrinter(object):
         for result in results:
             if result is None:
                 return
-            elif result.database:
+            if result.database:
                 self.using_db = result.database
                 self._database_changed()
-            elif result.message:
-                self._message_report(result.message)
-            else:
+            if result.headers:
                 self._print(result)
+            if result.message:
+                self._message_report(result.message)

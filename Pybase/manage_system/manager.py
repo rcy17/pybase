@@ -114,6 +114,7 @@ class SystemManger:
         self.dbs.remove(name)
         if self.using_db == name:
             self.using_db = None
+            return QueryResult(change_db='None')
 
     def use_db(self, name):
         if name not in self.dbs:

@@ -36,8 +36,9 @@ class SystemVisitor(SQLVisitor):
         for statement in ctx.statement():
             try:
                 result: QueryResult = statement.accept(self)
-                result.cost = self.time_cost()
+                cost = self.time_cost()
                 if result:
+                    result.cost = cost
                     results.append(result)
             except DataBaseError as e:
                 # Once meet error, record result and stop visiting
