@@ -39,6 +39,7 @@ class SystemVisitor(SQLVisitor):
                 cost = self.time_cost()
                 if result:
                     result.cost = cost
+                    result.simplify()
                     results.append(result)
             except DataBaseError as e:
                 # Once meet error, record result and stop visiting

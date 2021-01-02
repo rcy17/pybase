@@ -13,17 +13,31 @@ class QueryResult:
     data are supposed to be tuple of tuple of string
     """
     def __init__(self, headers=None, data=None, message=None, change_db=None, cost=None):
-        if not isinstance(headers, (list, tuple)):
+        if headers and not isinstance(headers, (list, tuple)):
             headers = (headers, )
         if data and not isinstance(data[0], (list, tuple)):
             data = tuple((each, ) for each in data)
         self._headers = headers
         self._data = data
-        self._header_index = {h:i for i,h in enumerate(headers)}
+        self._header_index = {h:i for i,h in enumerate(headers)} if headers else {}
         self._alias_map = {}
         self._message = message
         self._database = change_db
         self._cost = cost
+
+    def simplify(self):
+        """Simplify headers if all headers have same prefix"""
+        if not self._headers:
+            return
+        header: str = self._headers[0]
+        if header.find('.') < 0:
+            return
+        prefix = header[:header.find('.') + 1]  # Prefix contains "."
+        for header in self._headers:
+            if len(header) <= len(prefix) or not header.startswith(prefix):
+                break
+        else:
+            self._headers = tuple(header[len(prefix):] for header in self._headers)
 
     @property
     def headers(self) -> tuple:
