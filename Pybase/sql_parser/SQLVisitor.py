@@ -184,8 +184,33 @@ class SQLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by SQLParser#where_clause.
-    def visitWhere_clause(self, ctx:SQLParser.Where_clauseContext):
+    # Visit a parse tree produced by SQLParser#where_operator_expression.
+    def visitWhere_operator_expression(self, ctx:SQLParser.Where_operator_expressionContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#where_operator_select.
+    def visitWhere_operator_select(self, ctx:SQLParser.Where_operator_selectContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#where_null.
+    def visitWhere_null(self, ctx:SQLParser.Where_nullContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#where_in_list.
+    def visitWhere_in_list(self, ctx:SQLParser.Where_in_listContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#where_in_select.
+    def visitWhere_in_select(self, ctx:SQLParser.Where_in_selectContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#where_like_string.
+    def visitWhere_like_string(self, ctx:SQLParser.Where_like_stringContext):
         return self.visitChildren(ctx)
 
 

@@ -113,12 +113,12 @@ where_and_clause
     ;
 
 where_clause
-    : column operator expression
-    | column operator '(' select_table ')'
-    | column 'IS' ('NOT')? 'NULL'
-    | column 'IN' expression
-    | column 'IN' '(' select_table ')'
-    | column 'LIKE' String
+    : column operator expression            # where_operator_expression
+    | column operator '(' select_table ')'  # where_operator_select
+    | column 'IS' ('NOT')? 'NULL'           # where_null
+    | column 'IN' value_list                # where_in_list
+    | column 'IN' '(' select_table ')'      # where_in_select
+    | column 'LIKE' String                  # where_like_string
     ;
 
 column

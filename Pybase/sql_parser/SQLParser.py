@@ -153,37 +153,38 @@ def serializedATN():
         buf.write("\"\22\2\u013a\u013c\7-\2\2\u013b\u013d\7%\2\2\u013c\u013b")
         buf.write("\3\2\2\2\u013c\u013d\3\2\2\2\u013d\u013e\3\2\2\2\u013e")
         buf.write("\u013f\7&\2\2\u013f\u014f\3\2\2\2\u0140\u0141\5\"\22\2")
-        buf.write("\u0141\u0142\7.\2\2\u0142\u0143\5$\23\2\u0143\u014f\3")
-        buf.write("\2\2\2\u0144\u0145\5\"\22\2\u0145\u0146\7.\2\2\u0146\u0147")
-        buf.write("\7\f\2\2\u0147\u0148\5\f\7\2\u0148\u0149\7\r\2\2\u0149")
-        buf.write("\u014f\3\2\2\2\u014a\u014b\5\"\22\2\u014b\u014c\7/\2\2")
-        buf.write("\u014c\u014d\7>\2\2\u014d\u014f\3\2\2\2\u014e\u012f\3")
-        buf.write("\2\2\2\u014e\u0133\3\2\2\2\u014e\u0139\3\2\2\2\u014e\u0140")
-        buf.write("\3\2\2\2\u014e\u0144\3\2\2\2\u014e\u014a\3\2\2\2\u014f")
-        buf.write("!\3\2\2\2\u0150\u0151\7<\2\2\u0151\u0153\7\60\2\2\u0152")
-        buf.write("\u0150\3\2\2\2\u0152\u0153\3\2\2\2\u0153\u0154\3\2\2\2")
-        buf.write("\u0154\u0155\7<\2\2\u0155#\3\2\2\2\u0156\u0159\5\34\17")
-        buf.write("\2\u0157\u0159\5\"\22\2\u0158\u0156\3\2\2\2\u0158\u0157")
-        buf.write("\3\2\2\2\u0159%\3\2\2\2\u015a\u015b\7<\2\2\u015b\u015c")
-        buf.write("\7\62\2\2\u015c\u0163\5\34\17\2\u015d\u015e\7$\2\2\u015e")
-        buf.write("\u015f\7<\2\2\u015f\u0160\7\62\2\2\u0160\u0162\5\34\17")
-        buf.write("\2\u0161\u015d\3\2\2\2\u0162\u0165\3\2\2\2\u0163\u0161")
-        buf.write("\3\2\2\2\u0163\u0164\3\2\2\2\u0164\'\3\2\2\2\u0165\u0163")
-        buf.write("\3\2\2\2\u0166\u0179\7\61\2\2\u0167\u016c\5\"\22\2\u0168")
-        buf.write("\u0169\7$\2\2\u0169\u016b\5\"\22\2\u016a\u0168\3\2\2\2")
-        buf.write("\u016b\u016e\3\2\2\2\u016c\u016a\3\2\2\2\u016c\u016d\3")
-        buf.write("\2\2\2\u016d\u0179\3\2\2\2\u016e\u016c\3\2\2\2\u016f\u0170")
-        buf.write("\7B\2\2\u0170\u0171\7\f\2\2\u0171\u0172\5$\23\2\u0172")
-        buf.write("\u0173\7\r\2\2\u0173\u0179\3\2\2\2\u0174\u0175\78\2\2")
-        buf.write("\u0175\u0176\7\f\2\2\u0176\u0177\7\61\2\2\u0177\u0179")
-        buf.write("\7\r\2\2\u0178\u0166\3\2\2\2\u0178\u0167\3\2\2\2\u0178")
-        buf.write("\u016f\3\2\2\2\u0178\u0174\3\2\2\2\u0179)\3\2\2\2\u017a")
-        buf.write("\u017f\7<\2\2\u017b\u017c\7$\2\2\u017c\u017e\7<\2\2\u017d")
-        buf.write("\u017b\3\2\2\2\u017e\u0181\3\2\2\2\u017f\u017d\3\2\2\2")
-        buf.write("\u017f\u0180\3\2\2\2\u0180+\3\2\2\2\u0181\u017f\3\2\2")
-        buf.write("\2\u0182\u0183\t\3\2\2\u0183-\3\2\2\2\32\61GVu}\u009b")
-        buf.write("\u00ba\u00e0\u00e7\u00ee\u00f2\u0104\u0110\u0117\u0120")
-        buf.write("\u012c\u013c\u014e\u0152\u0158\u0163\u016c\u0178\u017f")
+        buf.write("\u0141\u0142\7.\2\2\u0142\u0143\5\32\16\2\u0143\u014f")
+        buf.write("\3\2\2\2\u0144\u0145\5\"\22\2\u0145\u0146\7.\2\2\u0146")
+        buf.write("\u0147\7\f\2\2\u0147\u0148\5\f\7\2\u0148\u0149\7\r\2\2")
+        buf.write("\u0149\u014f\3\2\2\2\u014a\u014b\5\"\22\2\u014b\u014c")
+        buf.write("\7/\2\2\u014c\u014d\7>\2\2\u014d\u014f\3\2\2\2\u014e\u012f")
+        buf.write("\3\2\2\2\u014e\u0133\3\2\2\2\u014e\u0139\3\2\2\2\u014e")
+        buf.write("\u0140\3\2\2\2\u014e\u0144\3\2\2\2\u014e\u014a\3\2\2\2")
+        buf.write("\u014f!\3\2\2\2\u0150\u0151\7<\2\2\u0151\u0153\7\60\2")
+        buf.write("\2\u0152\u0150\3\2\2\2\u0152\u0153\3\2\2\2\u0153\u0154")
+        buf.write("\3\2\2\2\u0154\u0155\7<\2\2\u0155#\3\2\2\2\u0156\u0159")
+        buf.write("\5\34\17\2\u0157\u0159\5\"\22\2\u0158\u0156\3\2\2\2\u0158")
+        buf.write("\u0157\3\2\2\2\u0159%\3\2\2\2\u015a\u015b\7<\2\2\u015b")
+        buf.write("\u015c\7\62\2\2\u015c\u0163\5\34\17\2\u015d\u015e\7$\2")
+        buf.write("\2\u015e\u015f\7<\2\2\u015f\u0160\7\62\2\2\u0160\u0162")
+        buf.write("\5\34\17\2\u0161\u015d\3\2\2\2\u0162\u0165\3\2\2\2\u0163")
+        buf.write("\u0161\3\2\2\2\u0163\u0164\3\2\2\2\u0164\'\3\2\2\2\u0165")
+        buf.write("\u0163\3\2\2\2\u0166\u0179\7\61\2\2\u0167\u016c\5\"\22")
+        buf.write("\2\u0168\u0169\7$\2\2\u0169\u016b\5\"\22\2\u016a\u0168")
+        buf.write("\3\2\2\2\u016b\u016e\3\2\2\2\u016c\u016a\3\2\2\2\u016c")
+        buf.write("\u016d\3\2\2\2\u016d\u0179\3\2\2\2\u016e\u016c\3\2\2\2")
+        buf.write("\u016f\u0170\7B\2\2\u0170\u0171\7\f\2\2\u0171\u0172\5")
+        buf.write("$\23\2\u0172\u0173\7\r\2\2\u0173\u0179\3\2\2\2\u0174\u0175")
+        buf.write("\78\2\2\u0175\u0176\7\f\2\2\u0176\u0177\7\61\2\2\u0177")
+        buf.write("\u0179\7\r\2\2\u0178\u0166\3\2\2\2\u0178\u0167\3\2\2\2")
+        buf.write("\u0178\u016f\3\2\2\2\u0178\u0174\3\2\2\2\u0179)\3\2\2")
+        buf.write("\2\u017a\u017f\7<\2\2\u017b\u017c\7$\2\2\u017c\u017e\7")
+        buf.write("<\2\2\u017d\u017b\3\2\2\2\u017e\u0181\3\2\2\2\u017f\u017d")
+        buf.write("\3\2\2\2\u017f\u0180\3\2\2\2\u0180+\3\2\2\2\u0181\u017f")
+        buf.write("\3\2\2\2\u0182\u0183\t\3\2\2\u0183-\3\2\2\2\32\61GVu}")
+        buf.write("\u009b\u00ba\u00e0\u00e7\u00ee\u00f2\u0104\u0110\u0117")
+        buf.write("\u0120\u012c\u013c\u014e\u0152\u0158\u0163\u016c\u0178")
+        buf.write("\u017f")
         return buf.getvalue()
 
 
@@ -2310,42 +2311,184 @@ class SQLParser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
 
+
+        def getRuleIndex(self):
+            return SQLParser.RULE_where_clause
+
+     
+        def copyFrom(self, ctx:ParserRuleContext):
+            super().copyFrom(ctx)
+
+
+
+    class Where_in_listContext(Where_clauseContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a SQLParser.Where_clauseContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
         def column(self):
             return self.getTypedRuleContext(SQLParser.ColumnContext,0)
 
+        def value_list(self):
+            return self.getTypedRuleContext(SQLParser.Value_listContext,0)
+
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterWhere_in_list" ):
+                listener.enterWhere_in_list(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitWhere_in_list" ):
+                listener.exitWhere_in_list(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitWhere_in_list" ):
+                return visitor.visitWhere_in_list(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class Where_operator_selectContext(Where_clauseContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a SQLParser.Where_clauseContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def column(self):
+            return self.getTypedRuleContext(SQLParser.ColumnContext,0)
 
         def operator(self):
             return self.getTypedRuleContext(SQLParser.OperatorContext,0)
-
-
-        def expression(self):
-            return self.getTypedRuleContext(SQLParser.ExpressionContext,0)
-
 
         def select_table(self):
             return self.getTypedRuleContext(SQLParser.Select_tableContext,0)
 
 
-        def String(self):
-            return self.getToken(SQLParser.String, 0)
-
-        def getRuleIndex(self):
-            return SQLParser.RULE_where_clause
-
         def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterWhere_clause" ):
-                listener.enterWhere_clause(self)
+            if hasattr( listener, "enterWhere_operator_select" ):
+                listener.enterWhere_operator_select(self)
 
         def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitWhere_clause" ):
-                listener.exitWhere_clause(self)
+            if hasattr( listener, "exitWhere_operator_select" ):
+                listener.exitWhere_operator_select(self)
 
         def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitWhere_clause" ):
-                return visitor.visitWhere_clause(self)
+            if hasattr( visitor, "visitWhere_operator_select" ):
+                return visitor.visitWhere_operator_select(self)
             else:
                 return visitor.visitChildren(self)
 
+
+    class Where_nullContext(Where_clauseContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a SQLParser.Where_clauseContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def column(self):
+            return self.getTypedRuleContext(SQLParser.ColumnContext,0)
+
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterWhere_null" ):
+                listener.enterWhere_null(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitWhere_null" ):
+                listener.exitWhere_null(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitWhere_null" ):
+                return visitor.visitWhere_null(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class Where_operator_expressionContext(Where_clauseContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a SQLParser.Where_clauseContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def column(self):
+            return self.getTypedRuleContext(SQLParser.ColumnContext,0)
+
+        def operator(self):
+            return self.getTypedRuleContext(SQLParser.OperatorContext,0)
+
+        def expression(self):
+            return self.getTypedRuleContext(SQLParser.ExpressionContext,0)
+
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterWhere_operator_expression" ):
+                listener.enterWhere_operator_expression(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitWhere_operator_expression" ):
+                listener.exitWhere_operator_expression(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitWhere_operator_expression" ):
+                return visitor.visitWhere_operator_expression(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class Where_in_selectContext(Where_clauseContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a SQLParser.Where_clauseContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def column(self):
+            return self.getTypedRuleContext(SQLParser.ColumnContext,0)
+
+        def select_table(self):
+            return self.getTypedRuleContext(SQLParser.Select_tableContext,0)
+
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterWhere_in_select" ):
+                listener.enterWhere_in_select(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitWhere_in_select" ):
+                listener.exitWhere_in_select(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitWhere_in_select" ):
+                return visitor.visitWhere_in_select(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class Where_like_stringContext(Where_clauseContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a SQLParser.Where_clauseContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def column(self):
+            return self.getTypedRuleContext(SQLParser.ColumnContext,0)
+
+        def String(self):
+            return self.getToken(SQLParser.String, 0)
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterWhere_like_string" ):
+                listener.enterWhere_like_string(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitWhere_like_string" ):
+                listener.exitWhere_like_string(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitWhere_like_string" ):
+                return visitor.visitWhere_like_string(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2359,6 +2502,7 @@ class SQLParser ( Parser ):
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,17,self._ctx)
             if la_ == 1:
+                localctx = SQLParser.Where_operator_expressionContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 301
                 self.column()
@@ -2369,6 +2513,7 @@ class SQLParser ( Parser ):
                 pass
 
             elif la_ == 2:
+                localctx = SQLParser.Where_operator_selectContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 305
                 self.column()
@@ -2383,6 +2528,7 @@ class SQLParser ( Parser ):
                 pass
 
             elif la_ == 3:
+                localctx = SQLParser.Where_nullContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
                 self.state = 311
                 self.column()
@@ -2401,16 +2547,18 @@ class SQLParser ( Parser ):
                 pass
 
             elif la_ == 4:
+                localctx = SQLParser.Where_in_listContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
                 self.state = 318
                 self.column()
                 self.state = 319
                 self.match(SQLParser.T__43)
                 self.state = 320
-                self.expression()
+                self.value_list()
                 pass
 
             elif la_ == 5:
+                localctx = SQLParser.Where_in_selectContext(self, localctx)
                 self.enterOuterAlt(localctx, 5)
                 self.state = 322
                 self.column()
@@ -2425,6 +2573,7 @@ class SQLParser ( Parser ):
                 pass
 
             elif la_ == 6:
+                localctx = SQLParser.Where_like_stringContext(self, localctx)
                 self.enterOuterAlt(localctx, 6)
                 self.state = 328
                 self.column()
