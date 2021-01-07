@@ -182,11 +182,50 @@ class SystemManger:
             if not meta_handle.exists_index(tbname + "." + col):
                 self.create_index(tbname + "." + col, tbname, col)
 
-    def add_column(self, tbname, colinfo: ColumnInfo):
-        pass
+    def add_column(self, tbname, colInfo: ColumnInfo):
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to add column")
+        meta_handle = self._MM.open_meta(self.using_db)
+        tbInfo = meta_handle.get_table(tbname)
+        if tbInfo.get_col_index(colInfo._name) is not None:
+            raise DataBaseError(f"Column already exists.")
+        oldtbInfo = tbInfo
+        meta_handle.add_col(tbname, colInfo)
+
+        record_handle = self._RM.open_file(self.get_table_name(tbname))
+        new_record_handle = self._RM.open_file(self.get_table_name(tbname + ".copy"))
+        scanner = FileScan(record_handle)        
+        for record in scanner:
+            value_list = oldtbInfo.load_record(record)
+            value_list.append(colInfo._default)
+            data = tbInfo.build_record(value_list)
+            new_record_handle.insert_record(data)            
+        self._RM.close_file(self.get_table_name(tbname))
+        self._RM.close_file(self.get_table_name(tbname + ".copy"))
+        # Rename
+
 
     def drop_column(self, tbname, colname):
-        pass
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to drop column")
+        meta_handle = self._MM.open_meta(self.using_db)
+        tbInfo = meta_handle.get_table(tbname)
+        if tbInfo.get_col_index(colname) is not None:
+            raise DataBaseError(f"Column already exists.")
+        index = tbInfo.get_col_index(colname)
+        oldtbInfo = tbInfo
+        meta_handle.drop_column(tbname, colname)
+        record_handle = self._RM.open_file(self.get_table_name(tbname))
+        new_record_handle = self._RM.open_file(self.get_table_name(tbname + ".copy"))
+        scanner = FileScan(record_handle)        
+        for record in scanner:
+            value_list = oldtbInfo.load_record(record)
+            value_list.pop(index)
+            data = tbInfo.build_record(value_list)
+            new_record_handle.insert_record(data) 
+        self._RM.close_file(self.get_table_name(tbname))
+        self._RM.close_file(self.get_table_name(tbname + ".copy"))
+        # Rename
 
     def create_index(self, index_name, tbname, colname):
         if self.using_db is None:

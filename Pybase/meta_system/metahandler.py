@@ -31,8 +31,8 @@ class MetaHandler:
         self._dump()
         print(f"Add talbe {table._name}")
     
-    def add_col(self, tbname, column: ColumnInfo, colindex: int):
-        self._db_info.insert_column(tbname, column, colindex)
+    def add_col(self, tbname, column: ColumnInfo):
+        self._db_info.insert_column(tbname, column)
         self._dump()
     
     def drop_table(self, tbname):

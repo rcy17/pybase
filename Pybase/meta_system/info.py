@@ -7,14 +7,11 @@ import numpy as np
 
 
 class ColumnInfo:
-    def __init__(self, type, name, size, default=None, is_index=False, root_id=None, foreign=None) -> None:
+    def __init__(self, type, name, size, default=None) -> None:
         self._type = type
         self._name = name
         self._size = size
         self._default = default
-        self._is_index = is_index
-        self._root_id = root_id
-        self._foreign = foreign
 
     def get_size(self) -> int:
         if self._type == "INT":
@@ -35,7 +32,6 @@ class ColumnInfo:
             self._name,
             f'{self._type}{("(%d)" % self._size) if self._size else ""}',
             "NO",
-            "MUL" if self._foreign else "",
             self._default,
             "",
         )
@@ -57,10 +53,10 @@ class TableInfo:
     def name(self):
         return self._name
 
-    def insert_column(self, column: ColumnInfo, colindex: int):
+    def insert_column(self, column: ColumnInfo):
         if column._name not in self._colMap:
             self._colMap[column._name] = column
-            self._colindex[column._name] = colindex
+            self._colindex[column._name] = len(self._colMap) - 1
         else:
             raise ColumnExistenceError(f"Column {column._name} should not exists.")
 

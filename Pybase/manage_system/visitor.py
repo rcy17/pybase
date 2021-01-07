@@ -70,9 +70,7 @@ class SystemVisitor(SQLVisitor):
                 # default = to_str(field.value()) if field.value() else None
                 name_to_column[name] = ColumnInfo(type=type_,
                                                   name=name,
-                                                  size=size,
-                                                  is_index=name == primary_key,
-                                                  foreign=foreign_keys.get(name))
+                                                  size=size)
             elif isinstance(field, SQLParser.Foreign_key_fieldContext):
 
                 field_name, table_name, refer_name = tuple(to_str(each) for each in field.Identifier())
