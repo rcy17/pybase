@@ -58,6 +58,15 @@ class RecordManager:
         self.opened_files[filename] = handle
         return handle
 
+    def replace_file(self, source, dest):
+        """Replace dest with source"""
+        if source in self.opened_files:
+            self.close_file(source)
+        if dest in self.opened_files:
+            self.close_file(dest)
+        self.remove_file(dest)
+        self._FM.move_file(source, dest)
+
     def close_file(self, filename):
         if filename not in self.opened_files:
             raise RecordFileOperationError(f'File {filename} is not opened')

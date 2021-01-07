@@ -73,6 +73,10 @@ class FileManager:
     def exists_file(filename: str):
         return os.path.exists(filename)
 
+    @staticmethod
+    def move_file(source: str, dest: str):
+        return os.rename(source, dest)
+
     def open_file(self, filename: str):
         if filename in self.file_name_to_id:
             return self.file_name_to_id[filename]
