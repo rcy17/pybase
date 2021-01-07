@@ -43,21 +43,24 @@ def main(args: Namespace):
     if args.gui:
         from PybaseGUI.main_window import MainWindow
         from PyQt5 import QtWidgets
+        import qdarkstyle
         app = QtWidgets.QApplication(sys.argv)
         window = MainWindow(parent_conn, args.base)
         window.show()
+        window.showMaximized()
+        app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
         app.exec()
-        p.terminate()
     elif args.file:
-        p.join()
+        parent_conn.send((args.file, args.database, args.table))
+        results = parent_conn.recv()
+        printer.print(results)
     else:
         sql = ''
         mode = os.fstat(0).st_mode
         while True:
             if not stat.S_ISREG(mode):
-                # if stdin is redirected, do not print
-                # prefix = f'pybase({manager.using_db})'
-                prefix = f'pybase'
+                # if stdin is redirected, do not print prefix
+                prefix = f'pybase({printer.using_db})'
                 print(('-'.rjust(len(prefix)) if sql else prefix) + '> ', end='')
             try:
                 sql += input().strip()
@@ -67,12 +70,10 @@ def main(args: Namespace):
                 break
             if sql.endswith(';'):
                 parent_conn.send(sql)
-                start = datetime.now()
-                result = parent_conn.recv()
-                stop = datetime.now()
-                printer.print(result, stop - start)
+                results = parent_conn.recv()
+                printer.print(results)
                 sql = ''
-        p.terminate()
+    p.terminate()
 
 
 if __name__ == '__main__':

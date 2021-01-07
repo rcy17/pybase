@@ -7,12 +7,19 @@ Greater: '>';
 GreaterEqual: '>=';
 NotEqual: '<>';
 
+Count: 'COUNT';
+Average: 'AVG';
+Max: 'MAX';
+Min: 'MIN';
+
+
 Identifier: [a-zA-Z_] [a-zA-Z_0-9]*;
 Integer: [0-9]+;
 String:  '\'' (~'\'')* '\'';
 Float: ('-')? [0-9]+ '.' [0-9]*;
 Whitespace: [ \t\n\r]+ -> skip;
 Annotation: '-' '-' (~';')+;
+Aggregator: Count | Average | Max | Min;
 
 program
     : statement* EOF
@@ -45,7 +52,10 @@ table_statement
     | 'INSERT' 'INTO' Identifier 'VALUES' value_lists                   # insert_into_table
     | 'DELETE' 'FROM' Identifier 'WHERE' where_and_clause               # delete_from_table
     | 'UPDATE' Identifier 'SET' set_clause 'WHERE' where_and_clause     # update_table
-    | 'SELECT' selector 'FROM' identifiers ('WHERE' where_and_clause)?  # select_table
+    ;
+
+select_table
+    : 'SELECT' selector 'FROM' identifiers ('WHERE' where_and_clause)?
     ;
 
 index_statement
@@ -104,7 +114,11 @@ where_and_clause
 
 where_clause
     : column operator expression
+    | column operator '(' select_table ')'
     | column 'IS' ('NOT')? 'NULL'
+    | column 'IN' expression
+    | column 'IN' '(' select_table ')'
+    | column 'LIKE' String
     ;
 
 column
@@ -124,6 +138,8 @@ set_clause
 selector
     : '*'
     | column (',' column)*
+    | Aggregator '(' expression ')'
+    | Count '(' '*' ')'
     ;
 
 identifiers

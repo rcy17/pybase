@@ -9,7 +9,7 @@ from numpy.lib.function_base import insert
 from Pybase.meta_system.metahandler import MetaHandler
 from Pybase.record_system.rid import RID
 from Pybase.index_system.fileindex import FileIndex
-from Pybase.record_system.record import Record
+from datetime import datetime
 from pathlib import Path
 
 from antlr4 import InputStream, CommonTokenStream
@@ -20,14 +20,14 @@ from antlr4.error.ErrorListener import ErrorListener
 from Pybase import settings
 from Pybase.manage_system.result import QueryResult
 from Pybase.record_system.filescan import FileScan
-from Pybase.sql_parser.SQLLexer import SQLLexer
-from Pybase.sql_parser.SQLParser import SQLParser
-from Pybase.sql_parser.SQLVisitor import SQLVisitor
+from Pybase.sql_parser import SQLLexer, SQLParser, SQLVisitor
 from Pybase.file_system.manager import FileManager
 from Pybase.record_system.manager import RecordManager
+from Pybase.record_system.record import Record
 from Pybase.index_system.manager import IndexManager
 from Pybase.meta_system.manager import MetaManager
 from Pybase.exceptions.run_sql import DataBaseError
+from Pybase.exceptions.base import Error
 from Pybase.settings import (INDEX_FILE_SUFFIX, TABLE_FILE_SUFFIX, META_FILE_NAME)
 from Pybase.meta_system.info import ColumnInfo, TableInfo, DbInfo
 from Pybase.printer.table import TablePrinter
@@ -38,7 +38,7 @@ from .join import nested_loops_join
 class SystemManger:
     """Class to manage the whole system"""
 
-    def __init__(self, visitor: SQLVisitor, base_path: Path):
+    def __init__(self, visitor, base_path: Path):
         self._FM = FileManager()
         self._RM = RecordManager(self._FM)
         self._IM = IndexManager(self._FM, base_path)
@@ -50,8 +50,7 @@ class SystemManger:
         self.using_db = None
         self.visitor = visitor
         self.visitor.manager = self
-        self.target_table = None    # Only for file input
-        self.bar = None             # Only for file input
+        self.bar = None  # Only for file input
 
     def get_db_path(self, db_name):
         return self._base_path / db_name
@@ -74,6 +73,7 @@ class SystemManger:
             def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
                 raise ParseCancellationException("line " + str(line) + ":" + str(column) + " " + msg)
 
+        self.visitor.time_cost()
         input_stream = InputStream(sql)
         lexer = SQLLexer(input_stream)
         lexer.removeErrorListeners()
@@ -86,11 +86,11 @@ class SystemManger:
         try:
             tree = parser.program()
         except ParseCancellationException as e:
-            return QueryResult(None, None, str(e))
+            return [QueryResult(None, None, str(e), cost=self.visitor.time_cost())]
         try:
             return self.visitor.visit(tree)
-        except DataBaseError as e:
-            return QueryResult(None, None, str(e))
+        except Error as e:
+            return [QueryResult(message=str(e), cost=self.visitor.time_cost())]
 
     def create_db(self, name):
         if name in self.dbs:
@@ -115,11 +115,13 @@ class SystemManger:
         self.dbs.remove(name)
         if self.using_db == name:
             self.using_db = None
+            return QueryResult(change_db='None')
 
     def use_db(self, name):
         if name not in self.dbs:
             raise DataBaseError(f"Can't use not existing database {name}")
         self.using_db = name
+        return QueryResult(change_db=name)
 
     def show_tables(self):
         if self.using_db is None:
@@ -166,7 +168,7 @@ class SystemManger:
         meta_handle.add_foreign(tbname, col, foreign)
         if not meta_handle.exists_index(foreign[0] + "." + foreign[1]):
             self.create_index(foreign[0] + "." + foreign[1], foreign[0], foreign[1])
-    
+
     def remove_foreign(self, tbname, col):
         meta_handle = self._MM.open_meta(self.using_db)
         meta_handle.remove_foreign(tbname, col)
@@ -248,7 +250,7 @@ class SystemManger:
         meta_handle.create_index(index_name, tbname, colname)
         self._IM.close_index(tbname, colname)
         self._RM.close_file(self.get_table_name(tbname))
-    
+
     def drop_index(self, index_name):
         if self.using_db is None:
             raise DataBaseError(f"No using database to create index")
@@ -270,7 +272,7 @@ class SystemManger:
         record_handle = self._RM.open_file(self.get_table_name(tbname))
         # Build a record
         data = tbInfo.build_record(value_list)
-        values = tbInfo.load_record(Record(RID(0,0), data))
+        values = tbInfo.load_record(Record(RID(0, 0), data))
         rid = record_handle.insert_record(data)
         # TODO:Check constraints
         if not self.check_insert_constraints(tbname, values):
@@ -295,8 +297,9 @@ class SystemManger:
         from datetime import timedelta
         self._printer.print(result, timedelta(0))
 
-    def build_cond_func(self, tbname, conditions, meta_handle:MetaHandler) -> list:
+    def build_cond_func(self, tbname, conditions, meta_handle: MetaHandler) -> list:
         func_list = []
+
         def build_cond_func(condition):
             if condition[0] is None:
                 condition = (tbname, *condition[1:])
@@ -322,7 +325,7 @@ class SystemManger:
             cond_func = build_cond_func(condition)
             if cond_func is not None:
                 func_list.append(build_cond_func(condition))
-        
+
         return func_list
 
     def cond_scan(self, tbname, conditions: tuple) -> QueryResult:
@@ -392,7 +395,7 @@ class SystemManger:
             results_map[new_key] = new_result
             results = new_result
         return results
-    
+
     def delete_records(self, tbname, conditions: tuple):
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
@@ -402,7 +405,7 @@ class SystemManger:
         records = self.search_records_indexes(tbname, conditions)
         record_handle = self._RM.open_file(self.get_table_name(tbname))
         for record in records:
-            rid:RID = record.rid
+            rid: RID = record.rid
             values = tbInfo.load_record(record.data)
             # TODO:Check Constraint
             if not self.check_insert_constraints(tbname, values):
@@ -411,8 +414,8 @@ class SystemManger:
             # Handle Index
             self.handle_remove_indexes(tbInfo, self.using_db, values, rid)
         self._RM.close_file(self.get_table_name(tbname))
-        return QueryResult('delete_items', (len(records), ))
-    
+        return QueryResult('deleted_items', (len(records),))
+
     def update_records(self, tbname, conditions: tuple, set_value_map: dict):
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
@@ -439,20 +442,20 @@ class SystemManger:
 
             # Handle indexes
             self.handle_remove_indexes(tbInfo, self.using_db, old_values, record.rid)
-            
+
             record.update_data(tbInfo.build_record(new_values))
             record_handle.update_record(record)
             # Handle indexes
             self.handle_insert_indexes(tbInfo, self.using_db, new_values, record.rid)
         self._RM.close_file(self.get_table_name(tbname))
-        return QueryResult('delete_items', (len(records), ))
-
+        return QueryResult('updated_items', (len(records),))
 
     def index_filter(self, tbname, conditions) -> QueryResult:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         cond_index_map = {}
         meta_handle = self._MM.open_meta(self.using_db)
+
         def build_cond_index(condition):
             if condition[0] is None:
                 condition = (tbname, *condition[1:])
@@ -465,7 +468,7 @@ class SystemManger:
             if len(condition) == 4:
                 if condition[1] in tbInfo.indexes:
                     if condition[1] not in cond_index_map:
-                        cond_index_map[condition[1]] = [-1000000000,1000000000]
+                        cond_index_map[condition[1]] = [-1000000000, 1000000000]
                     if condition[2] == "==":
                         lower = cond_index_map[condition[1]][0]
                         upper = cond_index_map[condition[1]][1]
@@ -496,6 +499,7 @@ class SystemManger:
                             cond_index_map[condition[1]][0] = val
                     else:
                         raise DataBaseError("No such operate.")
+
         for condition in conditions:
             build_cond_index(condition)
         tbInfo = meta_handle.get_table(tbname)
@@ -509,7 +513,7 @@ class SystemManger:
             else:
                 results = results & (index.range(lower, upper))
         return results
-    
+
     def cond_scan_index(self, tbname, conditions: tuple) -> QueryResult:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
@@ -518,9 +522,8 @@ class SystemManger:
         tbInfo = meta_handle.get_table(tbname)
         headers = tbInfo.get_header()
         results = tuple(tbInfo.load_record(record) for record in records)
-        return QueryResult(headers, results)    
-    
-    
+        return QueryResult(headers, results)
+
     def search_records(self, tbname, conditions: tuple):
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
@@ -541,7 +544,7 @@ class SystemManger:
                 results.append(record)
         self._RM.close_file(self.get_table_name(tbname))
         return results
-    
+
     def search_records_indexes(self, tbname, conditions: tuple):
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
@@ -579,7 +582,7 @@ class SystemManger:
     def check_primary(self, tbname, values):
         meta_handle = self._MM.open_meta(self.using_db)
         tbInfo: TableInfo = meta_handle.get_table(tbname)
-        if tbInfo.primary is None:
+        if not tbInfo.primary:
             return True
         results = None
         for col in tbInfo.primary:
@@ -590,7 +593,7 @@ class SystemManger:
             else:
                 results = results & (index.range(val, val))
         return len(results) == 0
-    
+
     def check_foreign(self, tbname, values):
         meta_handle = self._MM.open_meta(self.using_db)
         tbInfo: TableInfo = meta_handle.get_table(tbname)
@@ -601,7 +604,7 @@ class SystemManger:
             val = values[tbInfo.get_col_index(col)]
             foreign_tbname = tbInfo.foreign[col][0]
             foreign_colname = tbInfo.foreign[col][1]
-            foreign_tbInfo:TableInfo = meta_handle.get_table(foreign_tbname)
+            foreign_tbInfo: TableInfo = meta_handle.get_table(foreign_tbname)
             root_id = foreign_tbInfo.indexes[foreign_tbname]
             index: FileIndex = self._IM.open_index(self.using_db, foreign_tbname, foreign_colname, root_id)
             if results is None:
@@ -620,24 +623,24 @@ class SystemManger:
         if not self.check_foreign(tbname, values):
             return False
         return True
-    
+
     def check_remove_constraints(self, tbname, values):
         # FOERIGN CONSTRAINT
 
         return True
 
-    def handle_insert_indexes(self, tbInfo:TableInfo, dbname, data, rid:RID):
+    def handle_insert_indexes(self, tbInfo: TableInfo, dbname, data, rid: RID):
         tbname = tbInfo.name
         for colname in tbInfo.indexes:
-            index:FileIndex = self._IM.open_index(dbname, tbname, colname, tbInfo.indexes[colname])
+            index: FileIndex = self._IM.open_index(dbname, tbname, colname, tbInfo.indexes[colname])
             col_id = tbInfo.get_col_index(colname)
             index.insert(data[col_id], rid)
             self._IM.close_index(tbname, colname)
 
-    def handle_remove_indexes(self, tbInfo:TableInfo, dbname, data, rid:RID):
+    def handle_remove_indexes(self, tbInfo: TableInfo, dbname, data, rid: RID):
         tbname = tbInfo.name
         for colname in tbInfo.indexes:
-            index:FileIndex = self._IM.open_index(dbname, tbname, colname, tbInfo.indexes[colname])
+            index: FileIndex = self._IM.open_index(dbname, tbname, colname, tbInfo.indexes[colname])
             col_id = tbInfo.get_col_index(colname)
             index.remove(data[col_id], rid)
             self._IM.close_index(tbname, colname)

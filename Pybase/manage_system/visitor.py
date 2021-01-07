@@ -3,10 +3,13 @@ Visitor for SystemManager
 
 Date: 2020/11/30
 """
+from datetime import datetime
+
 from Pybase.sql_parser.SQLParser import SQLParser
 from Pybase.sql_parser.SQLVisitor import SQLVisitor
 from Pybase.utils.tools import to_str, to_int
 from Pybase.meta_system.info import ColumnInfo, TableInfo
+from Pybase.exceptions.run_sql import DataBaseError
 from .manager import SystemManger
 from .result import QueryResult
 
@@ -17,17 +20,32 @@ class SystemVisitor(SQLVisitor):
     def __init__(self, manager=None):
         super().__init__()
         self.manager: SystemManger = manager
+        self.last_start = None
 
-    def aggregateResult(self, aggregate, nextResult):
-        if nextResult is None:
-            return aggregate
-        if aggregate is None:
-            return nextResult
-        if isinstance(nextResult, QueryResult):
-            return nextResult
-        if not isinstance(aggregate, tuple):
-            aggregate = (aggregate,)
-        return aggregate + (nextResult,)
+    def time_cost(self):
+        current = datetime.now()
+        cost = (current - self.last_start) if self.last_start else None
+        self.last_start = current
+        return cost
+
+    def aggregateResult(self, aggregate, next_result):
+        return aggregate if next_result is None else next_result
+
+    def visitProgram(self, ctx: SQLParser.ProgramContext):
+        results = []
+        for statement in ctx.statement():
+            try:
+                result: QueryResult = statement.accept(self)
+                cost = self.time_cost()
+                if result:
+                    result.cost = cost
+                    result.simplify()
+                    results.append(result)
+            except DataBaseError as e:
+                # Once meet error, record result and stop visiting
+                results.append(QueryResult(message=str(e), cost=self.time_cost()))
+                break
+        return results
 
     def visitSystem_statement(self, ctx: SQLParser.System_statementContext):
         return QueryResult('databases', tuple(self.manager.dbs))
@@ -110,6 +128,7 @@ class SystemVisitor(SQLVisitor):
         value_lists = ctx.value_lists().accept(self)
         for value_list in value_lists:
             self.manager.insert_record(table_name, value_list)
+        return QueryResult('inserted_items', (len(value_lists),))
 
     def visitValue_lists(self, ctx: SQLParser.Value_listsContext):
         return tuple(each.accept(self) for each in ctx.value_list())
@@ -134,18 +153,18 @@ class SystemVisitor(SQLVisitor):
             #    self.manager.print_results(result_map[table_name])
             result = self.manager.cond_join(result_map, conditions)
             return result
-    
+
     def visitDelete_from_table(self, ctx: SQLParser.Delete_from_tableContext):
         table_name = to_str(ctx.Identifier())
         conditions = ctx.where_and_clause().accept(self)
         return self.manager.delete_records(table_name, conditions)
-    
+
     def visitUpdate_table(self, ctx: SQLParser.Update_tableContext):
         table_name = to_str(ctx.Identifier())
         conditions = ctx.where_and_clause().accept(self)
         set_value_map = ctx.set_clause().accept(self)
         return self.manager.update_records(table_name, conditions, set_value_map)
-    
+
     def visitWhere_and_clause(self, ctx: SQLParser.Where_and_clauseContext):
         return tuple(each.accept(self) for each in ctx.where_clause())
 
@@ -159,8 +178,7 @@ class SystemVisitor(SQLVisitor):
             return (tbname, colname, oper, val[0], val[1])
         else:
             return (tbname, colname, oper, val)
-        
-    
+
     def visitColumn(self, ctx: SQLParser.ColumnContext):
         if len(ctx.Identifier()) == 1:
             return None, to_str(ctx.Identifier(0))
@@ -172,13 +190,13 @@ class SystemVisitor(SQLVisitor):
             return ctx.column().accept(self)
         else:
             return to_str(ctx.value())
-    
+
     def visitSet_clause(self, ctx: SQLParser.Set_clauseContext):
         set_value_map = {}
         for identifier, value in zip(ctx.Identifier(), ctx.value()):
             set_value_map[to_str(identifier)] = to_str(value)
         return set_value_map
-    
+
     def visitCreate_index(self, ctx: SQLParser.Create_indexContext):
         index_name = to_str(ctx.getChild(2))
         table_name = to_str(ctx.getChild(4))
