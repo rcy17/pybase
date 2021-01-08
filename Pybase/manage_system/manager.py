@@ -546,7 +546,7 @@ class SystemManger:
         index_filter_rids = self.index_filter(tbname, conditions)
         record_handle = self._RM.open_file(self.get_table_name(tbname))
         func_list = self.build_cond_func(tbname, conditions, meta_handle)
-        print(len(func_list))
+
         results = []
         if index_filter_rids is None:
             scanner = FileScan(record_handle)
@@ -586,6 +586,7 @@ class SystemManger:
                 results = set(index.range(val, val))
             else:
                 results = results & set(index.range(val, val))
+            self._IM.close_index(tbname, col)
         return len(results) == 0
 
     def check_foreign(self, tbname, values):
@@ -605,6 +606,7 @@ class SystemManger:
                 results = set(index.range(val, val))
             else:
                 results = results & set(index.range(val, val))
+            self._IM.close_index(tbname, col)
         return len(results) > 0
 
     def check_insert_constraints(self, tbname, values):
