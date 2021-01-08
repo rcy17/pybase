@@ -166,22 +166,22 @@ class SystemManger:
         foreign = meta_handle.get_table(table_name).foreign[col]
         self.drop_index(foreign[0] + "." + foreign[1])
 
-    def set_primary(self, tbname, primary):
+    def set_primary(self, table_name, primary):
         meta_handle = self._MM.open_meta(self.using_db)
-        meta_handle.set_primary(tbname, primary)
+        meta_handle.set_primary(table_name, primary)
         if primary is None:
             return
         for col in primary:
             if not meta_handle.exists_index(table_name + "." + col):
                 self.create_index(table_name + "." + col, table_name, col)
     
-    def drop_primary(self, tbname):
+    def drop_primary(self, table_name):
         meta_handle = self._MM.open_meta(self.using_db)
-        primary = meta_handle.get_table(tbname).primary
-        meta_handle.drop_table(tbname)
+        primary = meta_handle.get_table(table_name).primary
+        meta_handle.drop_table(table_name)
         for col in primary:
-            if meta_handle.exists_index(tbname + "." + col):
-                self.drop_index(tbname + "." + col)
+            if meta_handle.exists_index(table_name + "." + col):
+                self.drop_index(table_name + "." + col)
 
     def add_column(self, table_name, column_info: ColumnInfo):
         if self.using_db is None:
@@ -272,11 +272,11 @@ class SystemManger:
         meta_handler = self._MM.open_meta(self.using_db)
         meta_handler.rename_index(old_index, new_index)
 
-    def rename_column(self, tbname, oldname, newname):
+    def rename_column(self, table_name, oldname, newname):
         if self.using_db is None:
             raise DataBaseError(f"No using database to create index")
         meta_handler = self._MM.open_meta(self.using_db)
-        meta_handler.rename_col(tbname, oldname, newname)
+        meta_handler.rename_col(table_name, oldname, newname)
         # Primary
         # Foreign
     

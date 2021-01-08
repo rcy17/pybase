@@ -11,12 +11,12 @@ Count: 'COUNT';
 Average: 'AVG';
 Max: 'MAX';
 Min: 'MIN';
+Null: 'NULL';
 
 Identifier: [a-zA-Z_] [a-zA-Z_0-9]*;
 Integer: [0-9]+;
 String:  '\'' (~'\'')* '\'';
 Float: ('-')? [0-9]+ '.' [0-9]*;
-Null: 'NULL';
 Whitespace: [ \t\n\r]+ -> skip;
 Annotation: '-' '-' (~';')+;
 
@@ -31,6 +31,7 @@ statement
     | index_statement ';'
     | alter_statement ';'
     | Annotation ';'
+    | Null ';'
     ;
 
 system_statement
@@ -81,7 +82,7 @@ field_list
     ;
 
 field
-    : Identifier type_ ('NOT' Null)? ('DEFAULT' value)?                               # normal_field
+    : Identifier type_ ('NOT' Null)? ('DEFAULT' value)?                                 # normal_field
     | 'PRIMARY' 'KEY' '(' identifiers ')'                                               # primary_key_field
     | 'FOREIGN' 'KEY' '(' Identifier ')' 'REFERENCES' Identifier '(' Identifier ')'     # foreign_key_field
     ;
@@ -115,7 +116,7 @@ where_and_clause
 where_clause
     : column operator expression            # where_operator_expression
     | column operator '(' select_table ')'  # where_operator_select
-    | column 'IS' ('NOT')? Null           # where_null
+    | column 'IS' ('NOT')? Null             # where_null
     | column 'IN' value_list                # where_in_list
     | column 'IN' '(' select_table ')'      # where_in_select
     | column 'LIKE' String                  # where_like_string
