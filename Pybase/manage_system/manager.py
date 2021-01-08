@@ -411,7 +411,7 @@ class SystemManger:
             results = new_result
         return results
 
-    def select_records(self, table_names: tuple, conditions: tuple):
+    def select_records(self, table_names: tuple, conditions: tuple, group_by: str=None):
         if len(table_names) > 1 and any(condition.table_name is None for condition in conditions):
             raise DataBaseError('Filed without table name is forbidden when join on tables ')
         for condition in conditions:
@@ -486,7 +486,7 @@ class SystemManger:
             if condition.type != ConditionType.Compare or condition.table_name != table_name:
                 return None
             cond_index = table_info.get_col_index(condition.column_name)
-            if cond_index and condition.value is not None:
+            if cond_index and condition.value is not None and table_info.exists_index(cond_index):
                 operator = condition.operator
                 column = condition.column_name
                 lower, upper = cond_index_map.get(column, (-1 << 32, 1 << 32))
