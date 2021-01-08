@@ -168,7 +168,7 @@ class SystemManger:
 
     def set_primary(self, tbname, primary):
         meta_handle = self._MM.open_meta(self.using_db)
-        meta_handle.set_primary(table_name, primary)
+        meta_handle.set_primary(tbname, primary)
         if primary is None:
             return
         for col in primary:
