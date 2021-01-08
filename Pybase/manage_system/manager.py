@@ -486,7 +486,7 @@ class SystemManger:
             if condition.type != ConditionType.Compare or condition.table_name != table_name:
                 return None
             cond_index = table_info.get_col_index(condition.column_name)
-            if cond_index and condition.value is not None:
+            if cond_index and condition.value is not None and table_info.exists_index(cond_index):
                 operator = condition.operator
                 column = condition.column_name
                 lower, upper = cond_index_map.get(column, (-1 << 32, 1 << 32))
