@@ -86,18 +86,36 @@ class MetaHandler:
         return self._db_info.get_index_info(index_name)
     
     def set_primary(self, tbname, primary):
-        table: TableInfo = self._db_info._tbMap[tbname]
+        table: TableInfo = self.get_table(tbname)
         table.set_primary(primary)
         self._dump()
     
+    def drop_primary(self, tbname):
+        table: TableInfo = self.get_table(tbname)
+        table.primary = None
+        self._dump()
+    
     def add_foreign(self, tbname, col, foreign):
-        table: TableInfo = self._db_info._tbMap[tbname]
+        table: TableInfo = self.get_table(tbname)
         table.add_foreign(col, foreign)
         self._dump()
     
     def remove_foreign(self, tbname, col):
-        table: TableInfo = self._db_info._tbMap[tbname]
+        table: TableInfo = self.get_table(tbname)
         table.remove_foreign(col)
+        self._dump()
+    
+    def rename_col(self, tbname, oldname, newname):
+        table: TableInfo = self.get_table(tbname)
+        table._colMap[newname] = table._colMap[oldname]
+        table._colindex[newname] = table._colindex[oldname]
+        table._colMap.pop(oldname)
+        table._colindex.pop(oldname)
+        self._dump()
+
+    def rename_index(self, old_index, new_index):
+        self._db_info._index_map[new_index] = self._db_info._index_map[old_index]
+        self._db_info._index_map.pop(old_index)
         self._dump()
 
     def close(self):

@@ -104,7 +104,9 @@ class SystemVisitor(SQLVisitor):
         return list(name_to_column.values()), foreign_keys, primary_key
 
     def visitNormal_field(self, ctx: SQLParser.Normal_fieldContext):
-        pass
+        name = to_str(ctx.Identifier())
+        type_, size = ctx.type_().accept(self)
+        return ColumnInfo(type=type_, name=name,  size=size)
 
     def visitForeign_key_field(self, ctx: SQLParser.Foreign_key_fieldContext):
         pass
@@ -148,12 +150,13 @@ class SystemVisitor(SQLVisitor):
             result_map[table_name] = self.manager.cond_scan_index(table_name, conditions)
             # compare_map[table_name] = self.manager.cond_scan_index(table_name, conditions)
         if len(table_name_list) == 1:
+            result_map[table_name_list[0]].deal_null()
             return result_map[table_name_list[0]]
         else:
             # for table_name in table_name_list:
             #    self.manager.print_results(result_map[table_name])
             result = self.manager.cond_join(result_map, conditions)
-            return result
+            return result.deal_null()
 
     def visitDelete_from_table(self, ctx: SQLParser.Delete_from_tableContext):
         table_name = to_str(ctx.Identifier())
@@ -229,22 +232,28 @@ class SystemVisitor(SQLVisitor):
         return self.manager.drop_index(index_name)
 
     def visitAlter_add_index(self, ctx: SQLParser.Alter_add_indexContext):
-        return super().visitAlter_add_index(ctx)
+        table_name = to_str(ctx.Identifier()[0])
+        index_name = to_str(ctx.Identifier()[1])
+        col_list = ctx.identifiers().accept(self)
+        for colname in col_list:
+            self.manager.create_index(index_name, table_name, colname)
 
     def visitAlter_drop_index(self, ctx: SQLParser.Alter_drop_indexContext):
-        return super().visitAlter_drop_index(ctx)
+        index_name = to_str(ctx.Identifier()[1])
+        return self.manager.drop_index(index_name)
 
     def visitAlter_table_add(self, ctx: SQLParser.Alter_table_addContext):
-        return super().visitAlter_table_add(ctx)
+        colInfo: ColumnInfo = ctx.field().accept()
+        table_name = to_str(ctx.Identifier())
+        self.manager.add_column(table_name, colInfo)
 
     def visitAlter_table_drop(self, ctx: SQLParser.Alter_table_dropContext):
-        return super().visitAlter_table_drop(ctx)
+        table_name = to_str(ctx.Identifier()[0])
+        col_name = to_str(ctx.Identifier()[1])
+        self.manager.drop_column(table_name, col_name)
 
     def visitAlter_table_change(self, ctx: SQLParser.Alter_table_changeContext):
-        return super().visitAlter_table_change(ctx)
+        pass
 
     def visitAlter_table_rename(self, ctx: SQLParser.Alter_table_renameContext):
         return super().visitAlter_table_rename(ctx)
-
-    def visitAlter_table_drop_pk(self, ctx: SQLParser.Alter_table_drop_pkContext):
-        return super().visitAlter_table_drop_pk(ctx)
