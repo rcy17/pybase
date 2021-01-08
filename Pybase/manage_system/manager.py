@@ -166,7 +166,7 @@ class SystemManger:
         foreign = meta_handle.get_table(table_name).foreign[col]
         self.drop_index(foreign[0] + "." + foreign[1])
 
-    def set_primary(self, table_name, primary):
+    def set_primary(self, tbname, primary):
         meta_handle = self._MM.open_meta(self.using_db)
         meta_handle.set_primary(table_name, primary)
         if primary is None:

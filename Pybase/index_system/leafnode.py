@@ -54,6 +54,7 @@ class LeafNode(TreeNode):
         arr[0:5] = [1, self._parent_id, self._prev_id, self._next_id, len(self._child_key)]
         for i in range(len(self._child_key)):
             rid:RID = self._child_val[i]
+            print(self._child_key[i], rid.page_id, rid.slot_id)
             arr[5 + 3 * i: 8 + 3 * i] = [self._child_key[i], rid.page_id, rid.slot_id]
         arr.dtype = np.uint8
         assert arr.size == settings.PAGE_SIZE
