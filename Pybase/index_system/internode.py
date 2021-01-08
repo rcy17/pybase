@@ -61,7 +61,7 @@ class InterNode(TreeNode):
                 self._child_val.pop(pos)
 
     def page_size(self):
-        return 16 + len(self._child_key) * (8 + 8)
+        return 16 + len(self._child_key) * (8 + 8) + 32
 
     def to_array(self) -> np.ndarray:
         arr = np.zeros(int(settings.PAGE_SIZE/8), np.int64)

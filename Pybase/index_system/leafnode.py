@@ -47,14 +47,13 @@ class LeafNode(TreeNode):
             
 
     def page_size(self) -> int:
-        return 32 + len(self._child_key) * (8 + 16)
+        return 32 + len(self._child_key) * (8 + 16) + 32
 
     def to_array(self) -> np.ndarray:
         arr = np.zeros(int(settings.PAGE_SIZE/8), np.int64)
         arr[0:5] = [1, self._parent_id, self._prev_id, self._next_id, len(self._child_key)]
         for i in range(len(self._child_key)):
             rid:RID = self._child_val[i]
-            print(self._child_key[i], rid.page_id, rid.slot_id)
             arr[5 + 3 * i: 8 + 3 * i] = [self._child_key[i], rid.page_id, rid.slot_id]
         arr.dtype = np.uint8
         assert arr.size == settings.PAGE_SIZE
