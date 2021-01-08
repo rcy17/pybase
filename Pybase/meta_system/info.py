@@ -211,12 +211,12 @@ class DbInfo:
         else:
             raise TableExistenceError(f"Table {table._name} should not exists.")
 
-    def insert_column(self, tbname, column: ColumnInfo, colindex: int):
+    def insert_column(self, tbname, column: ColumnInfo):
         if tbname not in self._tbMap:
             raise TableExistenceError(f"Table {tbname} should exists.")
         else:
             table: TableInfo = self._tbMap[tbname]
-            table.insert_column(column, colindex)
+            table.insert_column(column)
 
     def remove_table(self, tbname):
         if tbname not in self._tbMap:

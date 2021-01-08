@@ -11,6 +11,7 @@ from antlr4 import InputStream, CommonTokenStream
 from antlr4.error.Errors import ParseCancellationException
 from antlr4.error.ErrorStrategy import BailErrorStrategy
 from antlr4.error.ErrorListener import ErrorListener
+from copy import deepcopy
 
 from Pybase import settings
 from Pybase.meta_system import MetaHandler, MetaManager, ColumnInfo, TableInfo, DbInfo
@@ -191,9 +192,10 @@ class SystemManger:
         table_info = meta_handle.get_table(table_name)
         if table_info.get_col_index(column_info._name) is not None:
             raise DataBaseError(f"Column already exists.")
-        old_table_info = table_info
+        old_table_info = deepcopy(table_info)
         meta_handle.add_col(table_name, column_info)
 
+        self._RM.create_file(self.get_table_path(table_name + ".copy"), table_info.get_size())
         record_handle = self._RM.open_file(self.get_table_path(table_name))
         new_record_handle = self._RM.open_file(self.get_table_path(table_name + ".copy"))
         scanner = FileScan(record_handle)
@@ -215,11 +217,13 @@ class SystemManger:
             raise DataBaseError(f"No using database to drop column")
         meta_handle = self._MM.open_meta(self.using_db)
         table_info = meta_handle.get_table(table_name)
-        if table_info.get_col_index(column_name) is not None:
-            raise DataBaseError(f"Column already exists.")
+        if table_info.get_col_index(column_name) is None:
+            raise DataBaseError(f"Column not exists.")
         index = table_info.get_col_index(column_name)
-        old_table_info = table_info
+        old_table_info = deepcopy(table_info)
         meta_handle.drop_column(table_name, column_name)
+
+        self._RM.create_file(self.get_table_path(table_name + ".copy"), table_info.get_size())
         record_handle = self._RM.open_file(self.get_table_path(table_name))
         new_record_handle = self._RM.open_file(self.get_table_path(table_name + ".copy"))
         scanner = FileScan(record_handle)
@@ -326,7 +330,10 @@ class SystemManger:
                     cond_index_2 = table_info.get_col_index(condition.target_column)
                     return eval(f"lambda x:x[{cond_index}] {condition.operator} x[{cond_index_2}]")
                 else:
-                    return eval(f"lambda x:x[{cond_index}] {condition.operator} {condition.value}")
+                    if condition.operator != "==" and condition.operator != "!=":
+                        return eval(f"lambda x:x is not None and x[{cond_index}] {condition.operator} {condition.value}")
+                    else:
+                        return eval(f"lambda x:x[{cond_index}] {condition.operator} {condition.value}")
             elif condition.type == ConditionType.In:
                 return lambda x: x[cond_index] in condition.value
             elif condition.type == ConditionType.Like:
