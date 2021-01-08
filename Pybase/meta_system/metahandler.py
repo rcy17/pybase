@@ -29,7 +29,6 @@ class MetaHandler:
     def add_table(self, table: TableInfo):
         self._db_info.insert_table(table)
         self._dump()
-        print(f"Add talbe {table._name}")
     
     def add_col(self, tbname, column: ColumnInfo):
         self._db_info.insert_column(tbname, column)

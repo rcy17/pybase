@@ -12,6 +12,7 @@ from Pybase.meta_system.info import ColumnInfo, TableInfo
 from Pybase.exceptions.run_sql import DataBaseError
 from .manager import SystemManger
 from .result import QueryResult
+from Pybase import settings
 
 
 class SystemVisitor(SQLVisitor):
@@ -169,15 +170,28 @@ class SystemVisitor(SQLVisitor):
         return tuple(each.accept(self) for each in ctx.where_clause())
 
     def visitWhere_clause(self, ctx: SQLParser.Where_clauseContext):
-        tbname, colname = ctx.column().accept(self)
-        oper = to_str(ctx.operator())
-        if oper == '=':
-            oper = '=='
-        val = ctx.expression().accept(self)
-        if isinstance(val, tuple):
-            return (tbname, colname, oper, val[0], val[1])
-        else:
-            return (tbname, colname, oper, val)
+        if isinstance(ctx, SQLParser.Where_operator_expressionContext):
+            tbname, colname = ctx.column().accept(self)
+            oper = to_str(ctx.operator())
+            if oper == '=':
+                oper = '=='
+            if oper == '<>':
+                oper = "!="
+            val = ctx.expression().accept(self)
+            if isinstance(val, tuple):
+                return (tbname, colname, oper, val[0], val[1])
+            else:
+                return (tbname, colname, oper, val)
+        elif isinstance(ctx, SQLParser.Where_nullContext):
+            tbname, colname = ctx.column().accept(self)
+            oper = ""
+            if ctx.getChild(2) == "NOT":
+                oper = "=="
+            else:
+                oper = "!="
+            return (tbname, colname, oper, settings.NULL_VALUE)
+
+            
 
     def visitColumn(self, ctx: SQLParser.ColumnContext):
         if len(ctx.Identifier()) == 1:
@@ -207,3 +221,27 @@ class SystemVisitor(SQLVisitor):
     def visitDrop_index(self, ctx: SQLParser.Drop_indexContext):
         index_name = to_str(ctx.Identifier())
         return self.manager.drop_index(index_name)
+    
+    def visitAlter_add_index(self, ctx: SQLParser.Alter_add_indexContext):
+        return super().visitAlter_add_index(ctx)
+    
+    def visitAlter_drop_index(self, ctx: SQLParser.Alter_drop_indexContext):
+        return super().visitAlter_drop_index(ctx)
+    
+    def visitAlter_table_add(self, ctx: SQLParser.Alter_table_addContext):
+        return super().visitAlter_table_add(ctx)
+    
+    def visitAlter_table_drop(self, ctx: SQLParser.Alter_table_dropContext):
+        return super().visitAlter_table_drop(ctx)
+    
+    def visitAlter_table_change(self, ctx: SQLParser.Alter_table_changeContext):
+        return super().visitAlter_table_change(ctx)
+    
+    def visitAlter_table_rename(self, ctx: SQLParser.Alter_table_renameContext):
+        return super().visitAlter_table_rename(ctx)
+    
+    def visitAlter_table_drop_pk(self, ctx: SQLParser.Alter_table_drop_pkContext):
+        return super().visitAlter_table_drop_pk(ctx)
+
+    
+    

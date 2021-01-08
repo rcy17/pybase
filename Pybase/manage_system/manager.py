@@ -28,7 +28,7 @@ from Pybase.index_system.manager import IndexManager
 from Pybase.meta_system.manager import MetaManager
 from Pybase.exceptions.run_sql import DataBaseError
 from Pybase.exceptions.base import Error
-from Pybase.settings import (INDEX_FILE_SUFFIX, TABLE_FILE_SUFFIX, META_FILE_NAME)
+from Pybase.settings import (INDEX_FILE_SUFFIX, NULL_VALUE, TABLE_FILE_SUFFIX, META_FILE_NAME)
 from Pybase.meta_system.info import ColumnInfo, TableInfo, DbInfo
 from Pybase.printer.table import TablePrinter
 
@@ -199,13 +199,16 @@ class SystemManger:
         scanner = FileScan(record_handle)        
         for record in scanner:
             value_list = oldtbInfo.load_record(record)
-            value_list.append(colInfo._default)
+            if colInfo._default is not None:
+                value_list.append(colInfo._default)
+            else:
+                value_list.append(settings.NULL_VALUE)
             data = tbInfo.build_record(value_list)
             new_record_handle.insert_record(data)            
         self._RM.close_file(self.get_table_name(tbname))
         self._RM.close_file(self.get_table_name(tbname + ".copy"))
         # Rename
-
+        self._RM.replace_file(self.get_table_name(tbname + ".copy"), self.get_table_name(tbname))
 
     def drop_column(self, tbname, colname):
         if self.using_db is None:
@@ -228,6 +231,7 @@ class SystemManger:
         self._RM.close_file(self.get_table_name(tbname))
         self._RM.close_file(self.get_table_name(tbname + ".copy"))
         # Rename
+        self._RM.replace_file(self.get_table_name(tbname + ".copy"), self.get_table_name(tbname))
 
     def create_index(self, index_name, tbname, colname):
         if self.using_db is None:
@@ -497,7 +501,7 @@ class SystemManger:
                         if lower < val:
                             cond_index_map[condition[1]][0] = val
                     else:
-                        raise DataBaseError("No such operate.")
+                        return None
 
         for condition in conditions:
             build_cond_index(condition)
@@ -633,7 +637,10 @@ class SystemManger:
         for colname in tbInfo.indexes:
             index: FileIndex = self._IM.open_index(dbname, tbname, colname, tbInfo.indexes[colname])
             col_id = tbInfo.get_col_index(colname)
-            index.insert(data[col_id], rid)
+            if data[col_id] is not None:
+                index.insert(data[col_id], rid)
+            else:
+                index.insert(settings.NULL_VALUE, rid)
             self._IM.close_index(tbname, colname)
 
     def handle_remove_indexes(self, tbInfo: TableInfo, dbname, data, rid: RID):
@@ -641,5 +648,8 @@ class SystemManger:
         for colname in tbInfo.indexes:
             index: FileIndex = self._IM.open_index(dbname, tbname, colname, tbInfo.indexes[colname])
             col_id = tbInfo.get_col_index(colname)
-            index.remove(data[col_id], rid)
+            if data[col_id] is not None:
+                index.remove(data[col_id], rid)
+            else:
+                index.remove(settings.NULL_VALUE, rid)
             self._IM.close_index(tbname, colname)
