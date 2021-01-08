@@ -33,6 +33,7 @@ class ColumnInfo:
             self._name,
             f'{self._type}{("(%d)" % self._size) if self._size else ""}',
             "NO",
+            "",
             self._default,
             "",
         )

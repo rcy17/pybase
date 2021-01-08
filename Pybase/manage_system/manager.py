@@ -3,13 +3,6 @@ Here defines SystemManger class
 
 Date: 2020/11/30
 """
-from numpy.core.arrayprint import printoptions
-from numpy.core.numeric import flatnonzero
-from numpy.lib.function_base import insert
-from Pybase.meta_system.metahandler import MetaHandler
-from Pybase.record_system.rid import RID
-from Pybase.index_system.fileindex import FileIndex
-from datetime import datetime
 from pathlib import Path
 
 from antlr4 import InputStream, CommonTokenStream
@@ -18,19 +11,16 @@ from antlr4.error.ErrorStrategy import BailErrorStrategy
 from antlr4.error.ErrorListener import ErrorListener
 
 from Pybase import settings
-from Pybase.manage_system.result import QueryResult
-from Pybase.record_system.filescan import FileScan
-from Pybase.sql_parser import SQLLexer, SQLParser, SQLVisitor
-from Pybase.file_system.manager import FileManager
-from Pybase.record_system.manager import RecordManager
-from Pybase.record_system.record import Record
-from Pybase.index_system.manager import IndexManager
-from Pybase.meta_system.manager import MetaManager
+from Pybase.meta_system import MetaHandler, MetaManager, ColumnInfo, TableInfo, DbInfo
+from Pybase.record_system import RID, FileScan, RecordManager, Record
+from Pybase.index_system import FileIndex, IndexManager
+from Pybase.sql_parser import SQLLexer, SQLParser
+from Pybase.file_system import FileManager
 from Pybase.exceptions.run_sql import DataBaseError
 from Pybase.exceptions.base import Error
-from Pybase.settings import (INDEX_FILE_SUFFIX, NULL_VALUE, TABLE_FILE_SUFFIX, META_FILE_NAME)
-from Pybase.meta_system.info import ColumnInfo, TableInfo, DbInfo
 from Pybase.printer.table import TablePrinter
+from .condition import ConditionType, Condition
+from .result import QueryResult
 
 from .join import nested_loops_join
 
@@ -106,9 +96,9 @@ class SystemManger:
         db_path = self.get_db_path(name)
         assert db_path.exists()
         for each in db_path.iterdir():
-            if each.suffix == TABLE_FILE_SUFFIX and str(each) in self._RM.opened_files:
+            if each.suffix == settings.TABLE_FILE_SUFFIX and str(each) in self._RM.opened_files:
                 self._RM.close_file(str(each))
-            if each.suffix == INDEX_FILE_SUFFIX:
+            if each.suffix == settings.INDEX_FILE_SUFFIX:
                 pass
             each.unlink()
         db_path.rmdir()
@@ -289,29 +279,25 @@ class SystemManger:
     def print_results(self, result: QueryResult):
         self._printer.print([result])
 
-    def build_cond_func(self, table_name, conditions, meta_handle: MetaHandler) -> list:
-        def build_cond_func(condition):
-            if condition[0] is None:
-                condition = (table_name, condition[1:])
-            if condition[0] != table_name:
+    def build_condions_func(self, table_name, conditions, meta_handle: MetaHandler) -> list:
+        def build_condition_func(condition: Condition):
+            if condition.table_name != table_name:
                 return None
-            table_info = meta_handle.get_table(condition[0])
-            cond_index = table_info.get_col_index(condition[1])
+            cond_index = table_info.get_col_index(condition.column_name)
             if cond_index is None:
                 return None
-            if len(condition) == 4:
-                cond_func = eval(f"lambda x:x[{cond_index}] {condition[2]} {condition[3]}")
-                return cond_func
-            elif len(condition) == 5:
-                if condition[3] != table_name:
+            if condition.target_column:
+                if condition.target_table != table_name:
                     return None
-                cond_index_2 = table_info.get_col_index(condition[4])
-                cond_func = eval(f"lambda x:x[{cond_index}] {condition[2]} x[{cond_index_2}]")
+                cond_index_2 = table_info.get_col_index(condition.target_column)
+                cond_func = eval(f"lambda x:x[{cond_index}] {condition.operator} x[{cond_index_2}]")
                 return cond_func
             else:
-                return None
+                cond_func = eval(f"lambda x:x[{cond_index}] {condition.operator} {condition.value}")
+                return cond_func
 
-        func_list = [func for func in (build_cond_func(condition) for condition in conditions) if func]
+        table_info = meta_handle.get_table(table_name)
+        func_list = [func for func in (build_condition_func(condition) for condition in conditions) if func]
         return func_list
 
     def cond_scan(self, table_name, conditions: tuple) -> QueryResult:
@@ -335,28 +321,24 @@ class SystemManger:
             raise DataBaseError(f"No using database to scan.")
         join_pair_map = {}
 
-        def build_join_pair(condition):
-            if len(condition) != 5:
-                return None
-            if condition[0] == condition[3]:
-                return None
-            assert condition[2] == '=='
-            if condition[0] < condition[3]:
-                return (condition[0], condition[3]), (condition[1], condition[4])
-            else:
-                return (condition[3], condition[0]), (condition[4], condition[1])
+        def build_join_pair(condition: Condition):
+            if condition.target_table and condition.table_name != condition.target_table:
+                assert condition.operator == '=='
+                pair = (condition.table_name, condition.column_name), (condition.target_table, condition.target_column)
+                return sorted(pair)
+            return None, None
 
-        for condition in conditions:
-            if build_join_pair(condition) is None:
+        for join_pair_key, join_pair_col in map(build_join_pair, conditions):
+            if join_pair_col is None:
                 continue
-            join_pair_key, join_pair_col = build_join_pair(condition)
             if join_pair_key in join_pair_map:
                 join_pair_map[join_pair_key][0].append(join_pair_col[0])
                 join_pair_map[join_pair_key][1].append(join_pair_col[1])
             else:
                 join_pair_map[join_pair_key] = ([join_pair_col[0]], [join_pair_col[1]])
-        # assert len(join_pair_map) > 0
-        # 
+
+        if not join_pair_map:
+            raise DataBaseError('Join tables need join condition')
         union_set = {key: key for key in results_map.keys()}
 
         def union_set_find(x):
@@ -381,6 +363,16 @@ class SystemManger:
             results_map[new_key] = new_result
             results = new_result
         return results
+
+    def select_records(self, table_names: tuple, conditions: tuple):
+        if len(table_names) > 1 and any(condition.table_name is None for condition in conditions):
+            raise DataBaseError('Filed without table name is forbidden when join on tables ')
+        for condition in conditions:
+            if condition.table_name is None:
+                # If there is still any condition with None table name, we can ensure that there is only one table
+                condition.table_name = table_names[0]
+        result_map = {table_name: self.cond_scan_index(table_name, conditions) for table_name in table_names}
+        return result_map[table_names[0]] if len(table_names) == 1 else self.cond_join(result_map, conditions)
 
     def delete_records(self, table_name, conditions: tuple):
         if self.using_db is None:
@@ -443,39 +435,38 @@ class SystemManger:
         cond_index_map = {}
         meta_handle = self._MM.open_meta(self.using_db)
 
-        def build_cond_index(condition):
-            if condition[0] is None:
-                condition = (table_name, *condition[1:])
-            if condition[0] != table_name:
+        def build_cond_index(condition: Condition):
+            if condition.table_name != table_name:
                 return None
-            table_info = meta_handle.get_table(condition[0])
-            cond_index = table_info.get_col_index(condition[1])
-            if cond_index and len(condition) == 4:
-                lower, upper = cond_index_map.get(condition[1], (-1 << 32, 1 << 32))
-                val = int(condition[3])
-                if condition[2] == "==":
-                    lower = max(lower, val)
-                    upper = min(upper, val)
-                elif condition[2] == "<":
-                    upper = min(upper, val - 1)
-                elif condition[2] == ">":
-                    lower = max(lower, val + 1)
-                elif condition[2] == "<=":
-                    upper = min(upper, val)
-                elif condition[2] == ">=":
-                    lower = max(lower, val)
-                cond_index_map[condition[1]] = lower, upper
+            cond_index = table_info.get_col_index(condition.column_name)
+            if cond_index and condition.value is not None:
+                operator = condition.operator
+                column = condition.column_name
+                lower, upper = cond_index_map.get(column, (-1 << 32, 1 << 32))
+                value = int(condition.value)
+                if operator == "==":
+                    lower = max(lower, value)
+                    upper = min(upper, value)
+                elif operator == "<":
+                    upper = min(upper, value - 1)
+                elif operator == ">":
+                    lower = max(lower, value + 1)
+                elif operator == "<=":
+                    upper = min(upper, value)
+                elif operator == ">=":
+                    lower = max(lower, value)
+                cond_index_map[column] = lower, upper
 
+        table_info = meta_handle.get_table(table_name)
         tuple(map(build_cond_index, conditions))
-        _table_info = meta_handle.get_table(table_name)
         results = None
         for column_name in cond_index_map:
             _lower, _upper = cond_index_map[column_name]
-            index = self._IM.open_index(self.using_db, table_name, column_name, _table_info.indexes[column_name])
+            index = self._IM.open_index(self.using_db, table_name, column_name, table_info.indexes[column_name])
             if results is None:
                 results = set(index.range(_lower, _upper))
             else:
-                results &= index.range(_lower, _upper)
+                results &= set(index.range(_lower, _upper))
         return results
 
     def cond_scan_index(self, table_name, conditions: tuple) -> QueryResult:
@@ -492,7 +483,7 @@ class SystemManger:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         meta_handle = self._MM.open_meta(self.using_db)
-        func_list = self.build_cond_func(table_name, conditions, meta_handle)
+        func_list = self.build_condions_func(table_name, conditions, meta_handle)
         table_info = meta_handle.get_table(table_name)
         record_handle = self._RM.open_file(self.get_table_name(table_name))
         results = []
@@ -513,7 +504,7 @@ class SystemManger:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         meta_handle = self._MM.open_meta(self.using_db)
-        func_list = self.build_cond_func(table_name, conditions, meta_handle)
+        func_list = self.build_condions_func(table_name, conditions, meta_handle)
         table_info = meta_handle.get_table(table_name)
         index_filter_rids = self.index_filter(table_name, conditions)
         record_handle = self._RM.open_file(self.get_table_name(table_name))
