@@ -11,6 +11,7 @@ Count: 'COUNT';
 Average: 'AVG';
 Max: 'MAX';
 Min: 'MIN';
+Sum: 'SUM';
 Null: 'NULL';
 
 Identifier: [a-zA-Z_] [a-zA-Z_0-9]*;
@@ -56,7 +57,7 @@ table_statement
     ;
 
 select_table
-    : 'SELECT' selector 'FROM' identifiers ('WHERE' where_and_clause)? ('GROUP' 'BY' column)?
+    : 'SELECT' selectors 'FROM' identifiers ('WHERE' where_and_clause)? ('GROUP' 'BY' column)?
     ;
 
 index_statement
@@ -136,10 +137,14 @@ set_clause
     : Identifier EqualOrAssign value (',' Identifier EqualOrAssign value)*
     ;
 
-selector
+selectors
     : '*'
-    | column (',' column)*
-    | aggregator '(' expression ')'
+    | selector (',' selector)*
+    ;
+
+selector
+    : column
+    | aggregator '(' column ')'
     | Count '(' '*' ')'
     ;
 
@@ -162,4 +167,5 @@ aggregator
     | Average
     | Max
     | Min
+    | Sum
     ;

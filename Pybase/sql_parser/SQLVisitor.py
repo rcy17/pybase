@@ -234,6 +234,11 @@ class SQLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by SQLParser#selectors.
+    def visitSelectors(self, ctx:SQLParser.SelectorsContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by SQLParser#selector.
     def visitSelector(self, ctx:SQLParser.SelectorContext):
         return self.visitChildren(ctx)
