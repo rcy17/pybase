@@ -15,7 +15,8 @@ class ConditionType(IntEnum):
 
 class Condition:
 
-    def __init__(self, type_, table_name, column_name, operator, target_table=None, target_column=None, value=None):
+    def __init__(self, type_, table_name, column_name, operator=None,
+                 target_table=None, target_column=None, value=None):
         self.type: ConditionType = type_
         self.table_name: str = table_name
         self.column_name: str = column_name

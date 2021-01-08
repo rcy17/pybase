@@ -8,7 +8,7 @@ from datetime import datetime
 from Pybase.sql_parser.SQLParser import SQLParser
 from Pybase.sql_parser.SQLVisitor import SQLVisitor
 from Pybase.utils.tools import to_str, to_int
-from Pybase.meta_system.info import ColumnInfo, TableInfo
+from Pybase.meta_system import ColumnInfo, TableInfo
 from Pybase.exceptions.run_sql import DataBaseError
 from .manager import SystemManger
 from .result import QueryResult
@@ -188,7 +188,7 @@ class SystemVisitor(SQLVisitor):
     def visitWhere_like_string(self, ctx: SQLParser.Where_like_stringContext):
         pattern = to_str(ctx.String())
         table_name, column_name = ctx.column().accept(self)
-        return table_name, column_name
+        return Condition(ConditionType.Like, table_name, column_name, value=pattern)
 
     def visitColumn(self, ctx: SQLParser.ColumnContext):
         if len(ctx.Identifier()) == 1:
@@ -220,22 +220,31 @@ class SystemVisitor(SQLVisitor):
         return self.manager.drop_index(index_name)
 
     def visitAlter_add_index(self, ctx: SQLParser.Alter_add_indexContext):
-        return super().visitAlter_add_index(ctx)
+        pass
 
     def visitAlter_drop_index(self, ctx: SQLParser.Alter_drop_indexContext):
-        return super().visitAlter_drop_index(ctx)
+        pass
 
     def visitAlter_table_add(self, ctx: SQLParser.Alter_table_addContext):
-        return super().visitAlter_table_add(ctx)
+        pass
 
     def visitAlter_table_drop(self, ctx: SQLParser.Alter_table_dropContext):
-        return super().visitAlter_table_drop(ctx)
+        pass
 
     def visitAlter_table_change(self, ctx: SQLParser.Alter_table_changeContext):
-        return super().visitAlter_table_change(ctx)
+        pass
 
     def visitAlter_table_rename(self, ctx: SQLParser.Alter_table_renameContext):
-        return super().visitAlter_table_rename(ctx)
+        pass
 
     def visitAlter_table_drop_pk(self, ctx: SQLParser.Alter_table_drop_pkContext):
-        return super().visitAlter_table_drop_pk(ctx)
+        pass
+
+    def visitAlter_table_drop_foreign_key(self, ctx: SQLParser.Alter_table_drop_foreign_keyContext):
+        pass
+
+    def visitAlter_table_add_pk(self, ctx: SQLParser.Alter_table_add_pkContext):
+        pass
+
+    def visitAlter_table_add_foreign_key(self, ctx: SQLParser.Alter_table_add_foreign_keyContext):
+        pass

@@ -4,6 +4,7 @@ Here defines SystemManger class
 Date: 2020/11/30
 """
 from pathlib import Path
+import re
 
 from antlr4 import InputStream, CommonTokenStream
 from antlr4.error.Errors import ParseCancellationException
@@ -279,22 +280,34 @@ class SystemManger:
     def print_results(self, result: QueryResult):
         self._printer.print([result])
 
-    def build_condions_func(self, table_name, conditions, meta_handle: MetaHandler) -> list:
+    @staticmethod
+    def build_regex_from_sql_like(pattern: str):
+        pattern = pattern.replace('%%', '\r').replace('%?', '\n').replace('%_', '\0')
+        pattern = re.escape(pattern)
+        pattern = pattern.replace('%', '.*').replace(r'\?', '.').replace('_', '.')
+        pattern = pattern.replace('\r', '%').replace('\n', r'\?').replace('\0', '_')
+        return re.compile('^' + pattern + '$')
+
+    def build_conditions_func(self, table_name, conditions, meta_handle: MetaHandler) -> list:
         def build_condition_func(condition: Condition):
             if condition.table_name != table_name:
                 return None
             cond_index = table_info.get_col_index(condition.column_name)
             if cond_index is None:
                 return None
-            if condition.target_column:
-                if condition.target_table != table_name:
-                    return None
-                cond_index_2 = table_info.get_col_index(condition.target_column)
-                cond_func = eval(f"lambda x:x[{cond_index}] {condition.operator} x[{cond_index_2}]")
-                return cond_func
-            else:
-                cond_func = eval(f"lambda x:x[{cond_index}] {condition.operator} {condition.value}")
-                return cond_func
+            if condition.type == ConditionType.Compare:
+                if condition.target_column:
+                    if condition.target_table != table_name:
+                        return None
+                    cond_index_2 = table_info.get_col_index(condition.target_column)
+                    return eval(f"lambda x:x[{cond_index}] {condition.operator} x[{cond_index_2}]")
+                else:
+                    return eval(f"lambda x:x[{cond_index}] {condition.operator} {condition.value}")
+            elif condition.type == ConditionType.In:
+                return lambda x: x[cond_index] in condition.value
+            elif condition.type == ConditionType.Like:
+                pattern = self.build_regex_from_sql_like(condition.value)
+                return lambda x: pattern.match(x)
 
         table_info = meta_handle.get_table(table_name)
         func_list = [func for func in (build_condition_func(condition) for condition in conditions) if func]
@@ -436,7 +449,7 @@ class SystemManger:
         meta_handle = self._MM.open_meta(self.using_db)
 
         def build_cond_index(condition: Condition):
-            if condition.table_name != table_name:
+            if condition.type != ConditionType.Compare or condition.table_name != table_name:
                 return None
             cond_index = table_info.get_col_index(condition.column_name)
             if cond_index and condition.value is not None:
@@ -483,7 +496,7 @@ class SystemManger:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         meta_handle = self._MM.open_meta(self.using_db)
-        func_list = self.build_condions_func(table_name, conditions, meta_handle)
+        func_list = self.build_conditions_func(table_name, conditions, meta_handle)
         table_info = meta_handle.get_table(table_name)
         record_handle = self._RM.open_file(self.get_table_name(table_name))
         results = []
@@ -504,7 +517,7 @@ class SystemManger:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         meta_handle = self._MM.open_meta(self.using_db)
-        func_list = self.build_condions_func(table_name, conditions, meta_handle)
+        func_list = self.build_conditions_func(table_name, conditions, meta_handle)
         table_info = meta_handle.get_table(table_name)
         index_filter_rids = self.index_filter(table_name, conditions)
         record_handle = self._RM.open_file(self.get_table_name(table_name))
