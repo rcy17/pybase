@@ -235,26 +235,25 @@ class SystemVisitor(SQLVisitor):
         return self.manager.drop_index(index_name)
 
     def visitAlter_add_index(self, ctx: SQLParser.Alter_add_indexContext):
-        table_name = to_str(ctx.Identifier()[0])
-        index_name = to_str(ctx.Identifier()[1])
+        table_name = to_str(ctx.Identifier(0))
+        index_name = to_str(ctx.Identifier(1))
         col_list = ctx.identifiers().accept(self)
         for colname in col_list:
             self.manager.create_index(index_name, table_name, colname)
 
     def visitAlter_drop_index(self, ctx: SQLParser.Alter_drop_indexContext):
-        index_name = to_str(ctx.Identifier()[1])
+        index_name = to_str(ctx.Identifier(1))
         return self.manager.drop_index(index_name)
 
     def visitAlter_table_add(self, ctx: SQLParser.Alter_table_addContext):
-        colInfo: ColumnInfo = ctx.field().accept()
+        colInfo: ColumnInfo = ctx.field().accept(self)
         table_name = to_str(ctx.Identifier())
         self.manager.add_column(table_name, colInfo)
 
     def visitAlter_table_drop(self, ctx: SQLParser.Alter_table_dropContext):
-        table_name = to_str(ctx.Identifier()[0])
-        col_name = to_str(ctx.Identifier()[1])
+        table_name = to_str(ctx.Identifier(0))
+        col_name = to_str(ctx.Identifier(1))
         self.manager.drop_column(table_name, col_name)
-        pass
 
     def visitAlter_table_change(self, ctx: SQLParser.Alter_table_changeContext):
         pass
@@ -263,20 +262,23 @@ class SystemVisitor(SQLVisitor):
         pass
 
     def visitAlter_table_drop_pk(self, ctx: SQLParser.Alter_table_drop_pkContext):
-        pass
+        table_name = to_str(ctx.Identifier())
+        self.manager.drop_primary(table_name)
 
     def visitAlter_table_drop_foreign_key(self, ctx: SQLParser.Alter_table_drop_foreign_keyContext):
-        pass
+        table_name = to_str(ctx.Identifier(0))
+        col_name = to_str(ctx.Identifier(1))
+        self.manager.remove_foreign(table_name, col_name)
 
     def visitAlter_table_add_pk(self, ctx: SQLParser.Alter_table_add_pkContext):
-        tbname = to_str(ctx.Identifier())
-        primary = ctx.identifiers().accept()
+        tbname = to_str(ctx.Identifier(0))
+        primary = ctx.identifiers().accept(self)
         self.manager.set_primary(tbname, primary)
 
     def visitAlter_table_add_foreign_key(self, ctx: SQLParser.Alter_table_add_foreign_keyContext):
-        tbname = to_str(ctx.Identifier()[0])
-        forname = to_str(ctx.Identifier()[1])
-        tb_list = ctx.identifiers(0).accept()
-        for_list = ctx.identifiers(1).accept()
+        tbname = to_str(ctx.Identifier(0))
+        forname = to_str(ctx.Identifier(2))
+        tb_list = ctx.identifiers(0).accept(self)
+        for_list = ctx.identifiers(1).accept(self)
         for (tbcol, forcol) in zip(tb_list, for_list):
             self.manager.add_foreign(tbname, tbcol, (forname, forcol))

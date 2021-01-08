@@ -83,6 +83,8 @@ class InterNode(TreeNode):
     def range(self, low, high):
         pos_low = self.lower_bound(low)
         pos_high = self.upper_bound(high)
+        if pos_high is not None and pos_high < len(self._child_key) - 1:
+            pos_high += 1
         records = []
         if pos_low is None:
             return []

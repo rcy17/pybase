@@ -486,7 +486,7 @@ class SystemManger:
             if condition.type != ConditionType.Compare or condition.table_name != table_name:
                 return None
             cond_index = table_info.get_col_index(condition.column_name)
-            if cond_index and condition.value is not None and table_info.exists_index(cond_index):
+            if cond_index is not None and condition.value is not None and table_info.exists_index(condition.column_name):
                 operator = condition.operator
                 column = condition.column_name
                 lower, upper = cond_index_map.get(column, (-1 << 32, 1 << 32))
@@ -555,7 +555,7 @@ class SystemManger:
         table_info = meta_handle.get_table(table_name)
         index_filter_rids = self.index_filter(table_name, conditions)
         record_handle = self._RM.open_file(self.get_table_name(table_name))
-        iterator = map(record_handle.get_record, index_filter_rids) if index_filter_rids else FileScan(record_handle)
+        iterator = map(record_handle.get_record, index_filter_rids) if index_filter_rids is not None else FileScan(record_handle)
         results = []
         for record in iterator:
             values = table_info.load_record(record)
@@ -591,7 +591,7 @@ class SystemManger:
             foreign_table_name = table_info.foreign[col][0]
             foreign_column_name = table_info.foreign[col][1]
             foreign_table_info: TableInfo = meta_handle.get_table(foreign_table_name)
-            root_id = foreign_table_info.indexes[foreign_table_name]
+            root_id = foreign_table_info.indexes[foreign_column_name]
             index: FileIndex = self._IM.open_index(self.using_db, foreign_table_name, foreign_column_name, root_id)
             if results is None:
                 results = set(index.range(val, val))
