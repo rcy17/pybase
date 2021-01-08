@@ -197,7 +197,7 @@ class SystemVisitor(SQLVisitor):
         return Condition(ConditionType.In, table_name, column_name, value=value)
 
     def visitWhere_like_string(self, ctx: SQLParser.Where_like_stringContext):
-        pattern = to_str(ctx.String())
+        pattern = to_str(ctx.String())[1:-1]
         table_name, column_name = ctx.column().accept(self)
         return Condition(ConditionType.Like, table_name, column_name, value=pattern)
 
@@ -212,8 +212,8 @@ class SystemVisitor(SQLVisitor):
             return to_int(ctx)
         if ctx.Float():
             return to_float(ctx)
-        if ctx.String():
-            return to_str(ctx)
+        if ctx.String():    # 1:-1 to remove "'" at begin and end
+            return to_str(ctx)[1:-1]
         if ctx.Null():
             return to_str(ctx)
 

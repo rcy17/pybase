@@ -304,7 +304,7 @@ class SystemManger:
         self._printer.print([result])
 
     @staticmethod
-    def build_regex_from_sql_like(pattern: str):
+    def build_regex_from_sql_like(pattern: str) -> re.Pattern:
         pattern = pattern.replace('%%', '\r').replace('%?', '\n').replace('%_', '\0')
         pattern = re.escape(pattern)
         pattern = pattern.replace('%', '.*').replace(r'\?', '.').replace('_', '.')
@@ -330,7 +330,7 @@ class SystemManger:
                 return lambda x: x[cond_index] in condition.value
             elif condition.type == ConditionType.Like:
                 pattern = self.build_regex_from_sql_like(condition.value)
-                return lambda x: pattern.match(x)
+                return lambda x: pattern.match(str(x[cond_index]))
 
         table_info = meta_handle.get_table(table_name)
         func_list = [func for func in (build_condition_func(condition) for condition in conditions) if func]
@@ -370,7 +370,8 @@ class SystemManger:
 
         def build_join_pair(condition: Condition):
             if condition.target_table and condition.table_name != condition.target_table:
-                assert condition.operator == '=='
+                if condition.operator != '==':
+                    raise DataBaseError('Comparison between different tables must be "="')
                 pair = (condition.table_name, condition.column_name), (condition.target_table, condition.target_column)
                 return sorted(pair)
             return None, None
