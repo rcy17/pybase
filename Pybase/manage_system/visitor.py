@@ -143,23 +143,7 @@ class SystemVisitor(SQLVisitor):
     def visitSelect_table(self, ctx: SQLParser.Select_tableContext):
         table_names = ctx.identifiers().accept(self)
         conditions = ctx.where_and_clause().accept(self) if ctx.where_and_clause() else []
-<<<<<<< HEAD
-        result_map = {}
-        # compare_map = {}
-        for table_name in table_name_list:
-            result_map[table_name] = self.manager.cond_scan_index(table_name, conditions)
-            # compare_map[table_name] = self.manager.cond_scan_index(table_name, conditions)
-        if len(table_name_list) == 1:
-            result_map[table_name_list[0]].deal_null()
-            return result_map[table_name_list[0]]
-        else:
-            # for table_name in table_name_list:
-            #    self.manager.print_results(result_map[table_name])
-            result = self.manager.cond_join(result_map, conditions)
-            return result.deal_null()
-=======
         return self.manager.select_records(table_names, conditions)
->>>>>>> ae33ebc06b2f6805fce52bbebf8d6237733199f3
 
     def visitDelete_from_table(self, ctx: SQLParser.Delete_from_tableContext):
         table_name = to_str(ctx.Identifier())

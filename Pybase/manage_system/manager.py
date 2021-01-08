@@ -171,7 +171,6 @@ class SystemManger:
         if primary is None:
             return
         for col in primary:
-<<<<<<< HEAD
             if not meta_handle.exists_index(tbname + "." + col):
                 self.create_index(tbname + "." + col, tbname, col)
     
@@ -182,10 +181,6 @@ class SystemManger:
         for col in primary:
             if meta_handle.exists_index(tbname + "." + col):
                 self.drop_index(tbname + "." + col)
-=======
-            if not meta_handle.exists_index(table_name + "." + col):
-                self.create_index(table_name + "." + col, table_name, col)
->>>>>>> ae33ebc06b2f6805fce52bbebf8d6237733199f3
 
     def add_column(self, table_name, column_info: ColumnInfo):
         if self.using_db is None:
