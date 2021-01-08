@@ -256,7 +256,14 @@ class SystemVisitor(SQLVisitor):
         pass
 
     def visitAlter_table_add_pk(self, ctx: SQLParser.Alter_table_add_pkContext):
-        pass
+        tbname = to_str(ctx.Identifier())
+        primary = ctx.identifiers().accept()
+        self.manager.set_primary(tbname, primary)
 
     def visitAlter_table_add_foreign_key(self, ctx: SQLParser.Alter_table_add_foreign_keyContext):
-        pass
+        tbname = to_str(ctx.Identifier()[0])
+        forname = to_str(ctx.Identifier()[1])
+        tb_list = ctx.identifiers(0).accept()
+        for_list = ctx.identifiers(1).accept()
+        for (tbcol, forcol) in zip(tb_list, for_list):
+            self.manager.add_foreign(tbname, tbcol, (forname, forcol))
