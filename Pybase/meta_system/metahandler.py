@@ -1,6 +1,7 @@
 """
 """
 
+from Pybase.exceptions.run_sql import DataBaseError
 from math import inf
 import pickle
 import os
@@ -56,6 +57,8 @@ class MetaHandler:
     
     def get_table(self, tbname) -> TableInfo:
         # print(tbname)
+        if tbname not in self._db_info._tbMap:
+            raise DataBaseError(f"There is not table named {tbname}")
         return self._db_info._tbMap[tbname]
     
     def update_index_root(self, tbname, colname, new_root):

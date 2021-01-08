@@ -273,28 +273,17 @@ class SystemManger:
             raise DataBaseError(f"No using database to insert record")
         meta_handle = self._MM.open_meta(self.using_db)
         tbInfo = meta_handle.get_table(tbname)
-        record_handle = self._RM.open_file(self.get_table_name(tbname))
         # Build a record
         data = tbInfo.build_record(value_list)
         values = tbInfo.load_record(Record(RID(0, 0), data))
-        rid = record_handle.insert_record(data)
         # TODO:Check constraints
         if not self.check_insert_constraints(tbname, values):
             raise DataBaseError("This record can not be inserted.")
+        record_handle = self._RM.open_file(self.get_table_name(tbname))
+        rid = record_handle.insert_record(data)
         # Handle indexes
         self.handle_insert_indexes(tbInfo, self.using_db, values, rid)
         # Other
-        self._RM.close_file(self.get_table_name(tbname))
-
-    def scan_record(self, tbname):
-        if self.using_db is None:
-            raise DataBaseError(f"No using database to scan")
-        meta_handle = self._MM.open_meta(self.using_db)
-        tbInfo = meta_handle.get_table(tbname)
-        record_handle = self._RM.open_file(self.get_table_name(tbname))
-        scanner = FileScan(record_handle)
-        for record in scanner:
-            print(tbInfo.load_record(record))
         self._RM.close_file(self.get_table_name(tbname))
 
     def print_results(self, result: QueryResult):
@@ -305,7 +294,7 @@ class SystemManger:
 
         def build_cond_func(condition):
             if condition[0] is None:
-                condition = (tbname, *condition[1:])
+                condition = (tbname, condition[1:])
             if condition[0] != tbname:
                 return None
             tbInfo = meta_handle.get_table(condition[0])
@@ -412,6 +401,7 @@ class SystemManger:
             values = tbInfo.load_record(record.data)
             # TODO:Check Constraint
             if not self.check_insert_constraints(tbname, values):
+                self._RM.close_file(self.get_table_name(tbname))
                 raise DataBaseError("This record can not be inserted.")
             record_handle.delete_record(rid)
             # Handle Index
@@ -552,10 +542,11 @@ class SystemManger:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         meta_handle = self._MM.open_meta(self.using_db)
-        func_list = self.build_cond_func(tbname, conditions, meta_handle)
         tbInfo = meta_handle.get_table(tbname)
         index_filter_rids = self.index_filter(tbname, conditions)
         record_handle = self._RM.open_file(self.get_table_name(tbname))
+        func_list = self.build_cond_func(tbname, conditions, meta_handle)
+        print(len(func_list))
         results = []
         if index_filter_rids is None:
             scanner = FileScan(record_handle)
@@ -594,7 +585,7 @@ class SystemManger:
             if results is None:
                 results = set(index.range(val, val))
             else:
-                results = results & (index.range(val, val))
+                results = results & set(index.range(val, val))
         return len(results) == 0
 
     def check_foreign(self, tbname, values):
@@ -613,7 +604,7 @@ class SystemManger:
             if results is None:
                 results = set(index.range(val, val))
             else:
-                results = results & (index.range(val, val))
+                results = results & set(index.range(val, val))
         return len(results) > 0
 
     def check_insert_constraints(self, tbname, values):

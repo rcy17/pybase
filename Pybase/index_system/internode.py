@@ -87,5 +87,6 @@ class InterNode(TreeNode):
         if pos_low is None:
             return []
         for i in range(pos_low, pos_high):
-            records += self._child_val[i].range(low, high)
+            if self._child_val[i].range(low, high) is not None:
+                records += self._child_val[i].range(low, high)
         return records
