@@ -13,6 +13,7 @@ from Pybase.exceptions.run_sql import DataBaseError
 from .manager import SystemManger
 from .result import QueryResult
 from .condition import Condition, ConditionType
+from .selector import Selector, SelectorType
 from Pybase import settings
 
 
@@ -142,9 +143,10 @@ class SystemVisitor(SQLVisitor):
 
     def visitSelect_table(self, ctx: SQLParser.Select_tableContext):
         table_names = ctx.identifiers().accept(self)
-        conditions = ctx.where_and_clause().accept(self) if ctx.where_and_clause() else []
+        conditions = ctx.where_and_clause().accept(self) if ctx.where_and_clause() else ()
+        selectors = ctx.selectors().accept(self)
         group_by = ctx.column().accept(self) if ctx.column() else None
-        return self.manager.select_records(table_names, conditions, group_by)
+        return self.manager.select_records(selectors, table_names, conditions, group_by)
 
     def visitDelete_from_table(self, ctx: SQLParser.Delete_from_tableContext):
         table_name = to_str(ctx.Identifier())
@@ -156,6 +158,19 @@ class SystemVisitor(SQLVisitor):
         conditions = ctx.where_and_clause().accept(self)
         set_value_map = ctx.set_clause().accept(self)
         return self.manager.update_records(table_name, conditions, set_value_map)
+
+    def visitSelectors(self, ctx: SQLParser.SelectorsContext) -> tuple:
+        if to_str(ctx.getChild(0)) == '*':
+            return Selector(SelectorType.All, '*', '*'),
+        return tuple(item.accept(self) for item in ctx.selector())
+
+    def visitSelector(self, ctx: SQLParser.SelectorContext):
+        if ctx.Count():
+            return Selector(SelectorType.Counter, '*', '*')
+        table_name, column_name = ctx.column().accept(self)
+        if ctx.aggregator():
+            return Selector(SelectorType.Aggregation, table_name, column_name, to_str(ctx.aggregator()))
+        return Selector(SelectorType.Field, table_name, column_name)
 
     def visitWhere_and_clause(self, ctx: SQLParser.Where_and_clauseContext):
         return tuple(each.accept(self) for each in ctx.where_clause())
@@ -212,7 +227,7 @@ class SystemVisitor(SQLVisitor):
             return to_int(ctx)
         if ctx.Float():
             return to_float(ctx)
-        if ctx.String():    # 1:-1 to remove "'" at begin and end
+        if ctx.String():  # 1:-1 to remove "'" at begin and end
             return to_str(ctx)[1:-1]
         if ctx.Null():
             return to_str(ctx)
