@@ -52,7 +52,8 @@ class RecordManager:
 
     def open_file(self, filename):
         if filename in self.opened_files:
-            raise RecordFileOperationError(f'File {filename} is already opened')
+            # raise RecordFileOperationError(f'File {filename} is already opened')
+            return self.opened_files[filename]
         file = self._FM.open_file(filename)
         handle = FileHandle(self, file, filename)
         self.opened_files[filename] = handle
@@ -69,10 +70,12 @@ class RecordManager:
 
     def close_file(self, filename):
         if filename not in self.opened_files:
-            raise RecordFileOperationError(f'File {filename} is not opened')
+            # raise RecordFileOperationError(f'File {filename} is not opened')
+            return False
         handle = self.opened_files[filename]
         if handle.header_modified:
             handle.modify_header()
         self.opened_files.pop(handle.filename)
         self._FM.close_file(handle.file_id)
         handle.is_opened = False
+        return True

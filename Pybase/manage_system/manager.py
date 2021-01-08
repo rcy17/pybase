@@ -172,13 +172,13 @@ class SystemManger:
         if primary is None:
             return
         for col in primary:
-            if not meta_handle.exists_index(tbname + "." + col):
-                self.create_index(tbname + "." + col, tbname, col)
+            if not meta_handle.exists_index(table_name + "." + col):
+                self.create_index(table_name + "." + col, table_name, col)
     
     def drop_primary(self, tbname):
         meta_handle = self._MM.open_meta(self.using_db)
         primary = meta_handle.get_table(tbname).primary
-        meta_handle.drop_column(tbname)
+        meta_handle.drop_table(tbname)
         for col in primary:
             if meta_handle.exists_index(tbname + "." + col):
                 self.drop_index(tbname + "." + col)
@@ -335,6 +335,17 @@ class SystemManger:
         table_info = meta_handle.get_table(table_name)
         func_list = [func for func in (build_condition_func(condition) for condition in conditions) if func]
         return func_list
+
+    @staticmethod
+    def result_to_value(result: QueryResult, is_in):
+        if len(result.headers) > 1:
+            raise DataBaseError('Recursive select must return one column')
+        value = sum(result.data, ())
+        if not is_in:
+            if len(result.data) != 1:
+                raise DataBaseError(f'One value of {result.headers[0]} expected bug got {len(result.data)}')
+            value, = value
+        return value
 
     def cond_scan(self, table_name, conditions: tuple) -> QueryResult:
         """
