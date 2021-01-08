@@ -196,7 +196,7 @@ class SystemManger:
 
         record_handle = self._RM.open_file(self.get_table_name(tbname))
         new_record_handle = self._RM.open_file(self.get_table_name(tbname + ".copy"))
-        scanner = FileScan(record_handle)        
+        scanner = FileScan(record_handle)
         for record in scanner:
             value_list = oldtbInfo.load_record(record)
             if colInfo._default is not None:
@@ -204,7 +204,7 @@ class SystemManger:
             else:
                 value_list.append(settings.NULL_VALUE)
             data = tbInfo.build_record(value_list)
-            new_record_handle.insert_record(data)            
+            new_record_handle.insert_record(data)
         self._RM.close_file(self.get_table_name(tbname))
         self._RM.close_file(self.get_table_name(tbname + ".copy"))
         # Rename
@@ -222,12 +222,12 @@ class SystemManger:
         meta_handle.drop_column(tbname, colname)
         record_handle = self._RM.open_file(self.get_table_name(tbname))
         new_record_handle = self._RM.open_file(self.get_table_name(tbname + ".copy"))
-        scanner = FileScan(record_handle)        
+        scanner = FileScan(record_handle)
         for record in scanner:
             value_list = oldtbInfo.load_record(record)
             value_list.pop(index)
             data = tbInfo.build_record(value_list)
-            new_record_handle.insert_record(data) 
+            new_record_handle.insert_record(data)
         self._RM.close_file(self.get_table_name(tbname))
         self._RM.close_file(self.get_table_name(tbname + ".copy"))
         # Rename
@@ -301,8 +301,6 @@ class SystemManger:
         self._printer.print([result])
 
     def build_cond_func(self, tbname, conditions, meta_handle: MetaHandler) -> list:
-        func_list = []
-
         def build_cond_func(condition):
             if condition[0] is None:
                 condition = (tbname, *condition[1:])
@@ -324,11 +322,7 @@ class SystemManger:
             else:
                 return None
 
-        for condition in conditions:
-            cond_func = build_cond_func(condition)
-            if cond_func is not None:
-                func_list.append(build_cond_func(condition))
-
+        func_list = [func for func in (build_cond_func(condition) for condition in conditions) if func]
         return func_list
 
     def cond_scan(self, tbname, conditions: tuple) -> QueryResult:
@@ -453,7 +447,7 @@ class SystemManger:
         self._RM.close_file(self.get_table_name(tbname))
         return QueryResult('updated_items', (len(records),))
 
-    def index_filter(self, tbname, conditions) -> QueryResult:
+    def index_filter(self, table_name, conditions) -> set:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         cond_index_map = {}
@@ -461,70 +455,47 @@ class SystemManger:
 
         def build_cond_index(condition):
             if condition[0] is None:
-                condition = (tbname, *condition[1:])
-            if condition[0] != tbname:
+                condition = (table_name, *condition[1:])
+            if condition[0] != table_name:
                 return None
-            tbInfo = meta_handle.get_table(condition[0])
-            cond_index = tbInfo.get_col_index(condition[1])
-            if cond_index is None:
-                return None
-            if len(condition) == 4:
-                if condition[1] in tbInfo.indexes:
-                    if condition[1] not in cond_index_map:
-                        cond_index_map[condition[1]] = [-1000000000, 1000000000]
-                    if condition[2] == "==":
-                        lower = cond_index_map[condition[1]][0]
-                        upper = cond_index_map[condition[1]][1]
-                        val = int(condition[3])
-                        if lower < val:
-                            cond_index_map[condition[1]][0] = val
-                        if upper > val:
-                            cond_index_map[condition[1]][1] = val
-                    elif condition[2] == "<":
-                        upper = cond_index_map[condition[1]][1]
-                        val = int(condition[3]) + 1
-                        if upper > val:
-                            cond_index_map[condition[1]][1] = val
-                    elif condition[2] == ">":
-                        lower = cond_index_map[condition[1]][0]
-                        val = int(condition[3]) + 1
-                        if lower < val:
-                            cond_index_map[condition[1]][0] = val
-                    elif condition[2] == "<=":
-                        upper = cond_index_map[condition[1]][1]
-                        val = int(condition[3])
-                        if upper > val:
-                            cond_index_map[condition[1]][1] = val
-                    elif condition[2] == ">=":
-                        lower = cond_index_map[condition[1]][0]
-                        val = int(condition[3]) + 1
-                        if lower < val:
-                            cond_index_map[condition[1]][0] = val
-                    else:
-                        return None
+            table_info = meta_handle.get_table(condition[0])
+            cond_index = table_info.get_col_index(condition[1])
+            if cond_index and len(condition) == 4:
+                lower, upper = cond_index_map.get(condition[1], (-1 << 32, 1 << 32))
+                val = int(condition[3])
+                if condition[2] == "==":
+                    lower = max(lower, val)
+                    upper = min(upper, val)
+                elif condition[2] == "<":
+                    upper = min(upper, val - 1)
+                elif condition[2] == ">":
+                    lower = max(lower, val + 1)
+                elif condition[2] == "<=":
+                    upper = min(upper, val)
+                elif condition[2] == ">=":
+                    lower = max(lower, val)
+                cond_index_map[condition[1]] = lower, upper
 
-        for condition in conditions:
-            build_cond_index(condition)
-        tbInfo = meta_handle.get_table(tbname)
+        tuple(map(build_cond_index, conditions))
+        _table_info = meta_handle.get_table(table_name)
         results = None
-        for colname in cond_index_map:
-            lower = cond_index_map[colname][0]
-            upper = cond_index_map[colname][1]
-            index: FileIndex = self._IM.open_index(self.using_db, tbname, colname, tbInfo.indexes[colname])
+        for column_name in cond_index_map:
+            _lower, _upper = cond_index_map[column_name]
+            index = self._IM.open_index(self.using_db, table_name, column_name, _table_info.indexes[column_name])
             if results is None:
-                results = set(index.range(lower, upper))
+                results = set(index.range(_lower, _upper))
             else:
-                results = results & (index.range(lower, upper))
+                results &= index.range(_lower, _upper)
         return results
 
-    def cond_scan_index(self, tbname, conditions: tuple) -> QueryResult:
+    def cond_scan_index(self, table_name, conditions: tuple) -> QueryResult:
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         meta_handle = self._MM.open_meta(self.using_db)
-        records = self.search_records_indexes(tbname, conditions)
-        tbInfo = meta_handle.get_table(tbname)
-        headers = tbInfo.get_header()
-        results = tuple(tbInfo.load_record(record) for record in records)
+        records = self.search_records_indexes(table_name, conditions)
+        table_info = meta_handle.get_table(table_name)
+        headers = table_info.get_header()
+        results = tuple(table_info.load_record(record) for record in records)
         return QueryResult(headers, results)
 
     def search_records(self, tbname, conditions: tuple):
@@ -548,38 +519,21 @@ class SystemManger:
         self._RM.close_file(self.get_table_name(tbname))
         return results
 
-    def search_records_indexes(self, tbname, conditions: tuple):
+    def search_records_indexes(self, table_name, conditions: tuple):
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
         meta_handle = self._MM.open_meta(self.using_db)
-        func_list = self.build_cond_func(tbname, conditions, meta_handle)
-        tbInfo = meta_handle.get_table(tbname)
-        index_filter_rids = self.index_filter(tbname, conditions)
-        record_handle = self._RM.open_file(self.get_table_name(tbname))
+        func_list = self.build_cond_func(table_name, conditions, meta_handle)
+        table_info = meta_handle.get_table(table_name)
+        index_filter_rids = self.index_filter(table_name, conditions)
+        record_handle = self._RM.open_file(self.get_table_name(table_name))
+        iterator = map(record_handle.get_record, index_filter_rids) if index_filter_rids else FileScan(record_handle)
         results = []
-        if index_filter_rids is None:
-            scanner = FileScan(record_handle)
-            for record in scanner:
-                values = tbInfo.load_record(record)
-                is_satisfied = True
-                for cond_func in func_list:
-                    if not cond_func(values):
-                        is_satisfied = False
-                        break
-                if is_satisfied:
-                    results.append(record)
-        else:
-            for rid in index_filter_rids:
-                record = record_handle.get_record(rid)
-                values = tbInfo.load_record(record)
-                is_satisfied = True
-                for cond_func in func_list:
-                    if not cond_func(values):
-                        is_satisfied = False
-                        break
-                if is_satisfied:
-                    results.append(record)
-        self._RM.close_file(self.get_table_name(tbname))
+        for record in iterator:
+            values = table_info.load_record(record)
+            if all(map(lambda func: func(values), func_list)):
+                results.append(record)
+        self._RM.close_file(self.get_table_name(table_name))
         return results
 
     def check_primary(self, tbname, values):

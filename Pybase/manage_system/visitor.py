@@ -197,7 +197,9 @@ class SystemVisitor(SQLVisitor):
         pass
 
     def visitWhere_like_string(self, ctx: SQLParser.Where_like_stringContext):
-        pass
+        pattern = to_str(ctx.String())
+        table_name, column_name = ctx.column().accept(self)
+        return table_name, column_name
 
     def visitColumn(self, ctx: SQLParser.ColumnContext):
         if len(ctx.Identifier()) == 1:
