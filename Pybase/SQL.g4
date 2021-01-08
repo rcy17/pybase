@@ -56,7 +56,7 @@ table_statement
     ;
 
 select_table
-    : 'SELECT' selector 'FROM' identifiers ('WHERE' where_and_clause)?
+    : 'SELECT' selector 'FROM' identifiers ('WHERE' where_and_clause)? ('GROUP' 'BY' column)?
     ;
 
 index_statement

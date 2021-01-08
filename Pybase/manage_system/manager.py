@@ -411,7 +411,7 @@ class SystemManger:
             results = new_result
         return results
 
-    def select_records(self, table_names: tuple, conditions: tuple):
+    def select_records(self, table_names: tuple, conditions: tuple, group_by: str=None):
         if len(table_names) > 1 and any(condition.table_name is None for condition in conditions):
             raise DataBaseError('Filed without table name is forbidden when join on tables ')
         for condition in conditions:
