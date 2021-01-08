@@ -29,7 +29,8 @@ class TableModel(QAbstractTableModel):
 
     def data(self, index: QModelIndex, role=None):
         if role == Qt.DisplayRole:
-            return str(self._data[index.row()][index.column()])
+            value = self._data[index.row()][index.column()]
+            return 'NULL' if value is None else str(value)
 
     def headerData(self, section: int, orientation: Qt.Orientation, role: int = None):
         if role == Qt.DisplayRole:

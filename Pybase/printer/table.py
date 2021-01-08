@@ -11,8 +11,12 @@ from .base import QueryResult, BasePrinter
 
 
 class TablePrinter(BasePrinter):
+    class MyPrettyTable(PrettyTable):
+        def _format_value(self, field, value):
+            return 'NULL' if value is None else super()._format_value(field, value)
+
     def _print(self, result: QueryResult):
-        table = PrettyTable()
+        table = self.MyPrettyTable()
         table.field_names = result.headers
         table.add_rows(result.data)
         cost = result.cost

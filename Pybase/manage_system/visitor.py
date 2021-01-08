@@ -101,7 +101,7 @@ class SystemVisitor(SQLVisitor):
                 for name in names:
                     assert name in name_to_column
                 primary_key = names
-        return list(name_to_column.values()), foreign_keys, primary_key 
+        return list(name_to_column.values()), foreign_keys, primary_key
 
     def visitNormal_field(self, ctx: SQLParser.Normal_fieldContext):
         pass
@@ -169,29 +169,35 @@ class SystemVisitor(SQLVisitor):
     def visitWhere_and_clause(self, ctx: SQLParser.Where_and_clauseContext):
         return tuple(each.accept(self) for each in ctx.where_clause())
 
-    def visitWhere_clause(self, ctx: SQLParser.Where_clauseContext):
-        if isinstance(ctx, SQLParser.Where_operator_expressionContext):
-            tbname, colname = ctx.column().accept(self)
-            oper = to_str(ctx.operator())
-            if oper == '=':
-                oper = '=='
-            if oper == '<>':
-                oper = "!="
-            val = ctx.expression().accept(self)
-            if isinstance(val, tuple):
-                return (tbname, colname, oper, val[0], val[1])
-            else:
-                return (tbname, colname, oper, val)
-        elif isinstance(ctx, SQLParser.Where_nullContext):
-            tbname, colname = ctx.column().accept(self)
-            oper = ""
-            if ctx.getChild(2) == "NOT":
-                oper = "=="
-            else:
-                oper = "!="
-            return (tbname, colname, oper, settings.NULL_VALUE)
+    def visitWhere_operator_expression(self, ctx: SQLParser.Where_operator_expressionContext):
+        tb_name, col_name = ctx.column().accept(self)
+        operator = to_str(ctx.operator())
+        if operator == '=':
+            operator = '=='
+        if operator == '<>':
+            operator = "!="
+        val = ctx.expression().accept(self)
+        if isinstance(val, tuple):
+            return tb_name, col_name, operator, val[0], val[1]
+        else:
+            return tb_name, col_name, operator, val
 
-            
+    def visitWhere_operator_select(self, ctx: SQLParser.Where_operator_selectContext):
+        pass
+
+    def visitWhere_null(self, ctx: SQLParser.Where_nullContext):
+        tb_name, col_name = ctx.column().accept(self)
+        operator = '==' if ctx.getChild(2) == "NOT" else '!='
+        return tb_name, col_name, operator, settings.NULL_VALUE
+
+    def visitWhere_in_list(self, ctx: SQLParser.Where_in_listContext):
+        pass
+
+    def visitWhere_in_select(self, ctx: SQLParser.Where_in_selectContext):
+        pass
+
+    def visitWhere_like_string(self, ctx: SQLParser.Where_like_stringContext):
+        pass
 
     def visitColumn(self, ctx: SQLParser.ColumnContext):
         if len(ctx.Identifier()) == 1:
@@ -221,27 +227,24 @@ class SystemVisitor(SQLVisitor):
     def visitDrop_index(self, ctx: SQLParser.Drop_indexContext):
         index_name = to_str(ctx.Identifier())
         return self.manager.drop_index(index_name)
-    
+
     def visitAlter_add_index(self, ctx: SQLParser.Alter_add_indexContext):
         return super().visitAlter_add_index(ctx)
-    
+
     def visitAlter_drop_index(self, ctx: SQLParser.Alter_drop_indexContext):
         return super().visitAlter_drop_index(ctx)
-    
+
     def visitAlter_table_add(self, ctx: SQLParser.Alter_table_addContext):
         return super().visitAlter_table_add(ctx)
-    
+
     def visitAlter_table_drop(self, ctx: SQLParser.Alter_table_dropContext):
         return super().visitAlter_table_drop(ctx)
-    
+
     def visitAlter_table_change(self, ctx: SQLParser.Alter_table_changeContext):
         return super().visitAlter_table_change(ctx)
-    
+
     def visitAlter_table_rename(self, ctx: SQLParser.Alter_table_renameContext):
         return super().visitAlter_table_rename(ctx)
-    
+
     def visitAlter_table_drop_pk(self, ctx: SQLParser.Alter_table_drop_pkContext):
         return super().visitAlter_table_drop_pk(ctx)
-
-    
-    
