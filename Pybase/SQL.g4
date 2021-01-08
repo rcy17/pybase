@@ -12,14 +12,12 @@ Average: 'AVG';
 Max: 'MAX';
 Min: 'MIN';
 
-
 Identifier: [a-zA-Z_] [a-zA-Z_0-9]*;
 Integer: [0-9]+;
 String:  '\'' (~'\'')* '\'';
 Float: ('-')? [0-9]+ '.' [0-9]*;
 Whitespace: [ \t\n\r]+ -> skip;
 Annotation: '-' '-' (~';')+;
-Aggregator: Count | Average | Max | Min;
 
 program
     : statement* EOF
@@ -52,6 +50,7 @@ table_statement
     | 'INSERT' 'INTO' Identifier 'VALUES' value_lists                   # insert_into_table
     | 'DELETE' 'FROM' Identifier 'WHERE' where_and_clause               # delete_from_table
     | 'UPDATE' Identifier 'SET' set_clause 'WHERE' where_and_clause     # update_table
+    | select_table                                                      # select_table_
     ;
 
 select_table
@@ -138,7 +137,7 @@ set_clause
 selector
     : '*'
     | column (',' column)*
-    | Aggregator '(' expression ')'
+    | aggregator '(' expression ')'
     | Count '(' '*' ')'
     ;
 
@@ -153,4 +152,12 @@ operator
     | Greater
     | GreaterEqual
     | NotEqual
+    ;
+
+
+aggregator
+    : Count
+    | Average
+    | Max
+    | Min
     ;

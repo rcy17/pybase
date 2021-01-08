@@ -64,10 +64,10 @@ class SystemManger:
         return str(self.get_table_path(table_name)) + settings.TABLE_FILE_SUFFIX
 
     def execute(self, sql):
-        class Strategy(BailErrorStrategy):
-            def recover(self, recognizer, e):
-                recognizer._errHandler.reportError(recognizer, e)
-                super().recover(recognizer, e)
+        # class Strategy(BailErrorStrategy):
+        #     def recover(self, recognizer, e):
+        #         recognizer._errHandler.reportError(recognizer, e)
+        #         super().recover(recognizer, e)
 
         class StringErrorListener(ErrorListener):
             def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
@@ -294,8 +294,7 @@ class SystemManger:
         self._RM.close_file(self.get_table_name(tbname))
 
     def print_results(self, result: QueryResult):
-        from datetime import timedelta
-        self._printer.print(result, timedelta(0))
+        self._printer.print([result])
 
     def build_cond_func(self, tbname, conditions, meta_handle: MetaHandler) -> list:
         func_list = []

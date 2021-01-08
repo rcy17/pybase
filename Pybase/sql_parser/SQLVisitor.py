@@ -1,4 +1,4 @@
-# Generated from SQL.g4 by ANTLR 4.8
+# Generated from SQL.g4 by ANTLR 4.9
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .SQLParser import SQLParser
@@ -71,6 +71,11 @@ class SQLVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by SQLParser#update_table.
     def visitUpdate_table(self, ctx:SQLParser.Update_tableContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#select_table_.
+    def visitSelect_table_(self, ctx:SQLParser.Select_table_Context):
         return self.visitChildren(ctx)
 
 
@@ -241,6 +246,11 @@ class SQLVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by SQLParser#operator.
     def visitOperator(self, ctx:SQLParser.OperatorContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by SQLParser#aggregator.
+    def visitAggregator(self, ctx:SQLParser.AggregatorContext):
         return self.visitChildren(ctx)
 
 
