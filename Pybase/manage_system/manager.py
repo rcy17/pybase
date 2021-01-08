@@ -585,7 +585,6 @@ class SystemManger:
         table_info: TableInfo = meta_handle.get_table(table_name)
         if len(table_info.foreign) == 0:
             return True
-        results = None
         for col in table_info.foreign:
             val = values[table_info.get_col_index(col)]
             foreign_table_name = table_info.foreign[col][0]
@@ -593,12 +592,12 @@ class SystemManger:
             foreign_table_info: TableInfo = meta_handle.get_table(foreign_table_name)
             root_id = foreign_table_info.indexes[foreign_column_name]
             index: FileIndex = self._IM.open_index(self.using_db, foreign_table_name, foreign_column_name, root_id)
-            if results is None:
-                results = set(index.range(val, val))
-            else:
-                results = results & set(index.range(val, val))
+            results = set(index.range(val, val))
+            if len(results) == 0:
+                self._IM.close_index(table_name, col)
+                return False
             self._IM.close_index(table_name, col)
-        return len(results) > 0
+        return True
 
     def check_insert_constraints(self, table_name, values):
         # PRIMARY CONSTRAINT
@@ -608,6 +607,7 @@ class SystemManger:
 
         # FOREIGN CONSTRAINT
         if not self.check_foreign(table_name, values):
+            print("Foreign Error")
             return False
         return True
 
