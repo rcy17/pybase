@@ -7,7 +7,7 @@ import numpy as np
 
 from Pybase import settings
 from .filehandle import FileHandle
-from .record import Condition, Record
+from .record import Record
 from .rid import RID
 
 

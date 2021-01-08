@@ -12,6 +12,7 @@ from Pybase.meta_system.info import ColumnInfo, TableInfo
 from Pybase.exceptions.run_sql import DataBaseError
 from .manager import SystemManger
 from .result import QueryResult
+from .condition import Condition, ConditionType
 from Pybase import settings
 
 
@@ -140,10 +141,9 @@ class SystemVisitor(SQLVisitor):
         return tuple(to_str(each) for each in ctx.value())
 
     def visitSelect_table(self, ctx: SQLParser.Select_tableContext):
-        # Only for debug
-        table_name_list: list = ctx.identifiers().accept(self)
-        # self.manager.scan_record(table_name_list[0])
+        table_names = ctx.identifiers().accept(self)
         conditions = ctx.where_and_clause().accept(self) if ctx.where_and_clause() else []
+<<<<<<< HEAD
         result_map = {}
         # compare_map = {}
         for table_name in table_name_list:
@@ -157,6 +157,9 @@ class SystemVisitor(SQLVisitor):
             #    self.manager.print_results(result_map[table_name])
             result = self.manager.cond_join(result_map, conditions)
             return result.deal_null()
+=======
+        return self.manager.select_records(table_names, conditions)
+>>>>>>> ae33ebc06b2f6805fce52bbebf8d6237733199f3
 
     def visitDelete_from_table(self, ctx: SQLParser.Delete_from_tableContext):
         table_name = to_str(ctx.Identifier())
@@ -173,25 +176,26 @@ class SystemVisitor(SQLVisitor):
         return tuple(each.accept(self) for each in ctx.where_clause())
 
     def visitWhere_operator_expression(self, ctx: SQLParser.Where_operator_expressionContext):
-        tb_name, col_name = ctx.column().accept(self)
+        table_name, column_name = ctx.column().accept(self)
         operator = to_str(ctx.operator())
         if operator == '=':
             operator = '=='
         if operator == '<>':
             operator = "!="
-        val = ctx.expression().accept(self)
-        if isinstance(val, tuple):
-            return tb_name, col_name, operator, val[0], val[1]
+        value = ctx.expression().accept(self)
+        if isinstance(value, tuple):
+            return Condition(ConditionType.Compare, table_name, column_name, operator,
+                             target_table=value[0], target_column=value[1])
         else:
-            return tb_name, col_name, operator, val
+            return Condition(ConditionType.Compare, table_name, column_name, operator, value=value)
 
     def visitWhere_operator_select(self, ctx: SQLParser.Where_operator_selectContext):
         pass
 
     def visitWhere_null(self, ctx: SQLParser.Where_nullContext):
-        tb_name, col_name = ctx.column().accept(self)
+        table_name, column_name = ctx.column().accept(self)
         operator = '==' if ctx.getChild(2) == "NOT" else '!='
-        return tb_name, col_name, operator, settings.NULL_VALUE
+        return Condition(ConditionType.Compare, table_name, column_name, operator, settings.NULL_VALUE)
 
     def visitWhere_in_list(self, ctx: SQLParser.Where_in_listContext):
         pass
@@ -200,7 +204,9 @@ class SystemVisitor(SQLVisitor):
         pass
 
     def visitWhere_like_string(self, ctx: SQLParser.Where_like_stringContext):
-        pass
+        pattern = to_str(ctx.String())
+        table_name, column_name = ctx.column().accept(self)
+        return table_name, column_name
 
     def visitColumn(self, ctx: SQLParser.ColumnContext):
         if len(ctx.Identifier()) == 1:
