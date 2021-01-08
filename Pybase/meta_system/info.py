@@ -1,3 +1,4 @@
+from Pybase import settings
 from Pybase.exceptions.run_sql import DataBaseError
 from Pybase.record_system.record import Record
 from Pybase.exceptions.meta import TableExistenceError, ColumnExistenceError

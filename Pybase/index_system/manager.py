@@ -24,7 +24,7 @@ class IndexManager:
         return fileindex
     
     def open_index(self, dbname, tbname, colname, root_id) -> FileIndex:
-        if self._open_indexes.get((tbname, colname)) is not None:
+        if (tbname, colname) in self._open_indexes:
             return self._open_indexes.get((tbname, colname))
         handle = IndexHandler(self._FM, dbname, self._home_dir)
         fileindex = FileIndex(handle, root_id)
@@ -33,7 +33,7 @@ class IndexManager:
         return fileindex
     
     def close_index(self, tbname, colname):
-        if self._open_indexes.get((tbname, colname)) == None:
+        if (tbname, colname) not in self._open_indexes:
             return None
         fileindex: FileIndex = self._open_indexes[(tbname, colname)]
         handle: IndexHandler = fileindex._handle

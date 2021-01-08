@@ -69,6 +69,8 @@ class LeafNode(TreeNode):
             return None
 
     def range(self, low, high):
+        if self._child_key[-1] < low:
+            return None
         pos_low = self.lower_bound(low)
         pos_high = self.upper_bound(high)
         return self._child_val[pos_low:pos_high]
