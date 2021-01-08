@@ -17,6 +17,10 @@ def to_int(s):
     return int(to_str(s))
 
 
+def to_float(s):
+    return float(to_str(s))
+
+
 def float2bytes(f):
     bs = struct.pack("d", f)
     return tuple(bs[i] for i in reversed(range(8)))

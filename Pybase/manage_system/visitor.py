@@ -7,7 +7,7 @@ from datetime import datetime
 
 from Pybase.sql_parser.SQLParser import SQLParser
 from Pybase.sql_parser.SQLVisitor import SQLVisitor
-from Pybase.utils.tools import to_str, to_int
+from Pybase.utils.tools import to_str, to_int, to_float
 from Pybase.meta_system import ColumnInfo, TableInfo
 from Pybase.exceptions.run_sql import DataBaseError
 from .manager import SystemManger
@@ -138,7 +138,7 @@ class SystemVisitor(SQLVisitor):
         return tuple(each.accept(self) for each in ctx.value_list())
 
     def visitValue_list(self, ctx: SQLParser.Value_listContext):
-        return tuple(to_str(each) for each in ctx.value())
+        return tuple(each.accept(self) for each in ctx.value())
 
     def visitSelect_table(self, ctx: SQLParser.Select_tableContext):
         table_names = ctx.identifiers().accept(self)
@@ -174,7 +174,10 @@ class SystemVisitor(SQLVisitor):
             return Condition(ConditionType.Compare, table_name, column_name, operator, value=value)
 
     def visitWhere_operator_select(self, ctx: SQLParser.Where_operator_selectContext):
-        pass
+        table_name, column_name = ctx.column().accept(self)
+        result: QueryResult = ctx.select_table().accept(self)
+        value = self.manager.result_to_value(result, False)
+        return Condition(ConditionType.Compare, table_name, column_name, value=value)
 
     def visitWhere_null(self, ctx: SQLParser.Where_nullContext):
         table_name, column_name = ctx.column().accept(self)
@@ -182,10 +185,15 @@ class SystemVisitor(SQLVisitor):
         return Condition(ConditionType.Compare, table_name, column_name, operator, settings.NULL_VALUE)
 
     def visitWhere_in_list(self, ctx: SQLParser.Where_in_listContext):
-        pass
+        table_name, column_name = ctx.column().accept(self)
+        values = ctx.value_list().accept(self)
+        return Condition(ConditionType.In, table_name, column_name, value=values)
 
     def visitWhere_in_select(self, ctx: SQLParser.Where_in_selectContext):
-        pass
+        table_name, column_name = ctx.column().accept(self)
+        result: QueryResult = ctx.select_table().accept(self)
+        value = self.manager.result_to_value(result, True)
+        return Condition(ConditionType.In, table_name, column_name, value=value)
 
     def visitWhere_like_string(self, ctx: SQLParser.Where_like_stringContext):
         pattern = to_str(ctx.String())
@@ -198,11 +206,15 @@ class SystemVisitor(SQLVisitor):
         else:
             return to_str(ctx.Identifier(0)), to_str(ctx.Identifier(1))
 
-    def visitExpression(self, ctx: SQLParser.ExpressionContext):
-        if ctx.value() is None:
-            return ctx.column().accept(self)
-        else:
-            return to_str(ctx.value())
+    def visitValue(self, ctx: SQLParser.ValueContext):
+        if ctx.Integer():
+            return to_int(ctx)
+        if ctx.Float():
+            return to_float(ctx)
+        if ctx.String():
+            return to_str(ctx)
+        if ctx.Null():
+            return to_str(ctx)
 
     def visitSet_clause(self, ctx: SQLParser.Set_clauseContext):
         set_value_map = {}
