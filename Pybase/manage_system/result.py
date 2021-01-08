@@ -3,6 +3,7 @@ Here defines QueryResult class, each sql query returns such object
 
 Date: 2020/12/03
 """
+from Pybase import settings
 from datetime import timedelta
 
 
@@ -78,3 +79,9 @@ class QueryResult:
 
     def add_alias(self, alias, header):
         self._alias_map[alias] = header
+    
+    def deal_null(self):
+        for row in self.data:
+            for i in range(len(row)):
+                if row[i] == settings.NULL_VALUE:
+                    row[i] = None

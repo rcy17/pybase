@@ -172,8 +172,16 @@ class SystemManger:
         if primary is None:
             return
         for col in primary:
-            if not meta_handle.exists_index(table_name + "." + col):
-                self.create_index(table_name + "." + col, table_name, col)
+            if not meta_handle.exists_index(tbname + "." + col):
+                self.create_index(tbname + "." + col, tbname, col)
+    
+    def drop_primary(self, tbname):
+        meta_handle = self._MM.open_meta(self.using_db)
+        primary = meta_handle.get_table(tbname).primary
+        meta_handle.drop_column(tbname)
+        for col in primary:
+            if meta_handle.exists_index(tbname + "." + col):
+                self.drop_index(tbname + "." + col)
 
     def add_column(self, table_name, column_info: ColumnInfo):
         if self.using_db is None:
@@ -257,6 +265,21 @@ class SystemManger:
         table_info.drop_index(column_name)
         meta_handle.drop_index(index_name)
         self._MM.close_meta(self.using_db)
+    
+    def rename_index(self, old_index, new_index):
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to create index")
+        meta_handler = self._MM.open_meta(self.using_db)
+        meta_handler.rename_index(old_index, new_index)
+
+    def rename_column(self, tbname, oldname, newname):
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to create index")
+        meta_handler = self._MM.open_meta(self.using_db)
+        meta_handler.rename_col(tbname, oldname, newname)
+        # Primary
+        # Foreign
+    
 
     def insert_record(self, table_name, value_list: list):
         # Remember to get the order in Record from meta

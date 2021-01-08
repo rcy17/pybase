@@ -105,7 +105,9 @@ class SystemVisitor(SQLVisitor):
         return list(name_to_column.values()), foreign_keys, primary_key
 
     def visitNormal_field(self, ctx: SQLParser.Normal_fieldContext):
-        pass
+        name = to_str(ctx.Identifier())
+        type_, size = ctx.type_().accept(self)
+        return ColumnInfo(type=type_, name=name, size=size)
 
     def visitForeign_key_field(self, ctx: SQLParser.Foreign_key_fieldContext):
         pass
@@ -220,15 +222,25 @@ class SystemVisitor(SQLVisitor):
         return self.manager.drop_index(index_name)
 
     def visitAlter_add_index(self, ctx: SQLParser.Alter_add_indexContext):
-        pass
+        table_name = to_str(ctx.Identifier()[0])
+        index_name = to_str(ctx.Identifier()[1])
+        col_list = ctx.identifiers().accept(self)
+        for colname in col_list:
+            self.manager.create_index(index_name, table_name, colname)
 
     def visitAlter_drop_index(self, ctx: SQLParser.Alter_drop_indexContext):
-        pass
+        index_name = to_str(ctx.Identifier()[1])
+        return self.manager.drop_index(index_name)
 
     def visitAlter_table_add(self, ctx: SQLParser.Alter_table_addContext):
-        pass
+        colInfo: ColumnInfo = ctx.field().accept()
+        table_name = to_str(ctx.Identifier())
+        self.manager.add_column(table_name, colInfo)
 
     def visitAlter_table_drop(self, ctx: SQLParser.Alter_table_dropContext):
+        table_name = to_str(ctx.Identifier()[0])
+        col_name = to_str(ctx.Identifier()[1])
+        self.manager.drop_column(table_name, col_name)
         pass
 
     def visitAlter_table_change(self, ctx: SQLParser.Alter_table_changeContext):
