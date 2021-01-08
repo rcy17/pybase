@@ -109,8 +109,12 @@ class TableInfo:
             else:
                 ba = None
                 if type_ == "INT":
+                    if value_ is None:
+                        value_ = settings.NULL_VALUE
                     ba = int2bytes(int(value_))
                 elif type_ == "FLOAT":
+                    if value_ is None:
+                        value_ = settings.NULL_VALUE
                     ba = float2bytes(float(value_))
                 elif type_ == "DATE":
                     ba = tuple(ord(value_[i]) for i in range(8))
@@ -142,10 +146,16 @@ class TableInfo:
                 res.append(val)
             elif type_ == "INT":
                 ba = data[pos: pos + size_].tolist()
-                res.append(bytes2int(ba))
+                if bytes2int(ba) == settings.NULL_VALUE:
+                    res.append(None)
+                else:
+                    res.append(bytes2int(ba))
             elif type_ == "FLOAT":
                 ba = data[pos: pos + size_].tolist()
-                res.append(bytes2float(ba))
+                if bytes2float(ba) == settings.NULL_VALUE:
+                    res.append(None)
+                else:
+                    res.append(bytes2float(ba))
             elif type_ == "DATE":
                 val = ""
                 for i in range(size_):

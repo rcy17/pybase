@@ -198,7 +198,7 @@ class SystemVisitor(SQLVisitor):
     def visitWhere_null(self, ctx: SQLParser.Where_nullContext):
         table_name, column_name = ctx.column().accept(self)
         operator = '==' if ctx.getChild(2) == "NOT" else '!='
-        return Condition(ConditionType.Compare, table_name, column_name, operator, settings.NULL_VALUE)
+        return Condition(ConditionType.Compare, table_name, column_name, operator, None)
 
     def visitWhere_in_list(self, ctx: SQLParser.Where_in_listContext):
         table_name, column_name = ctx.column().accept(self)

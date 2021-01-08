@@ -523,7 +523,7 @@ class SystemManger:
             if cond_index is not None and condition.value is not None and table_info.exists_index(condition.column_name):
                 operator = condition.operator
                 column = condition.column_name
-                lower, upper = cond_index_map.get(column, (-1 << 32, 1 << 32))
+                lower, upper = cond_index_map.get(column, (-1 << 31 + 1, 1 << 31))
                 value = int(condition.value)
                 if operator == "==":
                     lower = max(lower, value)
