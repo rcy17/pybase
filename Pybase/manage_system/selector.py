@@ -20,7 +20,7 @@ class Selector:
         self.table_name = table_name
         self.column_name = column_name
         self.aggregator = aggregator
-        self.result = None
+        # self.index = None   # Index of column
 
     def to_string(self, prefix=True):
         base = self.target()
@@ -36,10 +36,15 @@ class Selector:
 
     def select(self, data: tuple):
         function_map = {
-            'COUNT': len,
+            'COUNT': lambda x: len(set(x)),
             'MAX': max,
             'MIN': min,
             'SUM': sum,
             'AVG': lambda x: sum(x) / len(x)
         }
-        return function_map[self.aggregator](data)
+        if self.type == SelectorType.Counter:
+            return len(data)
+        if self.type == SelectorType.Field:
+            return data[0]
+        if self.type == SelectorType.Aggregation:
+            return function_map[self.aggregator](tuple(filter(lambda x: x is not None, data)))

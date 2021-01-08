@@ -6,6 +6,7 @@ Date: 2020/11/30
 from typing import Tuple
 from pathlib import Path
 import re
+from collections import defaultdict
 
 from antlr4 import InputStream, CommonTokenStream
 from antlr4.error.Errors import ParseCancellationException
@@ -176,7 +177,7 @@ class SystemManger:
         for col in primary:
             if not meta_handle.exists_index(table_name + "." + col):
                 self.create_index(table_name + "." + col, table_name, col)
-    
+
     def drop_primary(self, table_name):
         meta_handle = self._MM.open_meta(self.using_db)
         primary = meta_handle.get_table(table_name).primary
@@ -270,7 +271,7 @@ class SystemManger:
         table_info.drop_index(column_name)
         meta_handle.drop_index(index_name)
         self._MM.close_meta(self.using_db)
-    
+
     def rename_index(self, old_index, new_index):
         if self.using_db is None:
             raise DataBaseError(f"No using database to create index")
@@ -284,7 +285,6 @@ class SystemManger:
         meta_handler.rename_col(table_name, oldname, newname)
         # Primary
         # Foreign
-    
 
     def insert_record(self, table_name, value_list: list):
         # Remember to get the order in Record from meta
@@ -420,47 +420,70 @@ class SystemManger:
             results = new_result
         return results
 
-    def select_records(self, selectors: Tuple[Selector], table_names: Tuple[str],
-                       conditions: Tuple[Condition], group_by: Tuple[str]) -> QueryResult:
+    def select_records(self, selectors: Tuple[Selector], table_names: Tuple[str, ...],
+                       conditions: Tuple[Condition], group_by: Tuple[str, str]) -> QueryResult:
+        def get_selected_data(column_to_data):
+            column_to_data['*.*'] = next(iter(column_to_data.values()))
+            return tuple(map(lambda selector: selector.select(column_to_data[selector.target()]), selectors))
+
+        group_table, group_column = group_by
         if len(table_names) > 1:
-            if any(item.table_name is None for item in conditions + selectors):
+            if any(item.table_name is None for item in conditions + selectors) or group_table is None:
                 raise DataBaseError('Filed without table name is forbidden when join on tables ')
         for item in conditions + selectors:
             if item.table_name is None:
                 # If there is still any condition with None table name, we can ensure that there is only one table
                 item.table_name = table_names[0]
+        group_table = group_table or table_names[0]
+        group_by = group_table + '.' + group_column
         types = set(selector.type for selector in selectors)
         if not group_by and SelectorType.Field in types and len(types) > 1:
             raise DataBaseError("Select without group by shouldn't contain both field and aggregations")
         if len(selectors) == len(table_names) == 1 and selectors[0].type == SelectorType.Counter and not group_by:
             # COUNT(*) can has a shortcut from table.header['record_number']
             file = self._RM.open_file(self.get_table_path(table_names[0]))
-            data = (file.header['record_number'], )
-            headers = (selectors[0].to_string(False), )
+            data = (file.header['record_number'],)
+            headers = (selectors[0].to_string(False),)
             return QueryResult(headers, data)
 
         result_map = {table_name: self.cond_scan_index(table_name, conditions) for table_name in table_names}
         result = result_map[table_names[0]] if len(table_names) == 1 else self.cond_join(result_map, conditions)
-        prefix = len(table_names) == 1
-        if group_by:
-            pass
+        prefix = len(table_names) > 1
+        if group_column:
+            def make_row(group):
+                _data_map = {_header: _data for _header, _data in zip(result.headers, zip(*group))}
+                return get_selected_data(_data_map)
+
+            index = result.get_header_index(group_by)
+            groups = defaultdict(list)
+            for row in result.data:
+                groups[row[index]].append(row)
+            if selectors[0].type == SelectorType.All:
+                assert len(selectors) == 1
+                data = tuple(group[0] for group in groups.values())
+                return QueryResult(result.headers, data)
+            data = tuple(map(make_row, groups.values()))
         else:
             if selectors[0].type == SelectorType.All:
                 assert len(selectors) == 1
                 return result
-            if SelectorType.Field in types:     # No aggregation
-                def take_columns(row):
-                    return tuple(row[each] for each in indexes)
+            if SelectorType.Field in types:  # No aggregation
+                def take_columns(_row):
+                    return tuple(_row[each] for each in indexes)
+
                 headers = tuple(selector.target() for selector in selectors)
                 indexes = tuple(result.get_header_index(header) for header in headers)
                 data = tuple(map(take_columns, result.data))
             else:
                 # Only aggregations
-                data_map = {header: data for header, data in zip(result.headers, zip(*result.data))}
-                data = tuple(map(lambda selector: selector.select(data_map[selector.target()]), selectors))
-            # Reset headers regarding to prefix
-            headers = tuple(selector.to_string(prefix) for selector in selectors)
-            return QueryResult(headers, data)
+                if not result.data:
+                    data = (None,) * len(result.headers)
+                else:
+                    data_map = {_header: _data for _header, _data in zip(result.headers, zip(*result.data))}
+                    data = get_selected_data(data_map),
+        # Reset headers regarding to prefix
+        headers = tuple(selector.to_string(prefix) for selector in selectors)
+        return QueryResult(headers, data)
 
     def delete_records(self, table_name, conditions: tuple):
         if self.using_db is None:
@@ -527,7 +550,8 @@ class SystemManger:
             if condition.type != ConditionType.Compare or condition.table_name != table_name:
                 return None
             cond_index = table_info.get_col_index(condition.column_name)
-            if cond_index is not None and condition.value is not None and table_info.exists_index(condition.column_name):
+            if cond_index is not None and condition.value is not None and table_info.exists_index(
+                    condition.column_name):
                 operator = condition.operator
                 column = condition.column_name
                 lower, upper = cond_index_map.get(column, (-1 << 31 + 1, 1 << 31))

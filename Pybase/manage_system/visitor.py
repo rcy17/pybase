@@ -145,7 +145,7 @@ class SystemVisitor(SQLVisitor):
         table_names = ctx.identifiers().accept(self)
         conditions = ctx.where_and_clause().accept(self) if ctx.where_and_clause() else ()
         selectors = ctx.selectors().accept(self)
-        group_by = ctx.column().accept(self) if ctx.column() else None
+        group_by = ctx.column().accept(self) if ctx.column() else (None, '')
         return self.manager.select_records(selectors, table_names, conditions, group_by)
 
     def visitDelete_from_table(self, ctx: SQLParser.Delete_from_tableContext):
