@@ -29,6 +29,10 @@ class IndexManager:
         if db_name not in self._opened_index_handlers:
             return False
         handler = self._opened_index_handlers.pop(db_name)
+        for key, file_index in tuple(self.opened_file_indexes.items()):
+            if file_index.handler is not handler:
+                continue
+            self.close_index(*key)
         handler.close()
         return True
 
@@ -56,7 +60,5 @@ class IndexManager:
             file_index.dump()
 
     def shutdown(self):
-        for table, root_id in tuple(self.opened_file_indexes):
-            self.close_index(table, root_id)
         for database in tuple(self._opened_index_handlers):
             self.close_handler(database)

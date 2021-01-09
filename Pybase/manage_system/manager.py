@@ -107,8 +107,10 @@ class SystemManger:
             raise DataBaseError(f"Can't drop non-existing database {name}")
         db_path = self.get_db_path(name)
         assert db_path.exists()
+        self._IM.close_handler(name)
+        self._MM.close_meta(name)
         for each in db_path.iterdir():
-            if each.suffix == settings.TABLE_FILE_SUFFIX and str(each) in self._RM.opened_files:
+            if each.suffix == settings.TABLE_FILE_SUFFIX:
                 self._RM.close_file(str(each))
             if each.suffix == settings.INDEX_FILE_SUFFIX:
                 pass
@@ -413,6 +415,19 @@ class SystemManger:
             column_to_data['*.*'] = next(iter(column_to_data.values()))
             return tuple(map(lambda selector: selector.select(column_to_data[selector.target()]), selectors))
 
+        def set_table_name(item, table_name_attr, column_name_attr):
+            _table = getattr(item, table_name_attr)
+            _column = getattr(item, column_name_attr)
+            if _column is None:
+                return
+            if _table is None:
+                tables = column_to_table[_column]
+                if len(tables) > 1:
+                    raise DataBaseError(f'Field {_column} is ambiguous when joining on tables ')
+                if not tables:
+                    raise DataBaseError(f'Field {_column} is unknown')
+                setattr(item, table_name_attr, tables[0])
+
         if self.using_db is None:
             raise DataBaseError(f"No using database to select.")
         group_table, group_column = group_by
@@ -420,14 +435,10 @@ class SystemManger:
         meta = self._MM.open_meta(self.using_db)
         column_to_table = meta.build_column_to_table_map(table_names)
 
-        for item in conditions + selectors:
-            if item.table_name is None:
-                tables = column_to_table[item.column_name]
-                if len(tables) > 1:
-                    raise DataBaseError(f'Field {item.column_name} is ambiguous when joining on tables ')
-                if not tables:
-                    raise DataBaseError(f'Field {item.column_name} is unknown')
-                item.table_name = tables[0]
+        for each in conditions + selectors:
+            if isinstance(each, Condition):
+                set_table_name(each, 'target_table', 'target_column')
+            set_table_name(each, 'table_name', 'column_name')
 
         group_table = group_table or table_names[0]
         group_by = group_table + '.' + group_column
@@ -580,7 +591,7 @@ class SystemManger:
                 data.append(values)
         return records, data
 
-    def check_primary(self, table_name, values, this: RID=None):
+    def check_primary(self, table_name, values, this: RID = None):
         """
         Check primary key constraint if values are inserted
         Return False if nothing in wrong else primary key (keys, values)

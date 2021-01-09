@@ -28,6 +28,10 @@ class FileIndex:
     def is_modified(self):
         return self._is_modified
 
+    @property
+    def handler(self):
+        return self._handle
+
     def build_node(self, page_id) -> TreeNode:
         self._is_modified = True
         data = self._handle.get_page(page_id)

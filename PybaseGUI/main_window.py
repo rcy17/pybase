@@ -249,6 +249,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if event.key() == Qt.Key_Return:  # enter
             if event.modifiers() in (Qt.ControlModifier, Qt.AltModifier):  # alt + enter or ctrl + enter
                 self.run_sql(self.text_code.toPlainText())
+                return
+        return super(QMainWindow, self).keyPressEvent(event)
 
     @pyqtSlot()
     def on_button_clear_clicked(self):
