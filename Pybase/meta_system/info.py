@@ -28,6 +28,10 @@ class ColumnInfo:
     def name(self):
         return self._name
 
+    @property
+    def default(self):
+        return self._default
+
     def get_size(self) -> int:
         if self._type == "INT":
             return 8

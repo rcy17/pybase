@@ -21,9 +21,10 @@ class MetaManager:
 
     def close_meta(self, dbname):
         if self._meta_list.get(dbname) is None:
-            raise DataBaseError("Never open this database")
+            return False
         meta_handler: MetaHandler = self._meta_list.pop(dbname)
         meta_handler.close()
+        return True
 
     def remove_all(self, dbname):
         self._FM.remove_file(dbname + settings.META_FILE_NAME)

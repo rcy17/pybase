@@ -212,9 +212,9 @@ class SystemManger:
         new_record_handle = self._RM.open_file(self.get_table_path(table_name + ".copy"))
         scanner = FileScan(record_handle)
         for record in scanner:
-            value_list = old_table_info.load_record(record)
-            if column_info._default is not None:
-                value_list.append(column_info._default)
+            value_list = list(old_table_info.load_record(record))
+            if column_info.default is not None:
+                value_list.append(column_info.default)
             else:
                 value_list.append(settings.NULL_VALUE)
             data = table_info.build_record(value_list)
@@ -534,7 +534,7 @@ class SystemManger:
         meta_handle, table_info = self.get_table_info(table_name, "scan")
 
         def build_cond_index(condition: Condition):
-            if condition.type != ConditionType.Compare or condition.table_name != table_name:
+            if condition.type != ConditionType.Compare or (condition.table_name and condition.table_name != table_name):
                 return None
             cond_index = table_info.get_col_index(condition.column_name)
             if cond_index is not None and condition.value is not None and table_info.exists_index(
