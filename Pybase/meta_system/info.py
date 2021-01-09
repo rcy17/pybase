@@ -58,37 +58,41 @@ class ColumnInfo:
 
 
 class TableInfo:
-    def __init__(self, name, columns, orders=None) -> None:
+    def __init__(self, name, columns: list) -> None:
         self._name = name
-        self.column_map = {col.name: col for col in columns}
+        self.columns = columns
+        self.column_map = {}
         self.primary = None
         self.foreign = {}
         self.indexes = {}
-        self.size_list = tuple(map(ColumnInfo.get_size, self.column_map.values()))
-        self.type_list = tuple(map(lambda x: x.type, self.column_map.values()))
-        self.total_size = sum(self.size_list)
-        if orders is None:
-            self._colindex = {col.name: i for i, col in enumerate(columns)}
-        else:
-            self._colindex = {col.name: i for i, col in zip(columns, orders)}
+        self.size_list = []
+        self.type_list = []
+        self.total_size = 0
+        self._colindex = {}
+        self.update_params()
     
     @property
     def name(self):
         return self._name
 
+    def update_params(self):
+        self.column_map = {col.name: col for col in self.columns}
+        self.size_list = tuple(map(ColumnInfo.get_size, self.column_map.values()))
+        self.type_list = tuple(map(lambda x: x.type, self.column_map.values()))
+        self.total_size = sum(self.size_list)
+        self._colindex = {col.name: i for i, col in enumerate(self.columns)}
+
     def insert_column(self, column: ColumnInfo):
-        if column.name not in self.column_map:
-            self.column_map[column.name] = column
-            self._colindex[column.name] = len(self.column_map) - 1
-        else:
+        if column.name in self.column_map:
             raise ColumnExistenceError(f"Column {column.name} should not exists.")
+        self.columns.append(column)
+        self.update_params()
 
     def remove_column(self, column_name):
         if column_name not in self.column_map:
             raise ColumnExistenceError(f"Column {column_name} should exists.")
-        else:
-            self._colindex.pop(column_name)
-            self.column_map.pop(column_name)
+        self.columns = [column for column in self.columns if column.name != column_name]
+        self.update_params()
 
     def set_primary(self, primary):
         self.primary = primary
@@ -107,10 +111,7 @@ class TableInfo:
         return Converter.decode(self.size_list, self.type_list, self.total_size, record)
 
     def get_col_index(self, column_name):
-        if column_name in self._colindex:
-            return self._colindex[column_name]
-        else:
-            return None
+        return self._colindex.get(column_name)
 
     def check_value_map(self, value_map: dict):
         for column_name, value in value_map.items():
@@ -137,41 +138,37 @@ class TableInfo:
 
 
 class DbInfo:
-    def __init__(self, name, tbList) -> None:
+    def __init__(self, name, tables) -> None:
         self._name = name
-        self._tbMap = {tb._name: tb for tb in tbList}
+        self._tbMap = {tb.name: tb for tb in tables}
         self._index_map = {}
 
     def insert_table(self, table: TableInfo):
-        if table._name not in self._tbMap:
-            self._tbMap[table._name] = table
-        else:
-            raise TableExistenceError(f"Table {table._name} should not exists.")
+        if table.name in self._tbMap:
+            raise TableExistenceError(f"Table {table.name} should not exists.")
+        self._tbMap[table.name] = table
 
-    def insert_column(self, tbname, column: ColumnInfo):
-        if tbname not in self._tbMap:
-            raise TableExistenceError(f"Table {tbname} should exists.")
-        else:
-            table: TableInfo = self._tbMap[tbname]
-            table.insert_column(column)
+    def insert_column(self, database_name, column: ColumnInfo):
+        if database_name not in self._tbMap:
+            raise TableExistenceError(f"Table {database_name} should exists.")
+        table: TableInfo = self._tbMap[database_name]
+        table.insert_column(column)
 
-    def remove_table(self, tbname):
-        if tbname not in self._tbMap:
-            raise TableExistenceError(f"Table {tbname} should exists.")
-        else:
-            self._tbMap.pop(tbname)
+    def remove_table(self, database_name):
+        if database_name not in self._tbMap:
+            raise TableExistenceError(f"Table {database_name} should exists.")
+        self._tbMap.pop(database_name)
 
-    def remove_column(self, tbname, column_name):
-        if tbname not in self._tbMap:
-            raise TableExistenceError(f"Table {tbname} should exists.")
-        else:
-            table: TableInfo = self._tbMap[tbname]
-            table.remove_column(column_name)
+    def remove_column(self, database_name, column_name):
+        if database_name not in self._tbMap:
+            raise TableExistenceError(f"Table {database_name} should exists.")
+        table: TableInfo = self._tbMap[database_name]
+        table.remove_column(column_name)
     
-    def create_index(self, index_name, tbname, column_name):
+    def create_index(self, index_name, database_name, column_name):
         if index_name in self._index_map:
             raise DataBaseError("Index name already exists.")
-        self._index_map[index_name] = (tbname, column_name)
+        self._index_map[index_name] = (database_name, column_name)
     
     def drop_index(self, index_name):
         if index_name not in self._index_map:

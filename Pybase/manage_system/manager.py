@@ -202,7 +202,7 @@ class SystemManger:
 
     def add_column(self, table_name, column_info: ColumnInfo):
         meta_handle, table_info = self.get_table_info(table_name, "add column")
-        if table_info.get_col_index(column_info._name) is not None:
+        if table_info.get_col_index(column_info.name) is not None:
             raise DataBaseError(f"Column already exists.")
         old_table_info = deepcopy(table_info)
         meta_handle.add_col(table_name, column_info)
@@ -216,7 +216,7 @@ class SystemManger:
             if column_info.default is not None:
                 value_list.append(column_info.default)
             else:
-                value_list.append(settings.NULL_VALUE)
+                value_list.append(None)
             data = table_info.build_record(value_list)
             new_record_handle.insert_record(data)
         self._RM.close_file(self.get_table_path(table_name))
@@ -237,7 +237,7 @@ class SystemManger:
         new_record_handle = self._RM.open_file(self.get_table_path(table_name + ".copy"))
         scanner = FileScan(record_handle)
         for record in scanner:
-            value_list = old_table_info.load_record(record)
+            value_list = list(old_table_info.load_record(record))
             value_list.pop(index)
             data = table_info.build_record(value_list)
             new_record_handle.insert_record(data)
@@ -609,7 +609,9 @@ class SystemManger:
                 results = set(index.range(value, value))
             else:
                 results = results & set(index.range(value, value))
-        assert len(results) <= 1
+        if len(results) > 1:
+            print(len(results))
+            assert len(results) <= 1
         if this in results:
             return False
         return results and (tuple(primary_key.keys()), tuple(primary_key.values()))

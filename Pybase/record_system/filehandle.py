@@ -58,6 +58,9 @@ class FileHandle:
 
     def _set_next_vacancy(self, data: np.ndarray, page_id: int):
         offset = settings.RECORD_PAGE_NEXT_OFFSET
+        if not isinstance(page_id, int):
+            a = 2
+            a += 1
         data[offset: offset + 4] = np.frombuffer(page_id.to_bytes(4, 'big'), dtype=np.uint8)
 
     def _get_record_offset(self, slot_id):
@@ -172,6 +175,7 @@ class FileHandle:
 
         # write data and update header
         page_id = self._manger.file_manager.new_page(self._file_id, data)
+        assert isinstance(page_id, int)
         header['page_number'] += 1
         header['next_vacancy_page'] = page_id
         self._header_modified = True

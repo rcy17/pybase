@@ -209,5 +209,6 @@ data
 temp*
 .INDEX
 *.cmd
+*.zip
 
 ############################## Here ends custom ignorance  ##############################

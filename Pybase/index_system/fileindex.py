@@ -43,7 +43,7 @@ class FileIndex:
             next_id = data[3]
             child_len = data[4]
             child_keys = [data[3 * i + 5] for i in range(child_len)]
-            child_rids = [RID(data[3 * i + 6], data[3 * i + 7]) for i in range(child_len)]
+            child_rids = [RID(int(data[3 * i + 6]), int(data[3 * i + 7])) for i in range(child_len)]
             assert len(child_keys) == len(child_rids)
             node = LeafNode(page_id, parent_id, prev_id, next_id, child_keys, child_rids, self._handle)
         elif data[0] == 0:
