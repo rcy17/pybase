@@ -370,7 +370,7 @@ class SystemManger:
                 if condition.operator != '=':
                     raise DataBaseError('Comparison between different tables must be "="')
                 pair = (condition.table_name, condition.column_name), (condition.target_table, condition.target_column)
-                return sorted(pair)
+                return tuple(zip(*sorted(pair)))
             return None, None
 
         for join_pair_key, join_pair_col in map(build_join_pair, conditions):
