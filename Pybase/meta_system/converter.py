@@ -77,7 +77,7 @@ class Converter:
     @staticmethod
     def deserialize(data: np.ndarray, type_):
         if type_ == "VARCHAR":
-            value = None if data[0] else data.tobytes()[1:].decode('utf-8')
+            value = None if data[0] else data.tobytes()[1:].rstrip(b'\x00').decode('utf-8')
         elif type_ == "INT":
             value = struct.unpack('<q', data)[0]
         elif type_ == "FLOAT":
