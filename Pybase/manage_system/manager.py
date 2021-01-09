@@ -72,7 +72,7 @@ class SystemManger:
         #         super().recover(recognizer, e)
 
         class StringErrorListener(ErrorListener):
-            def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
+            def syntaxError(self, recognizer, offending_symbol, line, column, msg, e):
                 raise ParseCancellationException("line " + str(line) + ":" + str(column) + " " + msg)
 
         self.visitor.time_cost()
@@ -140,7 +140,7 @@ class SystemManger:
         for i in tb_info._colindex.keys():
             print(i._name, ":", tb_info._colindex[i])
         '''
-        record_length = tb_info.get_size()
+        record_length = tb_info.total_size
         self._RM.create_file(self.get_table_path(tb_info._name), record_length)
 
     def drop_table(self, table_name):
@@ -150,16 +150,20 @@ class SystemManger:
         meta_handle.drop_table(table_name)
         self._RM.remove_file(self.get_table_path(table_name))
 
-    def describe_table(self, table_name):
+    def get_table_info(self, table_name, error="execute sql"):
         if self.using_db is None:
-            raise DataBaseError(f"No using database to create table")
+            raise DataBaseError(f"No using database to {error}")
         meta_handle = self._MM.open_meta(self.using_db)
         table_info = meta_handle.get_table(table_name)
+        return meta_handle, table_info
+
+    def describe_table(self, table_name):
+        _, table_info = self.get_table_info(table_name, "create table")
         desc = f"Table {table_info._name} (\n"
         for col in table_info._colMap.values():
             desc += f"\t{col._name} {col._type} {col._size}\n"
         desc += ")\n"
-        desc += f"Size:{table_info.get_size()}\n"
+        desc += f"Size:{table_info.total_size}\n"
         desc += f"Indexes:{table_info.indexes.__str__()}\n"
         header = ('Field', 'Type', 'Null', 'Key', 'Default', 'Extra')
         data = tuple((column.get_description()) for column in table_info._colMap.values())
@@ -195,16 +199,13 @@ class SystemManger:
                 self.drop_index(table_name + "." + col)
 
     def add_column(self, table_name, column_info: ColumnInfo):
-        if self.using_db is None:
-            raise DataBaseError(f"No using database to add column")
-        meta_handle = self._MM.open_meta(self.using_db)
-        table_info = meta_handle.get_table(table_name)
+        meta_handle, table_info = self.get_table_info(table_name, "add column")
         if table_info.get_col_index(column_info._name) is not None:
             raise DataBaseError(f"Column already exists.")
         old_table_info = deepcopy(table_info)
         meta_handle.add_col(table_name, column_info)
 
-        self._RM.create_file(self.get_table_path(table_name + ".copy"), table_info.get_size())
+        self._RM.create_file(self.get_table_path(table_name + ".copy"), table_info.total_size)
         record_handle = self._RM.open_file(self.get_table_path(table_name))
         new_record_handle = self._RM.open_file(self.get_table_path(table_name + ".copy"))
         scanner = FileScan(record_handle)
@@ -222,17 +223,14 @@ class SystemManger:
         self._RM.replace_file(self.get_table_path(table_name + ".copy"), self.get_table_path(table_name))
 
     def drop_column(self, table_name, column_name):
-        if self.using_db is None:
-            raise DataBaseError(f"No using database to drop column")
-        meta_handle = self._MM.open_meta(self.using_db)
-        table_info = meta_handle.get_table(table_name)
+        meta_handle, table_info = self.get_table_info(table_name, "drop column")
         if table_info.get_col_index(column_name) is None:
             raise DataBaseError(f"Column not exists.")
         index = table_info.get_col_index(column_name)
         old_table_info = deepcopy(table_info)
         meta_handle.drop_column(table_name, column_name)
 
-        self._RM.create_file(self.get_table_path(table_name + ".copy"), table_info.get_size())
+        self._RM.create_file(self.get_table_path(table_name + ".copy"), table_info.total_size)
         record_handle = self._RM.open_file(self.get_table_path(table_name))
         new_record_handle = self._RM.open_file(self.get_table_path(table_name + ".copy"))
         scanner = FileScan(record_handle)
@@ -247,10 +245,7 @@ class SystemManger:
         self._RM.replace_file(self.get_table_path(table_name + ".copy"), self.get_table_path(table_name))
 
     def create_index(self, index_name, table_name, column_name):
-        if self.using_db is None:
-            raise DataBaseError(f"No using database to create index")
-        meta_handle = self._MM.open_meta(self.using_db)
-        table_info = meta_handle.get_table(table_name)
+        meta_handle, table_info = self.get_table_info(table_name, "create index")
         if table_info.exists_index(column_name):
             raise DataBaseError(f"Indexes already exists.")
         index = self._IM.create_index(self.using_db, table_name, column_name)
@@ -296,10 +291,7 @@ class SystemManger:
 
     def insert_record(self, table_name, value_list: list):
         # Remember to get the order in Record from meta
-        if self.using_db is None:
-            raise DataBaseError(f"No using database to insert record")
-        meta_handle = self._MM.open_meta(self.using_db)
-        table_info = meta_handle.get_table(table_name)
+        meta_handle, table_info = self.get_table_info(table_name, "insert record")
         # Build a record
         data = table_info.build_record(value_list)
         values = table_info.load_record(Record(RID(0, 0), data))
@@ -336,7 +328,8 @@ class SystemManger:
                     return eval(f"lambda x:x[{cond_index}] {condition.operator} x[{cond_index_2}]")
                 else:
                     if condition.operator != "==" and condition.operator != "!=":
-                        return eval(f"lambda x:x is not None and x[{cond_index}] {condition.operator} {condition.value}")
+                        return eval(
+                            f"lambda x:x is not None and x[{cond_index}] {condition.operator} {condition.value}")
                     else:
                         return eval(f"lambda x:x[{cond_index}] {condition.operator} {condition.value}")
             elif condition.type == ConditionType.In:
@@ -477,10 +470,7 @@ class SystemManger:
         return QueryResult(headers, data)
 
     def delete_records(self, table_name, conditions: tuple):
-        if self.using_db is None:
-            raise DataBaseError(f"No using database to scan.")
-        meta_handle = self._MM.open_meta(self.using_db)
-        table_info = meta_handle.get_table(table_name)
+        meta_handle, table_info = self.get_table_info(table_name, "delete")
         # TODO:
         records = self.search_records_indexes(table_name, conditions)
         record_handle = self._RM.open_file(self.get_table_path(table_name))
@@ -495,10 +485,7 @@ class SystemManger:
         return QueryResult('deleted_items', (len(records),))
 
     def update_records(self, table_name, conditions: tuple, set_value_map: dict):
-        if self.using_db is None:
-            raise DataBaseError(f"No using database to scan.")
-        meta_handle = self._MM.open_meta(self.using_db)
-        table_info = meta_handle.get_table(table_name)
+        meta_handle, table_info = self.get_table_info(table_name, "update")
         # TODO:
         records = self.search_records_indexes(table_name, conditions)
         record_handle = self._RM.open_file(self.get_table_path(table_name))
@@ -526,10 +513,8 @@ class SystemManger:
         return QueryResult('updated_items', (len(records),))
 
     def index_filter(self, table_name, conditions) -> set:
-        if self.using_db is None:
-            raise DataBaseError(f"No using database to scan.")
         cond_index_map = {}
-        meta_handle = self._MM.open_meta(self.using_db)
+        meta_handle, table_info = self.get_table_info(table_name, "scan")
 
         def build_cond_index(condition: Condition):
             if condition.type != ConditionType.Compare or condition.table_name != table_name:
@@ -554,7 +539,6 @@ class SystemManger:
                     lower = max(lower, value)
                 cond_index_map[column] = lower, upper
 
-        table_info = meta_handle.get_table(table_name)
         tuple(map(build_cond_index, conditions))
         results = None
         for column_name in cond_index_map:
@@ -567,21 +551,15 @@ class SystemManger:
         return results
 
     def cond_scan_index(self, table_name, conditions: tuple) -> QueryResult:
-        if self.using_db is None:
-            raise DataBaseError(f"No using database to scan.")
-        meta_handle = self._MM.open_meta(self.using_db)
+        meta_handle, table_info = self.get_table_info(table_name, "scan")
         records = self.search_records_indexes(table_name, conditions)
-        table_info = meta_handle.get_table(table_name)
         headers = table_info.get_header()
         results = tuple(table_info.load_record(record) for record in records)
         return QueryResult(headers, results)
 
     def search_records_indexes(self, table_name, conditions: tuple):
-        if self.using_db is None:
-            raise DataBaseError(f"No using database to scan.")
-        meta_handle = self._MM.open_meta(self.using_db)
+        meta_handle, table_info = self.get_table_info(table_name, "scanf")
         func_list = self.build_conditions_func(table_name, conditions, meta_handle)
-        table_info = meta_handle.get_table(table_name)
         index_filter_rids = self.index_filter(table_name, conditions)
         record_handle = self._RM.open_file(self.get_table_path(table_name))
         iterator = map(record_handle.get_record, index_filter_rids) \
@@ -598,8 +576,7 @@ class SystemManger:
         Check primary key constraint if values are inserted
         Return False if nothing in wrong else primary key (keys, values)
         """
-        meta_handle = self._MM.open_meta(self.using_db)
-        table_info: TableInfo = meta_handle.get_table(table_name)
+        meta_handle, table_info = self.get_table_info(table_name, "check primary")
         if not table_info.primary:
             return True
         results = None
@@ -615,12 +592,11 @@ class SystemManger:
     def check_foreign(self, table_name, values):
         """
         Check primary key constraint if values are inserted
-        Return False if nothing in wrong else primary key values
+        Return False if nothing in wrong else foreign key values
         """
-        meta_handle = self._MM.open_meta(self.using_db)
-        table_info: TableInfo = meta_handle.get_table(table_name)
+        meta_handle, table_info = self.get_table_info(table_name, "check foreign")
         if len(table_info.foreign) == 0:
-            return True
+            return False
         for col in table_info.foreign:
             val = values[table_info.get_col_index(col)]
             foreign_table_name = table_info.foreign[col][0]
@@ -630,21 +606,20 @@ class SystemManger:
             index: FileIndex = self._IM.open_index(self.using_db, foreign_table_name, foreign_column_name, root_id)
             results = set(index.range(val, val))
             if len(results) == 0:
-                self._IM.close_index(table_name, col)
-                return False
-        return True
+                return col, val
+        return False
 
     def check_insert_constraints(self, table_name, values):
         # PRIMARY CONSTRAINT
         duplicated = self.check_primary(table_name, values)
         if duplicated:
-            raise ConstraintError(f'Duplicated primary keys {duplicated[0]}: {duplicated[1]} failed to insert')
+            raise ConstraintError(f'Duplicated primary keys {duplicated[0]}: {duplicated[1]}, failed to insert')
         # UNIQUE CONSTRAINT
 
         # FOREIGN CONSTRAINT
-        if not self.check_foreign(table_name, values):
-            print("Foreign Error")
-            return False
+        missing = self.check_foreign(table_name, values)
+        if missing:
+            raise ConstraintError(f"Missing foreign keys {missing[0]}: {missing[1]}, failed to insert")
         return True
 
     def check_remove_constraints(self, table_name, values):

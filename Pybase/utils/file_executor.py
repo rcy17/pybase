@@ -20,11 +20,24 @@ class FileExecutor:
 
     @staticmethod
     def _insert(manager, table, iterator, preprocess):
+        def decoder(pair):
+            value_, type_ = pair
+            if type_ == 'INT':
+                return int(value_) if value_ else None
+            if type_ == 'FLOAT':
+                return float(value_) if value_ else None
+            if type_ == 'VARCHAR':
+                return value_
+            if type == 'DATE':
+                return value_ if value_ else None
+
         inserted = 0
+        _, table_info = manager.get_table_info(table, None)
         for row in iterator:
             row = preprocess(row)
             if row[-1] == '':
                 row = row[:-1]
+            row = tuple(map(decoder, zip(row, table_info.type_list)))
             try:
                 manager.insert_record(table, row)
                 inserted += 1

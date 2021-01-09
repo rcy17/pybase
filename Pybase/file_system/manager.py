@@ -31,9 +31,6 @@ class FileManager:
         # self.file_size = {}
         self.last = settings.ID_DEFAULT_VALUE
 
-    def __del__(self):
-        self.shutdown()
-
     def _access(self, index):
         if index == self.last:
             return

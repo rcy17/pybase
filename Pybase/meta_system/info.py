@@ -3,8 +3,7 @@ from Pybase.exceptions.run_sql import DataBaseError
 from Pybase.record_system.record import Record
 from Pybase.exceptions.meta import TableExistenceError, ColumnExistenceError
 from Pybase.utils.tools import int2bytes, bytes2int, float2bytes, bytes2float
-
-import numpy as np
+from .converter import Converter
 
 
 class ColumnInfo:
@@ -14,6 +13,10 @@ class ColumnInfo:
         self._size = size
         self._default = default
 
+    @property
+    def type(self):
+        return self._type
+
     def get_size(self) -> int:
         if self._type == "INT":
             return 8
@@ -22,7 +25,7 @@ class ColumnInfo:
         elif self._type == "FLOAT":
             return 8
         elif self._type == "VARCHAR":
-            return self._size
+            return self._size + 1
 
     def get_description(self):
         """
@@ -46,6 +49,9 @@ class TableInfo:
         self.primary = None
         self.foreign = {}
         self.indexes = {}
+        self.size_list = tuple(map(ColumnInfo.get_size, self._colMap.values()))
+        self.type_list = tuple(map(lambda x: x.type, self._colMap.values()))
+        self.total_size = sum(self.size_list)
         if orderList is None:
             self._colindex = {col._name: i for i, col in enumerate(colList)}
         else:
@@ -69,9 +75,6 @@ class TableInfo:
             self._colindex.pop(colname)
             self._colMap.pop(colname)
 
-    def get_size(self) -> int:
-        return sum([col.get_size() for col in self._colMap.values()])
-
     def set_primary(self, primary):
         self.primary = primary
     
@@ -82,91 +85,11 @@ class TableInfo:
         if col in self.foreign:
             self.foreign.pop(col)
 
-    def get_size_list(self):
-        return [col.get_size() for col in self._colMap.values()]
-
-    def get_type_list(self):
-        return [col._type for col in self._colMap.values()]
-
-    def build_record(self, value_list: list) -> np.ndarray:
-        size_list = self.get_size_list()
-        type_list = self.get_type_list()
-        size_total = self.get_size()
-        assert len(value_list) == len(size_list)
-        record_data = np.zeros(shape=(size_total), dtype=np.uint8)
-        pos = 0
-        for i in range(len(size_list)):
-            size_ = size_list[i]
-            type_ = type_list[i]
-            value_ = value_list[i]
-            if type_ == "VARCHAR":
-                l = len(value_)
-                if l > size_:
-                    raise DataBaseError("Varchar length exceeds.")
-                for i in range(l):
-                    record_data[pos + i] = ord(value_[i])
-                pos += size_
-            else:
-                ba = None
-                if type_ == "INT":
-                    if value_ is None:
-                        value_ = settings.NULL_VALUE
-                    ba = int2bytes(int(value_))
-                elif type_ == "FLOAT":
-                    if value_ is None:
-                        value_ = settings.NULL_VALUE
-                    ba = float2bytes(float(value_))
-                elif type_ == "DATE":
-                    ba = tuple(ord(value_[i]) for i in range(8))
-                else:
-                    raise DataBaseError("Unsupported type.")
-                for i in range(size_):
-                    record_data[pos + i] = ba[i]
-                pos += size_
-        assert pos == size_total
-        return record_data
+    def build_record(self, value_list: list):
+        return Converter.encode(self.size_list, self.type_list, self.total_size, value_list)
 
     def load_record(self, record: Record):
-        data = record.data
-        size_list = self.get_size_list()
-        type_list = self.get_type_list()
-        size_total = self.get_size()
-        res = []
-        pos = 0
-        for i in range(len(size_list)):
-            size_ = size_list[i]
-            type_ = type_list[i]
-            if type_ == "VARCHAR":
-                val = ""
-                for i in range(size_):
-                    t = data[pos + i]
-                    if t == 0:
-                        break
-                    val += chr(t)
-                res.append(val)
-            elif type_ == "INT":
-                ba = data[pos: pos + size_].tolist()
-                if bytes2int(ba) == settings.NULL_VALUE:
-                    res.append(None)
-                else:
-                    res.append(bytes2int(ba))
-            elif type_ == "FLOAT":
-                ba = data[pos: pos + size_].tolist()
-                if bytes2float(ba) == settings.NULL_VALUE:
-                    res.append(None)
-                else:
-                    res.append(bytes2float(ba))
-            elif type_ == "DATE":
-                val = ""
-                for i in range(size_):
-                    t = data[pos + i]
-                    val += chr(t)
-                res.append(val)
-            else:
-                raise DataBaseError("Unsupported type.")
-            pos += size_
-        assert pos == size_total
-        return res
+        return Converter.decode(self.size_list, self.type_list, self.total_size, record)
 
     def get_col_index(self, colname):
         if colname in self._colindex:
