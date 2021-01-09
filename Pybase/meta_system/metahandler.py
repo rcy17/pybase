@@ -47,7 +47,7 @@ class MetaHandler:
         if tbname not in self._db_info._tbMap:
             return None
         table:TableInfo = self._db_info._tbMap[tbname]
-        return table._colMap[colname]
+        return table._column_map[colname]
     
     def get_column_index(self, tbname, colname) -> int:
         if tbname not in self._db_info._tbMap:
@@ -65,9 +65,9 @@ class MetaHandler:
         if self._db_info._tbMap.get(tbname) is None:
             raise TableExistenceError(f"Table {tbname} should exists.")
         table: TableInfo = self._db_info._tbMap[tbname]
-        if table._colMap.get(colname) is None:
+        if table._column_map.get(colname) is None:
             raise ColumnExistenceError(f"Column {colname} should exists.")
-        column:ColumnInfo = table._colMap[colname]
+        column:ColumnInfo = table._column_map[colname]
         assert column._is_index == True
         column._root_id = new_root
     
@@ -107,9 +107,9 @@ class MetaHandler:
     
     def rename_col(self, tbname, oldname, newname):
         table: TableInfo = self.get_table(tbname)
-        table._colMap[newname] = table._colMap[oldname]
+        table._column_map[newname] = table._column_map[oldname]
         table._colindex[newname] = table._colindex[oldname]
-        table._colMap.pop(oldname)
+        table._column_map.pop(oldname)
         table._colindex.pop(oldname)
         self._dump()
 

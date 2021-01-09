@@ -1,8 +1,16 @@
-from Pybase import settings
+from datetime import date
+
 from Pybase.exceptions.run_sql import DataBaseError
 from Pybase.record_system.record import Record
 from Pybase.exceptions.meta import TableExistenceError, ColumnExistenceError
 from .converter import Converter
+
+ACCEPT_TYPE = {
+    'INT': (int,),
+    'FLOAT': (int, float),
+    'VARCHAR': (str,),
+    'DATE': (date, str),
+}
 
 
 class ColumnInfo:
@@ -15,6 +23,10 @@ class ColumnInfo:
     @property
     def type(self):
         return self._type
+
+    @property
+    def name(self):
+        return self._name
 
     def get_size(self) -> int:
         if self._type == "INT":
@@ -42,37 +54,37 @@ class ColumnInfo:
 
 
 class TableInfo:
-    def __init__(self, name, colList, orderList=None) -> None:
+    def __init__(self, name, columns, orders=None) -> None:
         self._name = name
-        self._colMap = {col._name: col for col in colList}
+        self._column_map = {col.name: col for col in columns}
         self.primary = None
         self.foreign = {}
         self.indexes = {}
-        self.size_list = tuple(map(ColumnInfo.get_size, self._colMap.values()))
-        self.type_list = tuple(map(lambda x: x.type, self._colMap.values()))
+        self.size_list = tuple(map(ColumnInfo.get_size, self._column_map.values()))
+        self.type_list = tuple(map(lambda x: x.type, self._column_map.values()))
         self.total_size = sum(self.size_list)
-        if orderList is None:
-            self._colindex = {col._name: i for i, col in enumerate(colList)}
+        if orders is None:
+            self._colindex = {col.name: i for i, col in enumerate(columns)}
         else:
-            self._colindex = {col._name: i for i, col in zip(colList, orderList)}
+            self._colindex = {col.name: i for i, col in zip(columns, orders)}
     
     @property
     def name(self):
         return self._name
 
     def insert_column(self, column: ColumnInfo):
-        if column._name not in self._colMap:
-            self._colMap[column._name] = column
-            self._colindex[column._name] = len(self._colMap) - 1
+        if column.name not in self._column_map:
+            self._column_map[column.name] = column
+            self._colindex[column.name] = len(self._column_map) - 1
         else:
-            raise ColumnExistenceError(f"Column {column._name} should not exists.")
+            raise ColumnExistenceError(f"Column {column.name} should not exists.")
 
-    def remove_column(self, colname):
-        if colname not in self._colMap:
-            raise ColumnExistenceError(f"Column {colname} should exists.")
+    def remove_column(self, column_name):
+        if column_name not in self._column_map:
+            raise ColumnExistenceError(f"Column {column_name} should exists.")
         else:
-            self._colindex.pop(colname)
-            self._colMap.pop(colname)
+            self._colindex.pop(column_name)
+            self._column_map.pop(column_name)
 
     def set_primary(self, primary):
         self.primary = primary
@@ -90,35 +102,32 @@ class TableInfo:
     def load_record(self, record: Record):
         return Converter.decode(self.size_list, self.type_list, self.total_size, record)
 
-    def get_col_index(self, colname):
-        if colname in self._colindex:
-            return self._colindex[colname]
+    def get_col_index(self, column_name):
+        if column_name in self._colindex:
+            return self._colindex[column_name]
         else:
             return None
-    
-    def get_value(self, colname, value):
-        col:ColumnInfo = self._colMap[colname]
-        if col._type == "VARCHAR":
-            return value
-        elif col._type == "INT":
-            return int(value)
-        elif col._type == "FLOAT":
-            return float(value)
-        elif col._type == "DATE":
-            return value
-    
+
+    def check_value_map(self, value_map: dict):
+        for column_name, value in value_map.items():
+            column: ColumnInfo = self._column_map[column_name]
+            if type(value) not in ACCEPT_TYPE[column.type]:
+                raise DataBaseError(f'Field {column_name} expects {column.type} bug get {value} instead')
+            if column.type == 'DATE':
+                value_map[column_name] = Converter.parse_date(value)
+
     def get_header(self):
-        return tuple(self._name + '.' + colname for colname in self._colMap.keys())
+        return tuple(self._name + '.' + column_name for column_name in self._column_map.keys())
 
-    def exists_index(self, colname):
-        return colname in self.indexes
+    def exists_index(self, column_name):
+        return column_name in self.indexes
 
-    def create_index(self, colname, root_id):
-        assert not self.exists_index(colname)
-        self.indexes[colname] = root_id
+    def create_index(self, column_name, root_id):
+        assert not self.exists_index(column_name)
+        self.indexes[column_name] = root_id
     
-    def drop_index(self, colname):
-        self.indexes.pop(colname)
+    def drop_index(self, column_name):
+        self.indexes.pop(column_name)
 
 
 class DbInfo:
@@ -146,17 +155,17 @@ class DbInfo:
         else:
             self._tbMap.pop(tbname)
 
-    def remove_column(self, tbname, colname):
+    def remove_column(self, tbname, column_name):
         if tbname not in self._tbMap:
             raise TableExistenceError(f"Table {tbname} should exists.")
         else:
             table: TableInfo = self._tbMap[tbname]
-            table.remove_column(colname)
+            table.remove_column(column_name)
     
-    def create_index(self, index_name, tbname, colname):
+    def create_index(self, index_name, tbname, column_name):
         if index_name in self._index_map:
             raise DataBaseError("Index name already exists.")
-        self._index_map[index_name] = (tbname, colname)
+        self._index_map[index_name] = (tbname, column_name)
     
     def drop_index(self, index_name):
         if index_name not in self._index_map:

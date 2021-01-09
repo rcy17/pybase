@@ -5,7 +5,6 @@ Date: 2020/11/30
 """
 from typing import Tuple
 from pathlib import Path
-import re
 from collections import defaultdict
 
 from antlr4 import InputStream, CommonTokenStream
@@ -161,13 +160,13 @@ class SystemManger:
     def describe_table(self, table_name):
         _, table_info = self.get_table_info(table_name, "create table")
         desc = f"Table {table_info._name} (\n"
-        for col in table_info._colMap.values():
+        for col in table_info._column_map.values():
             desc += f"\t{col._name} {col._type} {col._size}\n"
         desc += ")\n"
         desc += f"Size:{table_info.total_size}\n"
         desc += f"Indexes:{table_info.indexes.__str__()}\n"
         header = ('Field', 'Type', 'Null', 'Key', 'Default', 'Extra')
-        data = tuple((column.get_description()) for column in table_info._colMap.values())
+        data = tuple((column.get_description()) for column in table_info._column_map.values())
         return QueryResult(header, data)
 
     def add_foreign(self, table_name, col, foreign):
@@ -301,12 +300,14 @@ class SystemManger:
         # Handle indexes
         self.handle_insert_indexes(table_info, self.using_db, values, rid)
 
-    def print_results(self, result: QueryResult):
+    @staticmethod
+    def print_results(result: QueryResult):
         TablePrinter().print([result])
 
-    def build_conditions_func(self, table_name, conditions, meta_handle: MetaHandler) -> list:
+    @staticmethod
+    def build_conditions_func(table_name, conditions, meta_handle: MetaHandler) -> list:
         def build_condition_func(condition: Condition):
-            if condition.table_name != table_name:
+            if condition.table_name and condition.table_name != table_name:
                 return None
             cond_index = table_info.get_col_index(condition.column_name)
             type_ = table_info.type_list[cond_index]
@@ -415,19 +416,18 @@ class SystemManger:
         if self.using_db is None:
             raise DataBaseError(f"No using database to select.")
         group_table, group_column = group_by
-        if len(table_names) > 1:
-            if any(item.table_name is None for item in conditions + selectors) or group_table is None:
-                raise DataBaseError('Filed without table name is forbidden when join on tables ')
-        for item in conditions + selectors:
+        if len(table_names) > 1 and any(item.table_name is None for item in conditions + selectors):
+            raise DataBaseError('Filed without table name is forbidden when join on tables ')
+        for item in selectors:
             if item.table_name is None:
                 # If there is still any condition with None table name, we can ensure that there is only one table
                 item.table_name = table_names[0]
         group_table = group_table or table_names[0]
         group_by = group_table + '.' + group_column
         types = set(selector.type for selector in selectors)
-        if not group_by and SelectorType.Field in types and len(types) > 1:
+        if not group_column and SelectorType.Field in types and len(types) > 1:
             raise DataBaseError("Select without group by shouldn't contain both field and aggregations")
-        if len(selectors) == len(table_names) == 1 and selectors[0].type == SelectorType.Counter and not group_column:
+        if not selectors and not group_column and len(table_names) == 1 and selectors[0].type == SelectorType.Counter:
             # COUNT(*) can has a shortcut from table.header['record_number']
             file = self._RM.open_file(self.get_table_path(table_names[0]))
             data = (file.header['record_number'],)
@@ -475,12 +475,10 @@ class SystemManger:
 
     def delete_records(self, table_name, conditions: tuple):
         meta_handle, table_info = self.get_table_info(table_name, "delete")
-        # TODO:
-        records = self.search_records_indexes(table_name, conditions)
+        records, data = self.search_records_indexes(table_name, conditions)
         record_handle = self._RM.open_file(self.get_table_path(table_name))
-        for record in records:
+        for record, values in zip(records, data):
             rid: RID = record.rid
-            values = table_info.load_record(record.data)
             # TODO:Check Constraint
             self.check_remove_constraints(table_name, values)
             record_handle.delete_record(rid)
@@ -488,24 +486,21 @@ class SystemManger:
             self.handle_remove_indexes(table_info, self.using_db, values, rid)
         return QueryResult('deleted_items', (len(records),))
 
-    def update_records(self, table_name, conditions: tuple, set_value_map: dict):
+    def update_records(self, table_name, conditions: tuple, value_map: dict):
         meta_handle, table_info = self.get_table_info(table_name, "update")
         # TODO:
-        records = self.search_records_indexes(table_name, conditions)
+        records, values = self.search_records_indexes(table_name, conditions)
         record_handle = self._RM.open_file(self.get_table_path(table_name))
-        for record in records:
-            old_values = table_info.load_record(record)
-            new_values = old_values
+        table_info.check_value_map(value_map)
+        for record, old_values in zip(records, values):
+            new_values = list(old_values)
             # Modify values
-            for pair in set_value_map.items():
-                column_name = pair[0]
-                value = pair[1]
-                real = table_info.get_value(column_name, value)
+            for column_name, value in value_map.items():
                 index = table_info.get_col_index(column_name)
-                new_values[index] = real
+                new_values[index] = value
             # TODO:Check Constraint
             self.check_remove_constraints(table_name, old_values)
-            self.check_insert_constraints(table_name, new_values)
+            self.check_insert_constraints(table_name, new_values, record.rid)
 
             # Handle indexes
             self.handle_remove_indexes(table_info, self.using_db, old_values, record.rid)
@@ -558,10 +553,9 @@ class SystemManger:
 
     def cond_scan_index(self, table_name, conditions: tuple) -> QueryResult:
         meta_handle, table_info = self.get_table_info(table_name, "scan")
-        records = self.search_records_indexes(table_name, conditions)
+        _, data = self.search_records_indexes(table_name, conditions)
         headers = table_info.get_header()
-        results = tuple(table_info.load_record(record) for record in records)
-        return QueryResult(headers, results)
+        return QueryResult(headers, data)
 
     def search_records_indexes(self, table_name, conditions: tuple):
         meta_handle, table_info = self.get_table_info(table_name, "scan")
@@ -570,21 +564,25 @@ class SystemManger:
         record_handle = self._RM.open_file(self.get_table_path(table_name))
         iterator = map(record_handle.get_record, index_filter_rids) \
             if index_filter_rids is not None else FileScan(record_handle)
-        results = []
+        records = []
+        data = []
         for record in iterator:
             values = table_info.load_record(record)
             if all(map(lambda func: func(values), func_list)):
-                results.append(record)
-        return results
+                records.append(record)
+                data.append(values)
+        return records, data
 
-    def check_primary(self, table_name, values):
+    def check_primary(self, table_name, values, this: RID=None):
         """
         Check primary key constraint if values are inserted
         Return False if nothing in wrong else primary key (keys, values)
+
+        Parameter "this" means an updating is going and not check itself
         """
         meta_handle, table_info = self.get_table_info(table_name, "check primary")
         if not table_info.primary:
-            return True
+            return False
         results = None
         primary_key = {column_name: values[table_info.get_col_index(column_name)] for column_name in table_info.primary}
         for col, value in primary_key.items():
@@ -593,6 +591,9 @@ class SystemManger:
                 results = set(index.range(value, value))
             else:
                 results = results & set(index.range(value, value))
+        assert len(results) <= 1
+        if this in results:
+            return False
         return results and (tuple(primary_key.keys()), tuple(primary_key.values()))
 
     def check_foreign(self, table_name, values):
@@ -615,9 +616,9 @@ class SystemManger:
                 return col, val
         return False
 
-    def check_insert_constraints(self, table_name, values):
+    def check_insert_constraints(self, table_name, values, this=None):
         # PRIMARY CONSTRAINT
-        duplicated = self.check_primary(table_name, values)
+        duplicated = self.check_primary(table_name, values, this)
         if duplicated:
             raise ConstraintError(f'Duplicated primary keys {duplicated[0]}: {duplicated[1]}, failed to insert')
         # UNIQUE CONSTRAINT

@@ -225,20 +225,20 @@ class SystemVisitor(SQLVisitor):
         if ctx.String():  # 1:-1 to remove "'" at begin and end
             return to_str(ctx)[1:-1]
         if ctx.Null():
-            return to_str(ctx)
+            return None
 
     def visitSet_clause(self, ctx: SQLParser.Set_clauseContext):
         set_value_map = {}
         for identifier, value in zip(ctx.Identifier(), ctx.value()):
-            set_value_map[to_str(identifier)] = to_str(value)
+            set_value_map[to_str(identifier)] = value.accept(self)
         return set_value_map
 
     def visitCreate_index(self, ctx: SQLParser.Create_indexContext):
         index_name = to_str(ctx.getChild(2))
         table_name = to_str(ctx.getChild(4))
-        col_list = ctx.identifiers().accept(self)
-        for colname in col_list:
-            self.manager.create_index(index_name, table_name, colname)
+        column_names = ctx.identifiers().accept(self)
+        for column_name in column_names:
+            self.manager.create_index(index_name, table_name, column_name)
 
     def visitDrop_index(self, ctx: SQLParser.Drop_indexContext):
         index_name = to_str(ctx.Identifier())
@@ -247,18 +247,18 @@ class SystemVisitor(SQLVisitor):
     def visitAlter_add_index(self, ctx: SQLParser.Alter_add_indexContext):
         table_name = to_str(ctx.Identifier(0))
         index_name = to_str(ctx.Identifier(1))
-        col_list = ctx.identifiers().accept(self)
-        for colname in col_list:
-            self.manager.create_index(index_name, table_name, colname)
+        column_names = ctx.identifiers().accept(self)
+        for column_name in column_names:
+            self.manager.create_index(index_name, table_name, column_name)
 
     def visitAlter_drop_index(self, ctx: SQLParser.Alter_drop_indexContext):
         index_name = to_str(ctx.Identifier(1))
         return self.manager.drop_index(index_name)
 
     def visitAlter_table_add(self, ctx: SQLParser.Alter_table_addContext):
-        colInfo: ColumnInfo = ctx.field().accept(self)
+        column_info: ColumnInfo = ctx.field().accept(self)
         table_name = to_str(ctx.Identifier())
-        self.manager.add_column(table_name, colInfo)
+        self.manager.add_column(table_name, column_info)
 
     def visitAlter_table_drop(self, ctx: SQLParser.Alter_table_dropContext):
         table_name = to_str(ctx.Identifier(0))
@@ -281,14 +281,14 @@ class SystemVisitor(SQLVisitor):
         self.manager.remove_foreign(table_name, col_name)
 
     def visitAlter_table_add_pk(self, ctx: SQLParser.Alter_table_add_pkContext):
-        tbname = to_str(ctx.Identifier(0))
+        table_name = to_str(ctx.Identifier(0))
         primary = ctx.identifiers().accept(self)
-        self.manager.set_primary(tbname, primary)
+        self.manager.set_primary(table_name, primary)
 
     def visitAlter_table_add_foreign_key(self, ctx: SQLParser.Alter_table_add_foreign_keyContext):
-        tbname = to_str(ctx.Identifier(0))
-        forname = to_str(ctx.Identifier(2))
+        table_name = to_str(ctx.Identifier(0))
+        for_name = to_str(ctx.Identifier(2))
         tb_list = ctx.identifiers(0).accept(self)
         for_list = ctx.identifiers(1).accept(self)
-        for (tbcol, forcol) in zip(tb_list, for_list):
-            self.manager.add_foreign(tbname, tbcol, (forname, forcol))
+        for (tb_col, for_col) in zip(tb_list, for_list):
+            self.manager.add_foreign(table_name, tb_col, (for_name, for_col))
