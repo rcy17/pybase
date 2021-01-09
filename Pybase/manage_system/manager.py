@@ -425,6 +425,8 @@ class SystemManger:
             column_to_data['*.*'] = next(iter(column_to_data.values()))
             return tuple(map(lambda selector: selector.select(column_to_data[selector.target()]), selectors))
 
+        if self.using_db is None:
+            raise DataBaseError(f"No using database to select.")
         group_table, group_column = group_by
         if len(table_names) > 1:
             if any(item.table_name is None for item in conditions + selectors) or group_table is None:
@@ -438,7 +440,7 @@ class SystemManger:
         types = set(selector.type for selector in selectors)
         if not group_by and SelectorType.Field in types and len(types) > 1:
             raise DataBaseError("Select without group by shouldn't contain both field and aggregations")
-        if len(selectors) == len(table_names) == 1 and selectors[0].type == SelectorType.Counter and not group_by:
+        if len(selectors) == len(table_names) == 1 and selectors[0].type == SelectorType.Counter and not group_column:
             # COUNT(*) can has a shortcut from table.header['record_number']
             file = self._RM.open_file(self.get_table_path(table_names[0]))
             data = (file.header['record_number'],)
