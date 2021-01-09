@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 from Pybase.manage_system.manager import SystemManger
 from Pybase.exceptions.file import ExcutorFileError
+from Pybase.exceptions.run_sql import ConstraintError
 from Pybase.exceptions.base import Error
 from Pybase.manage_system.result import QueryResult
 
@@ -17,29 +18,34 @@ class FileExecutor:
     def __init__(self, bar):
         self.iterate = tqdm if bar else (lambda x: x)
 
+    @staticmethod
+    def _insert(manager, table, iterator, preprocess):
+        inserted = 0
+        for row in iterator:
+            row = preprocess(row)
+            if row[-1] == '':
+                row = row[:-1]
+            try:
+                manager.insert_record(table, row)
+                inserted += 1
+            except ConstraintError as e:
+                # According to TA, we shouldn't abort insert if constraint failed
+                print('[WARNING]', e)
+        return inserted
+
     def exec_csv(self, manager: SystemManger, path: Path, database: str, table: str):
         if not table:
             table = path.stem.upper()
         manager.use_db(database)
-        inserted = 0
-        for row in self.iterate(csv.reader(open(path, encoding='utf-8'))):
-            if row[-1] == '':
-                row = row[:-1]
-            manager.insert_record(table, row)
-            inserted += 1
+        inserted = self._insert(manager, table, self.iterate(csv.reader(open(path, encoding='utf-8'))), lambda x: x)
         return [QueryResult('inserted_items', (inserted,), cost=manager.visitor.time_cost())]
 
     def exec_tbl(self, manager: SystemManger, path: Path, database: str, table: str):
         if not table:
             table = path.stem.upper()
         manager.use_db(database)
-        inserted = 0
-        for line in self.iterate(open(path, encoding='utf-8')):
-            row = line.rstrip('\n').split('|')
-            if row[-1] == '':
-                row = row[:-1]
-            manager.insert_record(table, row)
-            inserted += 1
+        inserted = self._insert(manager, table, self.iterate(open(path, encoding='utf-8')),
+                                lambda x: x.rstrip('\n').split('|'))
         return [QueryResult('inserted_items', (inserted,), cost=manager.visitor.time_cost())]
 
     def exec_sql(self, manager: SystemManger, path: Path, database: str, table: str):

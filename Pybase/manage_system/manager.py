@@ -20,7 +20,7 @@ from Pybase.record_system import RID, FileScan, RecordManager, Record
 from Pybase.index_system import FileIndex, IndexManager
 from Pybase.sql_parser import SQLLexer, SQLParser
 from Pybase.file_system import FileManager
-from Pybase.exceptions.run_sql import DataBaseError
+from Pybase.exceptions.run_sql import DataBaseError, ConstraintError
 from Pybase.exceptions.base import Error
 from Pybase.printer.table import TablePrinter
 from .condition import ConditionType, Condition
@@ -296,8 +296,7 @@ class SystemManger:
         data = table_info.build_record(value_list)
         values = table_info.load_record(Record(RID(0, 0), data))
         # TODO:Check constraints
-        if not self.check_insert_constraints(table_name, values):
-            raise DataBaseError("This record can not be inserted.")
+        self.check_insert_constraints(table_name, values)
         record_handle = self._RM.open_file(self.get_table_path(table_name))
         rid = record_handle.insert_record(data)
         # Handle indexes
@@ -497,9 +496,7 @@ class SystemManger:
             rid: RID = record.rid
             values = table_info.load_record(record.data)
             # TODO:Check Constraint
-            if not self.check_insert_constraints(table_name, values):
-                self._RM.close_file(self.get_table_path(table_name))
-                raise DataBaseError("This record can not be inserted.")
+            self.check_insert_constraints(table_name, values)
             record_handle.delete_record(rid)
             # Handle Index
             self.handle_remove_indexes(table_info, self.using_db, values, rid)
@@ -525,10 +522,8 @@ class SystemManger:
                 index = table_info.get_col_index(column_name)
                 new_values[index] = real
             # TODO:Check Constraint
-            if not self.check_insert_constraints(table_name, old_values):
-                raise DataBaseError("This record can not be deleted.")
-            if not self.check_insert_constraints(table_name, new_values):
-                raise DataBaseError("This record can not be inserted.")
+            self.check_remove_constraints(table_name, old_values)
+            self.check_insert_constraints(table_name, new_values)
 
             # Handle indexes
             self.handle_remove_indexes(table_info, self.using_db, old_values, record.rid)
@@ -631,22 +626,30 @@ class SystemManger:
         return results
 
     def check_primary(self, table_name, values):
+        """
+        Check primary key constraint if values are inserted
+        Return False if nothing in wrong else primary key (keys, values)
+        """
         meta_handle = self._MM.open_meta(self.using_db)
         table_info: TableInfo = meta_handle.get_table(table_name)
         if not table_info.primary:
             return True
         results = None
-        for col in table_info.primary:
-            val = values[table_info.get_col_index(col)]
+        primary_key = {column_name: values[table_info.get_col_index(column_name)] for column_name in table_info.primary}
+        for col, value in primary_key.items():
             index: FileIndex = self._IM.open_index(self.using_db, table_name, col, table_info.indexes[col])
             if results is None:
-                results = set(index.range(val, val))
+                results = set(index.range(value, value))
             else:
-                results = results & set(index.range(val, val))
+                results = results & set(index.range(value, value))
             self._IM.close_index(table_name, col)
-        return len(results) == 0
+        return results and (tuple(primary_key.keys()), tuple(primary_key.values()))
 
     def check_foreign(self, table_name, values):
+        """
+        Check primary key constraint if values are inserted
+        Return False if nothing in wrong else primary key values
+        """
         meta_handle = self._MM.open_meta(self.using_db)
         table_info: TableInfo = meta_handle.get_table(table_name)
         if len(table_info.foreign) == 0:
@@ -667,8 +670,9 @@ class SystemManger:
 
     def check_insert_constraints(self, table_name, values):
         # PRIMARY CONSTRAINT
-        if not self.check_primary(table_name, values):
-            return False
+        duplicated = self.check_primary(table_name, values)
+        if duplicated:
+            raise ConstraintError(f'Duplicated primary keys {duplicated[0]}: {duplicated[1]} failed to insert')
         # UNIQUE CONSTRAINT
 
         # FOREIGN CONSTRAINT
