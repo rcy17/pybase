@@ -76,7 +76,7 @@ class FileManager:
 
     def open_file(self, filename: str):
         if filename in self.file_name_to_id:
-            return self.file_name_to_id[filename]
+            raise OpenFileFailed(f"File {filename} has been opened")
         file_id = os.open(filename, FileManager.FILE_OPEN_MODE)
         if file_id == settings.ID_DEFAULT_VALUE:
             raise OpenFileFailed("Can't open file " + filename)

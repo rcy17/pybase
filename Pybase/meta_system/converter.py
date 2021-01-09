@@ -18,6 +18,13 @@ from Pybase.record_system.record import Record
 
 class Converter:
     @staticmethod
+    def parse_date(value):
+        try:
+            return parse_date(value).date()
+        except (TypeError, AttributeError):
+            raise DataBaseError(f"Expect DATE but get {value} instead")
+
+    @staticmethod
     def serialize(value_, type_: str):
         if type_ == "INT":
             if value_ is None:
@@ -35,11 +42,7 @@ class Converter:
             if value_ is None:
                 day = settings.NULL_VALUE
             else:
-                try:
-                    date_ = parse_date(value_).date()
-                    day = date_.toordinal()
-                except (TypeError, AttributeError):
-                    raise DataBaseError(f"Expect DATE but get {value_} instead")
+                day = parse_date(value_).toordinal()
             return struct.pack('<q', day)
         else:
             raise DataBaseError("Unsupported type.")

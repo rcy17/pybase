@@ -10,7 +10,6 @@ from collections import defaultdict
 
 from antlr4 import InputStream, CommonTokenStream
 from antlr4.error.Errors import ParseCancellationException
-from antlr4.error.ErrorStrategy import BailErrorStrategy
 from antlr4.error.ErrorListener import ErrorListener
 from copy import deepcopy
 
@@ -23,6 +22,7 @@ from Pybase.file_system import FileManager
 from Pybase.exceptions.run_sql import DataBaseError, ConstraintError
 from Pybase.exceptions.base import Error
 from Pybase.printer.table import TablePrinter
+from Pybase.meta_system.converter import Converter
 from .condition import ConditionType, Condition
 from .result import QueryResult
 from .selector import Selector, SelectorType
@@ -248,7 +248,7 @@ class SystemManger:
         meta_handle, table_info = self.get_table_info(table_name, "create index")
         if table_info.exists_index(column_name):
             raise DataBaseError(f"Indexes already exists.")
-        index = self._IM.create_index(self.using_db, table_name, column_name)
+        index = self._IM.create_index(self.using_db, table_name)
         table_info.create_index(column_name, index.root_id)
         col_id = table_info.get_col_index(column_name)
         if col_id is None:
@@ -260,8 +260,6 @@ class SystemManger:
             key = data[col_id]
             index.insert(key, record.rid)
         meta_handle.create_index(index_name, table_name, column_name)
-        self._IM.close_index(table_name, column_name)
-        self._RM.close_file(self.get_table_path(table_name))
 
     def drop_index(self, index_name):
         if self.using_db is None:
@@ -318,6 +316,7 @@ class SystemManger:
             if condition.table_name != table_name:
                 return None
             cond_index = table_info.get_col_index(condition.column_name)
+            type_ = table_info.type_list[cond_index]
             if cond_index is None:
                 return None
             if condition.type == ConditionType.Compare:
@@ -327,15 +326,25 @@ class SystemManger:
                     cond_index_2 = table_info.get_col_index(condition.target_column)
                     return eval(f"lambda x:x[{cond_index}] {condition.operator} x[{cond_index_2}]")
                 else:
-                    if condition.operator != "==" and condition.operator != "!=":
-                        return eval(
-                            f"lambda x:x is not None and x[{cond_index}] {condition.operator} {condition.value}")
-                    else:
-                        return eval(f"lambda x:x[{cond_index}] {condition.operator} {condition.value}")
+                    value = condition.value
+                    if type_ in ('INT', 'FLOAT'):
+                        if not isinstance(type_, (int, float)):
+                            raise DataBaseError(f"Expect {type_} but get '{value}' instead")
+                    elif type_ == 'DATE':
+                        value = Converter.parse_date(value)
+                    elif type_ == 'VARCHAR':
+                        if not isinstance(value, str):
+                            raise DataBaseError(f'Expect VARCHAR but get {value} instead')
+                    return eval(f"lambda x:x is not None and x[{cond_index}] {condition.operator} {value}")
             elif condition.type == ConditionType.In:
-                return lambda x: x[cond_index] in condition.value
+                values = condition.value
+                if type_ == 'DATE':
+                    values = tuple(map(Converter.parse_date, values))
+                return lambda x: x[cond_index] in values
             elif condition.type == ConditionType.Like:
                 pattern = self.build_regex_from_sql_like(condition.value)
+                if type_ != str:
+                    raise DataBaseError(f'Like operator expects VARCHAR but get {condition.column_name}:{type_}')
                 return lambda x: pattern.match(str(x[cond_index]))
 
         table_info = meta_handle.get_table(table_name)
@@ -478,7 +487,7 @@ class SystemManger:
             rid: RID = record.rid
             values = table_info.load_record(record.data)
             # TODO:Check Constraint
-            self.check_insert_constraints(table_name, values)
+            self.check_remove_constraints(table_name, values)
             record_handle.delete_record(rid)
             # Handle Index
             self.handle_remove_indexes(table_info, self.using_db, values, rid)
@@ -543,7 +552,7 @@ class SystemManger:
         results = None
         for column_name in cond_index_map:
             _lower, _upper = cond_index_map[column_name]
-            index = self._IM.open_index(self.using_db, table_name, column_name, table_info.indexes[column_name])
+            index = self._IM.open_index(self.using_db, table_name, table_info.indexes[column_name])
             if results is None:
                 results = set(index.range(_lower, _upper))
             else:
@@ -582,7 +591,7 @@ class SystemManger:
         results = None
         primary_key = {column_name: values[table_info.get_col_index(column_name)] for column_name in table_info.primary}
         for col, value in primary_key.items():
-            index: FileIndex = self._IM.open_index(self.using_db, table_name, col, table_info.indexes[col])
+            index: FileIndex = self._IM.open_index(self.using_db, table_name, table_info.indexes[col])
             if results is None:
                 results = set(index.range(value, value))
             else:
@@ -603,7 +612,7 @@ class SystemManger:
             foreign_column_name = table_info.foreign[col][1]
             foreign_table_info: TableInfo = meta_handle.get_table(foreign_table_name)
             root_id = foreign_table_info.indexes[foreign_column_name]
-            index: FileIndex = self._IM.open_index(self.using_db, foreign_table_name, foreign_column_name, root_id)
+            index: FileIndex = self._IM.open_index(self.using_db, foreign_table_name, root_id)
             results = set(index.range(val, val))
             if len(results) == 0:
                 return col, val
@@ -630,7 +639,7 @@ class SystemManger:
     def handle_insert_indexes(self, table_info: TableInfo, dbname, data, rid: RID):
         table_name = table_info.name
         for column_name in table_info.indexes:
-            index: FileIndex = self._IM.open_index(dbname, table_name, column_name, table_info.indexes[column_name])
+            index: FileIndex = self._IM.open_index(dbname, table_name, table_info.indexes[column_name])
             col_id = table_info.get_col_index(column_name)
             if data[col_id] is not None:
                 index.insert(data[col_id], rid)
@@ -640,7 +649,7 @@ class SystemManger:
     def handle_remove_indexes(self, table_info: TableInfo, dbname, data, rid: RID):
         table_name = table_info.name
         for column_name in table_info.indexes:
-            index: FileIndex = self._IM.open_index(dbname, table_name, column_name, table_info.indexes[column_name])
+            index: FileIndex = self._IM.open_index(dbname, table_name, table_info.indexes[column_name])
             col_id = table_info.get_col_index(column_name)
             if data[col_id] is not None:
                 index.remove(data[col_id], rid)
