@@ -49,6 +49,9 @@ class SystemManger:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self._MM.shutdown()
+        self._IM.shutdown()
+        self._RM.shutdown()
         self._FM.shutdown()
 
     def get_db_path(self, db_name):

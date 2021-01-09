@@ -15,7 +15,7 @@ class IndexHandler:
     '''
     Class to treat a file as index
     '''
-    def __init__(self, manager: FileManager, dbname=".", home_dir="./") -> None:
+    def __init__(self, manager: FileManager, dbname, home_dir) -> None:
         self._manager = manager
         self._is_modified = False
         if self._manager.exists_file(home_dir / dbname / (dbname + INDEX_FILE)):

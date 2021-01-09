@@ -72,10 +72,13 @@ class RecordManager:
         if filename not in self.opened_files:
             # raise RecordFileOperationError(f'File {filename} is not opened')
             return False
-        handle = self.opened_files[filename]
+        handle = self.opened_files.pop(filename)
         if handle.header_modified:
             handle.modify_header()
-        self.opened_files.pop(handle.filename)
         self._FM.close_file(handle.file_id)
         handle.is_opened = False
         return True
+
+    def shutdown(self):
+        for filename in tuple(self.opened_files):
+            self.close_file(filename)
