@@ -30,8 +30,9 @@ class LeafNode(TreeNode):
     def remove(self, key, val):
         low = self.lower_bound(key)
         high = self.upper_bound(key)
+        if high < len(self._child_key) - 1:
+            high += 1
         pos = high
-        # DEBUG: Maybe is high + 1
         for i in range(low, high):
             if self._child_val[i] == val:
                 pos = i

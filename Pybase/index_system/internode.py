@@ -50,7 +50,11 @@ class InterNode(TreeNode):
     def remove(self, key, val):
         pos_low = self.lower_bound(key)
         pos_high = self.upper_bound(key)
+        if pos_high == pos_low:
+            pos_high += 1
         for pos in range(pos_low, pos_high):
+            if pos >= len(self._child_val):
+                break
             node: TreeNode = self._child_val[pos]
             next_val = node.remove(key, val)
             if next_val is not None:
