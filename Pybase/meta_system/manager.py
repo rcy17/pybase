@@ -8,8 +8,8 @@ from Pybase.file_system.manager import FileManager
 
 
 class MetaManager:
-    def __init__(self, homedir="./") -> None:
-        self._FM = FileManager()
+    def __init__(self, manager: FileManager, homedir="./") -> None:
+        self._FM = manager
         self._meta_list = {}
         self._home_dir = homedir
 

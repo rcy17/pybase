@@ -73,7 +73,8 @@ def main(args: Namespace):
                 results = parent_conn.recv()
                 printer.print(results)
                 sql = ''
-    p.terminate()
+    parent_conn.send(None)
+    p.join()
 
 
 if __name__ == '__main__':

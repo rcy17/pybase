@@ -36,8 +36,7 @@ class SystemManger:
         self._FM = FileManager()
         self._RM = RecordManager(self._FM)
         self._IM = IndexManager(self._FM, base_path)
-        self._MM = MetaManager(base_path)
-        self._printer = TablePrinter()
+        self._MM = MetaManager(self._FM, base_path)
         self._base_path = base_path
         base_path.mkdir(exist_ok=True, parents=True)
         self.dbs = {path.name for path in base_path.iterdir()}
@@ -45,6 +44,12 @@ class SystemManger:
         self.visitor = visitor
         self.visitor.manager = self
         self.bar = None  # Only for file input
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._FM.shutdown()
 
     def get_db_path(self, db_name):
         return self._base_path / db_name
@@ -301,11 +306,9 @@ class SystemManger:
         rid = record_handle.insert_record(data)
         # Handle indexes
         self.handle_insert_indexes(table_info, self.using_db, values, rid)
-        # Other
-        self._RM.close_file(self.get_table_path(table_name))
 
     def print_results(self, result: QueryResult):
-        self._printer.print([result])
+        TablePrinter().print([result])
 
     @staticmethod
     def build_regex_from_sql_like(pattern: str) -> re.Pattern:
@@ -353,22 +356,6 @@ class SystemManger:
                 raise DataBaseError(f'One value of {result.headers[0]} expected bug got {len(result.data)}')
             value, = value
         return value
-
-    def cond_scan(self, table_name, conditions: tuple) -> QueryResult:
-        """
-        condition is a list like:
-        (table_name, column_name, operator, table_name, column_name)
-        or
-        (table_name, column_name, operator, value)
-        """
-        if self.using_db is None:
-            raise DataBaseError(f"No using database to scan.")
-        meta_handle = self._MM.open_meta(self.using_db)
-        table_info = meta_handle.get_table(table_name)
-        records = self.search_records(table_name, conditions)
-        headers = table_info.get_header()
-        results = tuple(table_info.load_record(record) for record in records)
-        return QueryResult(headers, results)
 
     def cond_join(self, results_map: dict, conditions) -> QueryResult:
         if self.using_db is None:
@@ -502,7 +489,6 @@ class SystemManger:
             record_handle.delete_record(rid)
             # Handle Index
             self.handle_remove_indexes(table_info, self.using_db, values, rid)
-        self._RM.close_file(self.get_table_path(table_name))
         return QueryResult('deleted_items', (len(records),))
 
     def update_records(self, table_name, conditions: tuple, set_value_map: dict):
@@ -534,7 +520,6 @@ class SystemManger:
             record_handle.update_record(record)
             # Handle indexes
             self.handle_insert_indexes(table_info, self.using_db, new_values, record.rid)
-        self._RM.close_file(self.get_table_path(table_name))
         return QueryResult('updated_items', (len(records),))
 
     def index_filter(self, table_name, conditions) -> set:
@@ -588,27 +573,6 @@ class SystemManger:
         results = tuple(table_info.load_record(record) for record in records)
         return QueryResult(headers, results)
 
-    def search_records(self, table_name, conditions: tuple):
-        if self.using_db is None:
-            raise DataBaseError(f"No using database to scan.")
-        meta_handle = self._MM.open_meta(self.using_db)
-        func_list = self.build_conditions_func(table_name, conditions, meta_handle)
-        table_info = meta_handle.get_table(table_name)
-        record_handle = self._RM.open_file(self.get_table_path(table_name))
-        results = []
-        scanner = FileScan(record_handle)
-        for record in scanner:
-            values = table_info.load_record(record)
-            is_satisfied = True
-            for cond_func in func_list:
-                if not cond_func(values):
-                    is_satisfied = False
-                    break
-            if is_satisfied:
-                results.append(record)
-        self._RM.close_file(self.get_table_path(table_name))
-        return results
-
     def search_records_indexes(self, table_name, conditions: tuple):
         if self.using_db is None:
             raise DataBaseError(f"No using database to scan.")
@@ -624,7 +588,6 @@ class SystemManger:
             values = table_info.load_record(record)
             if all(map(lambda func: func(values), func_list)):
                 results.append(record)
-        self._RM.close_file(self.get_table_path(table_name))
         return results
 
     def check_primary(self, table_name, values):
@@ -644,7 +607,6 @@ class SystemManger:
                 results = set(index.range(value, value))
             else:
                 results = results & set(index.range(value, value))
-            self._IM.close_index(table_name, col)
         return results and (tuple(primary_key.keys()), tuple(primary_key.values()))
 
     def check_foreign(self, table_name, values):
@@ -667,7 +629,6 @@ class SystemManger:
             if len(results) == 0:
                 self._IM.close_index(table_name, col)
                 return False
-            self._IM.close_index(table_name, col)
         return True
 
     def check_insert_constraints(self, table_name, values):
@@ -697,7 +658,6 @@ class SystemManger:
                 index.insert(data[col_id], rid)
             else:
                 index.insert(settings.NULL_VALUE, rid)
-            self._IM.close_index(table_name, column_name)
 
     def handle_remove_indexes(self, table_info: TableInfo, dbname, data, rid: RID):
         table_name = table_info.name
@@ -708,4 +668,3 @@ class SystemManger:
                 index.remove(data[col_id], rid)
             else:
                 index.remove(settings.NULL_VALUE, rid)
-            self._IM.close_index(table_name, column_name)
