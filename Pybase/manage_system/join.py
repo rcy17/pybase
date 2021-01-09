@@ -9,6 +9,9 @@ def take(vals:tuple, slices:tuple):
 
 def nested_loops_join_data(outer: tuple, inner: tuple, outer_joined:tuple, inner_joined:tuple):
     assert len(outer_joined) == len(inner_joined)
+    if len(outer) == 0 or len(inner) == 0:
+        print(len(outer), len(inner))
+        return None, None, None
     outer_left = tuple(i for i in range(len(outer[0])) if i not in outer_joined)
     inner_left = tuple(i for i in range(len(inner[0])) if i not in inner_joined)
     result = []
@@ -43,7 +46,10 @@ def nested_loops_join(outer:QueryResult, inner:QueryResult, outer_joined:tuple, 
     outer_joined_index = tuple(outer.get_header_index(header) for header in outer_joined)
     inner_joined_index = tuple(inner.get_header_index(header) for header in inner_joined)
     joined_data, outer_left, inner_left = nested_loops_join_data(outer_data, inner_data, outer_joined_index, inner_joined_index)
-    result = QueryResult(take(outer_head, outer_left) + take(inner_head, inner_left) + outer_joined, joined_data)
+    if joined_data is not None:
+        result = QueryResult(take(outer_head, outer_left) + take(inner_head, inner_left) + outer_joined, joined_data)
+    else:
+        result = QueryResult([], [])
     for outer_header, inner_header in zip(outer_joined, inner_joined):
         result.add_alias(inner_header, outer_header)
     for alias in outer.alias_map:

@@ -208,5 +208,6 @@ data
 *.tbl
 temp*
 .INDEX
+*.cmd
 
 ############################## Here ends custom ignorance  ##############################

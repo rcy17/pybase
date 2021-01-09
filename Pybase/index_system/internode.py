@@ -50,19 +50,26 @@ class InterNode(TreeNode):
     def remove(self, key, val):
         pos_low = self.lower_bound(key)
         pos_high = self.upper_bound(key)
-        if pos_high == pos_low:
+        if pos_high < len(self._child_key):
             pos_high += 1
+        shift = 0
+        ret = None
         for pos in range(pos_low, pos_high):
-            if pos >= len(self._child_val):
-                break
+            pos -= shift
             node: TreeNode = self._child_val[pos]
             next_val = node.remove(key, val)
             if next_val is not None:
                 self._child_key[pos] = next_val
+                if pos == 0:
+                    ret = next_val
             # Check need merge of not
             if len(node._child_key) == 0:
                 self._child_key.pop(pos)
                 self._child_val.pop(pos)
+                shift += 1
+                if pos == 0 and len(self._child_key) > 0:
+                    ret = self._child_key[0]
+        return ret
 
     def page_size(self):
         return 16 + len(self._child_key) * (8 + 8) + 32
