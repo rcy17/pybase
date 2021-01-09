@@ -186,9 +186,10 @@ class SystemVisitor(SQLVisitor):
 
     def visitWhere_operator_select(self, ctx: SQLParser.Where_operator_selectContext):
         table_name, column_name = ctx.column().accept(self)
+        operator = to_str(ctx.operator())
         result: QueryResult = ctx.select_table().accept(self)
         value = self.manager.result_to_value(result, False)
-        return Condition(ConditionType.Compare, table_name, column_name, value=value)
+        return Condition(ConditionType.Compare, table_name, column_name, operator, value=value)
 
     def visitWhere_null(self, ctx: SQLParser.Where_nullContext):
         table_name, column_name = ctx.column().accept(self)

@@ -56,12 +56,12 @@ class ColumnInfo:
 class TableInfo:
     def __init__(self, name, columns, orders=None) -> None:
         self._name = name
-        self._column_map = {col.name: col for col in columns}
+        self.column_map = {col.name: col for col in columns}
         self.primary = None
         self.foreign = {}
         self.indexes = {}
-        self.size_list = tuple(map(ColumnInfo.get_size, self._column_map.values()))
-        self.type_list = tuple(map(lambda x: x.type, self._column_map.values()))
+        self.size_list = tuple(map(ColumnInfo.get_size, self.column_map.values()))
+        self.type_list = tuple(map(lambda x: x.type, self.column_map.values()))
         self.total_size = sum(self.size_list)
         if orders is None:
             self._colindex = {col.name: i for i, col in enumerate(columns)}
@@ -73,18 +73,18 @@ class TableInfo:
         return self._name
 
     def insert_column(self, column: ColumnInfo):
-        if column.name not in self._column_map:
-            self._column_map[column.name] = column
-            self._colindex[column.name] = len(self._column_map) - 1
+        if column.name not in self.column_map:
+            self.column_map[column.name] = column
+            self._colindex[column.name] = len(self.column_map) - 1
         else:
             raise ColumnExistenceError(f"Column {column.name} should not exists.")
 
     def remove_column(self, column_name):
-        if column_name not in self._column_map:
+        if column_name not in self.column_map:
             raise ColumnExistenceError(f"Column {column_name} should exists.")
         else:
             self._colindex.pop(column_name)
-            self._column_map.pop(column_name)
+            self.column_map.pop(column_name)
 
     def set_primary(self, primary):
         self.primary = primary
@@ -110,14 +110,16 @@ class TableInfo:
 
     def check_value_map(self, value_map: dict):
         for column_name, value in value_map.items():
-            column: ColumnInfo = self._column_map[column_name]
+            column: ColumnInfo = self.column_map.get(column_name)
+            if column is None:
+                raise DataBaseError(f'Field {column_name} is unknown')
             if type(value) not in ACCEPT_TYPE[column.type]:
                 raise DataBaseError(f'Field {column_name} expects {column.type} bug get {value} instead')
             if column.type == 'DATE':
                 value_map[column_name] = Converter.parse_date(value)
 
     def get_header(self):
-        return tuple(self._name + '.' + column_name for column_name in self._column_map.keys())
+        return tuple(self._name + '.' + column_name for column_name in self.column_map.keys())
 
     def exists_index(self, column_name):
         return column_name in self.indexes

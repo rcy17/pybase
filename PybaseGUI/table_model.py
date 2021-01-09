@@ -34,7 +34,7 @@ class TableModel(QAbstractTableModel):
 
     def headerData(self, section: int, orientation: Qt.Orientation, role: int = None):
         if role == Qt.DisplayRole:
-            return str(section) if orientation == Qt.Vertical else self._headers[section]
+            return str(section + 1) if orientation == Qt.Vertical else self._headers[section]
 
     def sort(self, column: int, order=0):
         if not self._data:

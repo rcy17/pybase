@@ -160,13 +160,13 @@ class SystemManger:
     def describe_table(self, table_name):
         _, table_info = self.get_table_info(table_name, "create table")
         desc = f"Table {table_info._name} (\n"
-        for col in table_info._column_map.values():
+        for col in table_info.column_map.values():
             desc += f"\t{col._name} {col._type} {col._size}\n"
         desc += ")\n"
         desc += f"Size:{table_info.total_size}\n"
         desc += f"Indexes:{table_info.indexes.__str__()}\n"
         header = ('Field', 'Type', 'Null', 'Key', 'Default', 'Extra')
-        data = tuple((column.get_description()) for column in table_info._column_map.values())
+        data = tuple((column.get_description()) for column in table_info.column_map.values())
         return QueryResult(header, data)
 
     def add_foreign(self, table_name, col, foreign):
@@ -310,9 +310,9 @@ class SystemManger:
             if condition.table_name and condition.table_name != table_name:
                 return None
             cond_index = table_info.get_col_index(condition.column_name)
-            type_ = table_info.type_list[cond_index]
             if cond_index is None:
-                return None
+                raise DataBaseError(f'Field {condition.column_name} for table {table_name} is unknown')
+            type_ = table_info.type_list[cond_index]
             if condition.type == ConditionType.Compare:
                 if condition.target_column:
                     if condition.target_table != table_name:
@@ -354,7 +354,7 @@ class SystemManger:
         value = sum(result.data, ())
         if not is_in:
             if len(result.data) != 1:
-                raise DataBaseError(f'One value of {result.headers[0]} expected bug got {len(result.data)}')
+                raise DataBaseError(f'One value of {result.headers[0]} expected but got {len(result.data)}')
             value, = value
         return value
 
@@ -416,12 +416,19 @@ class SystemManger:
         if self.using_db is None:
             raise DataBaseError(f"No using database to select.")
         group_table, group_column = group_by
-        if len(table_names) > 1 and any(item.table_name is None for item in conditions + selectors):
-            raise DataBaseError('Filed without table name is forbidden when join on tables ')
-        for item in selectors:
+
+        meta = self._MM.open_meta(self.using_db)
+        column_to_table = meta.build_column_to_table_map(table_names)
+
+        for item in conditions + selectors:
             if item.table_name is None:
-                # If there is still any condition with None table name, we can ensure that there is only one table
-                item.table_name = table_names[0]
+                tables = column_to_table[item.column_name]
+                if len(tables) > 1:
+                    raise DataBaseError(f'Field {item.column_name} is ambiguous when joining on tables ')
+                if not tables:
+                    raise DataBaseError(f'Field {item.column_name} is unknown')
+                item.table_name = tables[0]
+
         group_table = group_table or table_names[0]
         group_by = group_table + '.' + group_column
         types = set(selector.type for selector in selectors)
