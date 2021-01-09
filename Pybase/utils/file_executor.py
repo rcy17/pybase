@@ -28,7 +28,7 @@ class FileExecutor:
                 return float(value_) if value_ else None
             if type_ == 'VARCHAR':
                 return value_
-            if type == 'DATE':
+            if type_ == 'DATE':
                 return value_ if value_ else None
 
         inserted = 0

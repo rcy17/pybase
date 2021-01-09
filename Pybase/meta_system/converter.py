@@ -8,7 +8,7 @@ from numbers import Number
 from datetime import date
 
 import numpy as np
-from dateparser import parse as parse_date
+# from dateparser import parse as parse_date
 
 
 from Pybase.exceptions.run_sql import DataBaseError
@@ -20,8 +20,9 @@ class Converter:
     @staticmethod
     def parse_date(value):
         try:
-            return parse_date(value).date()
-        except (TypeError, AttributeError):
+            return date.fromisoformat(value)
+            # return parse_date(value).date()
+        except (TypeError, AttributeError, ValueError):
             raise DataBaseError(f"Expect DATE but get {value} instead")
 
     @staticmethod
@@ -42,7 +43,7 @@ class Converter:
             if value_ is None:
                 day = settings.NULL_VALUE
             else:
-                day = parse_date(value_).toordinal()
+                day = Converter.parse_date(value_).toordinal()
             return struct.pack('<q', day)
         else:
             raise DataBaseError("Unsupported type.")

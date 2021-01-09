@@ -25,7 +25,7 @@ class TreeNode:
         low, high = 0, len(self._child_key) - 1
         pos = len(self._child_key) - 1
         while low < high:
-            mid = int((low + high) / 2)
+            mid = (low + high) // 2
             if self._child_key[mid] < key:
                 low = mid + 1
             else:
@@ -40,7 +40,7 @@ class TreeNode:
         low, high = 0, len(self._child_key) - 1
         pos = len(self._child_key)
         while low < high:
-            mid = int((low + high) / 2)
+            mid = (low + high) // 2
             if self._child_key[mid] <= key:
                 low = mid + 1
             else:

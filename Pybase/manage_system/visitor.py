@@ -14,7 +14,6 @@ from .manager import SystemManger
 from .result import QueryResult
 from .condition import Condition, ConditionType
 from .selector import Selector, SelectorType
-from Pybase import settings
 
 
 class SystemVisitor(SQLVisitor):
@@ -178,10 +177,6 @@ class SystemVisitor(SQLVisitor):
     def visitWhere_operator_expression(self, ctx: SQLParser.Where_operator_expressionContext):
         table_name, column_name = ctx.column().accept(self)
         operator = to_str(ctx.operator())
-        if operator == '=':
-            operator = '=='
-        if operator == '<>':
-            operator = "!="
         value = ctx.expression().accept(self)
         if isinstance(value, tuple):
             return Condition(ConditionType.Compare, table_name, column_name, operator,
@@ -197,8 +192,8 @@ class SystemVisitor(SQLVisitor):
 
     def visitWhere_null(self, ctx: SQLParser.Where_nullContext):
         table_name, column_name = ctx.column().accept(self)
-        operator = '==' if ctx.getChild(2) == "NOT" else '!='
-        return Condition(ConditionType.Compare, table_name, column_name, operator, None)
+        is_null = ctx.getChild(2) != "NOT"
+        return Condition(ConditionType.Null, table_name, column_name, is_null)
 
     def visitWhere_in_list(self, ctx: SQLParser.Where_in_listContext):
         table_name, column_name = ctx.column().accept(self)

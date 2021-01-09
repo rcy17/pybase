@@ -23,6 +23,7 @@ from Pybase.exceptions.run_sql import DataBaseError, ConstraintError
 from Pybase.exceptions.base import Error
 from Pybase.printer.table import TablePrinter
 from Pybase.meta_system.converter import Converter
+from Pybase.utils.tools import compare_to_value, compare_to_attr, like_pattern, in_value_list, null_check
 from .condition import ConditionType, Condition
 from .result import QueryResult
 from .selector import Selector, SelectorType
@@ -303,14 +304,6 @@ class SystemManger:
     def print_results(self, result: QueryResult):
         TablePrinter().print([result])
 
-    @staticmethod
-    def build_regex_from_sql_like(pattern: str) -> re.Pattern:
-        pattern = pattern.replace('%%', '\r').replace('%?', '\n').replace('%_', '\0')
-        pattern = re.escape(pattern)
-        pattern = pattern.replace('%', '.*').replace(r'\?', '.').replace('_', '.')
-        pattern = pattern.replace('\r', '%').replace('\n', r'\?').replace('\0', '_')
-        return re.compile('^' + pattern + '$')
-
     def build_conditions_func(self, table_name, conditions, meta_handle: MetaHandler) -> list:
         def build_condition_func(condition: Condition):
             if condition.table_name != table_name:
@@ -324,28 +317,30 @@ class SystemManger:
                     if condition.target_table != table_name:
                         return None
                     cond_index_2 = table_info.get_col_index(condition.target_column)
-                    return eval(f"lambda x:x[{cond_index}] {condition.operator} x[{cond_index_2}]")
+                    return compare_to_attr(cond_index, condition.operator, cond_index_2)
                 else:
                     value = condition.value
                     if type_ in ('INT', 'FLOAT'):
-                        if not isinstance(type_, (int, float)):
+                        if not isinstance(value, (int, float)):
                             raise DataBaseError(f"Expect {type_} but get '{value}' instead")
                     elif type_ == 'DATE':
                         value = Converter.parse_date(value)
                     elif type_ == 'VARCHAR':
                         if not isinstance(value, str):
                             raise DataBaseError(f'Expect VARCHAR but get {value} instead')
-                    return eval(f"lambda x:x is not None and x[{cond_index}] {condition.operator} {value}")
+                    return compare_to_value(cond_index, condition.operator, value)
             elif condition.type == ConditionType.In:
                 values = condition.value
                 if type_ == 'DATE':
                     values = tuple(map(Converter.parse_date, values))
-                return lambda x: x[cond_index] in values
+                return in_value_list(cond_index, values)
             elif condition.type == ConditionType.Like:
-                pattern = self.build_regex_from_sql_like(condition.value)
-                if type_ != str:
+                if type_ != 'VARCHAR':
                     raise DataBaseError(f'Like operator expects VARCHAR but get {condition.column_name}:{type_}')
-                return lambda x: pattern.match(str(x[cond_index]))
+                return like_pattern(cond_index, condition.value)
+            elif condition.type == ConditionType.Null:
+                assert isinstance(condition.value, bool)
+                return null_check(cond_index, condition.value)
 
         table_info = meta_handle.get_table(table_name)
         func_list = [func for func in (build_condition_func(condition) for condition in conditions) if func]
@@ -369,7 +364,7 @@ class SystemManger:
 
         def build_join_pair(condition: Condition):
             if condition.target_table and condition.table_name != condition.target_table:
-                if condition.operator != '==':
+                if condition.operator != '=':
                     raise DataBaseError('Comparison between different tables must be "="')
                 pair = (condition.table_name, condition.column_name), (condition.target_table, condition.target_column)
                 return sorted(pair)
@@ -535,7 +530,7 @@ class SystemManger:
                 column = condition.column_name
                 lower, upper = cond_index_map.get(column, (-1 << 31 + 1, 1 << 31))
                 value = int(condition.value)
-                if operator == "==":
+                if operator == "=":
                     lower = max(lower, value)
                     upper = min(upper, value)
                 elif operator == "<":
@@ -546,6 +541,8 @@ class SystemManger:
                     upper = min(upper, value)
                 elif operator == ">=":
                     lower = max(lower, value)
+                else:
+                    return None
                 cond_index_map[column] = lower, upper
 
         tuple(map(build_cond_index, conditions))
@@ -567,7 +564,7 @@ class SystemManger:
         return QueryResult(headers, results)
 
     def search_records_indexes(self, table_name, conditions: tuple):
-        meta_handle, table_info = self.get_table_info(table_name, "scanf")
+        meta_handle, table_info = self.get_table_info(table_name, "scan")
         func_list = self.build_conditions_func(table_name, conditions, meta_handle)
         index_filter_rids = self.index_filter(table_name, conditions)
         record_handle = self._RM.open_file(self.get_table_path(table_name))
