@@ -168,7 +168,8 @@ class SystemManger:
         desc += f"Size:{table_info.total_size}\n"
         desc += f"Indexes:{table_info.indexes.__str__()}\n"
         header = ('Field', 'Type', 'Null', 'Key', 'Default', 'Extra')
-        data = tuple((column.get_description()) for column in table_info.column_map.values())
+        # data = tuple((column.get_description()) for column in table_info.column_map.values())
+        data = table_info.describe()
         return QueryResult(header, data)
 
     def add_foreign(self, table_name, col, foreign, foreign_name=None):

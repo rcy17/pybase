@@ -14,8 +14,8 @@ ACCEPT_TYPE = {
 
 
 class ColumnInfo:
-    def __init__(self, type, name, size, default=None) -> None:
-        self._type = type
+    def __init__(self, type_, name, size, default=None) -> None:
+        self._type = type_
         self._name = name
         self._size = size
         self._default = default
@@ -45,16 +45,16 @@ class ColumnInfo:
     def get_description(self):
         """
         Get description of column
-        :return: (name, type, null, key, default, extra)
+        :return: [name, type, null, key, default, extra]
         """
-        return (
+        return [
             self._name,
             f'{self._type}{("(%d)" % self._size) if self._size else ""}',
             "NO",
             "",
             self._default,
             "",
-        )
+        ]
 
 
 class TableInfo:
@@ -74,6 +74,14 @@ class TableInfo:
     @property
     def name(self):
         return self._name
+
+    def describe(self):
+        desc = {column.name: column.get_description() for column in self.column_map.values()}
+        for each in self.primary:
+            desc[each][3] += ' PRI'
+        for each in self.foreign:
+            desc[each][3] += ' FOR'
+        return tuple(desc.values())
 
     def update_params(self):
         self.column_map = {col.name: col for col in self.columns}
