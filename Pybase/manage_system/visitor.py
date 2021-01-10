@@ -288,8 +288,9 @@ class SystemVisitor(SQLVisitor):
 
     def visitAlter_table_add_foreign_key(self, ctx: SQLParser.Alter_table_add_foreign_keyContext):
         table_name = to_str(ctx.Identifier(0))
-        for_name = to_str(ctx.Identifier(2))
+        foreign_name = to_str(ctx.Identifier(1))
+        for_table_name = to_str(ctx.Identifier(2))
         tb_list = ctx.identifiers(0).accept(self)
         for_list = ctx.identifiers(1).accept(self)
         for (tb_col, for_col) in zip(tb_list, for_list):
-            self.manager.add_foreign(table_name, tb_col, (for_name, for_col))
+            self.manager.add_foreign(table_name, tb_col, (for_table_name, for_col), foreign_name)
