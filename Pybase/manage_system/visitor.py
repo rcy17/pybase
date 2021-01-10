@@ -90,15 +90,18 @@ class SystemVisitor(SQLVisitor):
                 # default = to_str(field.value()) if field.value() else None
                 name_to_column[name] = ColumnInfo(type_, name, size)
             elif isinstance(field, SQLParser.Foreign_key_fieldContext):
-
-                field_name, table_name, refer_name = tuple(to_str(each) for each in field.Identifier())
+                field_name, table_name, refer_name = field.accept(self)
+                if field_name in foreign_keys:
+                    raise DataBaseError(f'Foreign key named {field_name} is duplicated')
                 foreign_keys[field_name] = table_name, refer_name
             else:
                 assert isinstance(field, SQLParser.Primary_key_fieldContext)
-                names = field.identifiers().accept(self)
-                # assert len(names) == 1
+                names = field.accept(self)
                 for name in names:
-                    assert name in name_to_column
+                    if name not in name_to_column:
+                        raise DataBaseError(f'Unknown field {name} field list')
+                if primary_key:
+                    raise DataBaseError('Only one primary key supported')
                 primary_key = names
         return list(name_to_column.values()), foreign_keys, primary_key
 
@@ -108,10 +111,10 @@ class SystemVisitor(SQLVisitor):
         return ColumnInfo(type_, name, size)
 
     def visitForeign_key_field(self, ctx: SQLParser.Foreign_key_fieldContext):
-        pass
+        return tuple(to_str(each) for each in ctx.Identifier())
 
     def visitPrimary_key_field(self, ctx: SQLParser.Primary_key_fieldContext):
-        pass
+        return ctx.identifiers().accept(self)
 
     def visitIdentifiers(self, ctx: SQLParser.IdentifiersContext):
         return tuple(to_str(each) for each in ctx.Identifier())
@@ -298,4 +301,5 @@ class SystemVisitor(SQLVisitor):
             self.manager.add_foreign(table_name, tb_col, (for_table_name, for_col), foreign_name)
 
     def visitAlter_table_add_unique(self, ctx: SQLParser.Alter_table_add_uniqueContext):
-        pass
+        table, name, column = tuple(map(to_str, ctx.Identifier()))
+        return self.manager.add_unique(table, column, name)

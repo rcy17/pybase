@@ -76,7 +76,7 @@ alter_statement
     | 'ALTER' 'TABLE' Identifier 'DROP' 'FOREIGN' 'KEY' Identifier              # alter_table_drop_foreign_key
     | 'ALTER' 'TABLE' Identifier 'ADD' 'CONSTRAINT' Identifier 'PRIMARY' 'KEY' '(' identifiers ')'      # alter_table_add_pk
     | 'ALTER' 'TABLE' Identifier 'ADD' 'CONSTRAINT' Identifier 'FOREIGN' 'KEY' '(' identifiers ')' 'REFERENCES' Identifier '(' identifiers ')'  # alter_table_add_foreign_key
-    | 'ALTER' 'TABLE' Identifier 'ADD' 'UNIQUE' Identifier(Identifier)          # alter_table_add_unique
+    | 'ALTER' 'TABLE' Identifier 'ADD' 'UNIQUE' Identifier '(' Identifier ')'   # alter_table_add_unique
     ;
 
 field_list

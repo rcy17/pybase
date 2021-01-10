@@ -172,6 +172,12 @@ class SystemManger:
         data = table_info.describe()
         return QueryResult(header, data)
 
+    def add_unique(self, table_name, column_name, name):
+        meta_handle, table_info = self.get_table_info(table_name, 'add unique')
+        meta_handle.add_unique(table_info, column_name, name)
+        if not meta_handle.exists_index(name):
+            self.create_index(name, table_name, column_name)
+
     def add_foreign(self, table_name, col, foreign, foreign_name=None):
         meta_handle = self._MM.open_meta(self.using_db)
         meta_handle.add_foreign(table_name, col, foreign)
@@ -259,7 +265,7 @@ class SystemManger:
             raise DataBaseError(f"Indexes {index_name} not exists.")
         if table_info.exists_index(column_name):
             meta_handle.create_index(index_name, table_name, column_name)
-            return 
+            return
         index = self._IM.create_index(self.using_db, table_name)
         table_info.create_index(column_name, index.root_id)
         col_id = table_info.get_col_index(column_name)
@@ -294,7 +300,7 @@ class SystemManger:
     def rename_table(self, old_name, new_name):
         if self.using_db is None:
             raise DataBaseError(f"No using database to rename table")
-        meta_handle:TableInfo = self._MM.open_meta(self.using_db)
+        meta_handle = self._MM.open_meta(self.using_db)
         meta_handle.rename_table(old_name, new_name)
         self._RM.rename_file(self.get_table_path(old_name), self.get_table_path(new_name))
 
@@ -606,6 +612,17 @@ class SystemManger:
                 data.append(values)
         return records, data
 
+    def check_any_unique(self, table_name, keys, this):
+        conditions = tuple(Condition(ConditionType.Compare, table_name, col, '=', value=value)
+                           for col, value in keys.items())
+        results, _ = self.search_records_indexes(table_name, conditions)
+        if len(results) > 1:
+            print(len(results))
+            assert len(results) <= 1
+        if results and this and this == results[0].rid:
+            return False
+        return results and (tuple(keys.keys()), tuple(keys.values()))
+
     def check_primary(self, table_name, values, this: RID = None):
         """
         Check primary key constraint if values are inserted
@@ -616,20 +633,24 @@ class SystemManger:
         meta_handle, table_info = self.get_table_info(table_name, "check primary")
         if not table_info.primary:
             return False
-        results = None
         primary_key = {column_name: values[table_info.get_col_index(column_name)] for column_name in table_info.primary}
-        for col, value in primary_key.items():
-            index: FileIndex = self._IM.open_index(self.using_db, table_name, table_info.indexes[col])
-            if results is None:
-                results = set(index.range(value, value))
-            else:
-                results = results & set(index.range(value, value))
-        if len(results) > 1:
-            print(len(results))
-            assert len(results) <= 1
-        if this in results:
+        return self.check_any_unique(table_name, primary_key, this)
+
+    def check_unique(self, table_name, values, this: RID = None):
+        """
+        Check unique key constraint if values are inserted
+        Return False if nothing in wrong else unique key (keys, values)
+
+        Parameter "this" means an updating is going and not check itself
+        """
+        meta_handle, table_info = self.get_table_info(table_name, "check unique")
+        if not table_info.unique:
             return False
-        return results and (tuple(primary_key.keys()), tuple(primary_key.values()))
+        for each in table_info.unique:
+            keys = {each: values[table_info.get_col_index(each)]}
+            error = self.check_any_unique(table_name, keys, this)
+            if error:
+                return error
 
     def check_foreign(self, table_name, values):
         """
@@ -656,7 +677,11 @@ class SystemManger:
         duplicated = self.check_primary(table_name, values, this)
         if duplicated:
             raise ConstraintError(f'Duplicated primary keys {duplicated[0]}: {duplicated[1]}, failed to insert')
+
         # UNIQUE CONSTRAINT
+        duplicated = self.check_unique(table_name, values, this)
+        if duplicated:
+            raise ConstraintError(f'Duplicated unique key {duplicated[0]}: {duplicated[1]}, failed to insert')
 
         # FOREIGN CONSTRAINT
         missing = self.check_foreign(table_name, values)

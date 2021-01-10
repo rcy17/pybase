@@ -106,6 +106,10 @@ class MetaHandler:
         table.remove_foreign(col)
         self._dump()
 
+    def add_unique(self, table: TableInfo, column, unique):
+        table.add_unique(column, unique)
+        self._dump()
+
     def rename_table(self, old_name, new_name):
         if old_name not in self._db_info._tbMap:
             raise DataBaseError(f"Table {old_name} not in database.")

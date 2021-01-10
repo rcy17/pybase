@@ -65,6 +65,7 @@ class TableInfo:
         self.primary = None
         self.foreign = {}
         self.indexes = {}
+        self.unique = {}
         self.size_list = []
         self.type_list = []
         self.total_size = 0
@@ -81,6 +82,8 @@ class TableInfo:
             desc[each][3] = 'PRI'
         for each in self.foreign:
             desc[each][3] = 'MUL' if desc[each][3] else 'FOR'
+        for each in self.unique:
+            desc[each][3] = desc[each][3] or 'UNI'
         return tuple(desc.values())
 
     def update_params(self):
@@ -111,6 +114,9 @@ class TableInfo:
     def remove_foreign(self, col):
         if col in self.foreign:
             self.foreign.pop(col)
+
+    def add_unique(self, col, unique):
+        self.unique[col] = unique
 
     def build_record(self, value_list: list):
         return Converter.encode(self.size_list, self.type_list, self.total_size, value_list)
