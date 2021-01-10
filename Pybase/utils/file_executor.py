@@ -27,7 +27,7 @@ class FileExecutor:
             if type_ == 'FLOAT':
                 return float(value_) if value_ else None
             if type_ == 'VARCHAR':
-                return value_
+                return value_.rstrip()
             if type_ == 'DATE':
                 return value_ if value_ else None
 
@@ -48,14 +48,14 @@ class FileExecutor:
 
     def exec_csv(self, manager: SystemManger, path: Path, database: str, table: str):
         if not table:
-            table = path.stem.upper()
+            table = path.stem
         manager.use_db(database)
         inserted = self._insert(manager, table, self.iterate(csv.reader(open(path, encoding='utf-8'))), lambda x: x)
         return [QueryResult('inserted_items', (inserted,), cost=manager.visitor.time_cost())]
 
     def exec_tbl(self, manager: SystemManger, path: Path, database: str, table: str):
         if not table:
-            table = path.stem.upper()
+            table = path.stem
         manager.use_db(database)
         inserted = self._insert(manager, table, self.iterate(open(path, encoding='utf-8')),
                                 lambda x: x.rstrip('\n').split('|'))
