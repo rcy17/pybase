@@ -283,17 +283,16 @@ class SystemManger:
 
     def rename_index(self, old_index, new_index):
         if self.using_db is None:
-            raise DataBaseError(f"No using database to create index")
+            raise DataBaseError(f"No using database to remove index")
         meta_handler = self._MM.open_meta(self.using_db)
         meta_handler.rename_index(old_index, new_index)
 
-    def rename_column(self, table_name, oldname, newname):
+    def rename_table(self, old_name, new_name):
         if self.using_db is None:
-            raise DataBaseError(f"No using database to create index")
-        meta_handler = self._MM.open_meta(self.using_db)
-        meta_handler.rename_col(table_name, oldname, newname)
-        # Primary
-        # Foreign
+            raise DataBaseError(f"No using database to rename table")
+        meta_handle = self._MM.open_meta(self.using_db)
+        meta_handle.rename_table(old_name, new_name)
+        pass
 
     def insert_record(self, table_name, value_list: list):
         # Remember to get the order in Record from meta

@@ -270,7 +270,9 @@ class SystemVisitor(SQLVisitor):
         pass
 
     def visitAlter_table_rename(self, ctx: SQLParser.Alter_table_renameContext):
-        pass
+        old_name = to_str(ctx.Identifier(0))
+        new_name = to_str(ctx.Identifier(1))
+        self.manager.rename_table(old_name, new_name)
 
     def visitAlter_table_drop_pk(self, ctx: SQLParser.Alter_table_drop_pkContext):
         table_name = to_str(ctx.Identifier())

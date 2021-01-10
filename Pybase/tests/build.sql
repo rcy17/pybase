@@ -11,7 +11,7 @@ CREATE TABLE part (
     p_size			INT(10),
     p_container		VARCHAR(10),
     p_retailpreice	FLOAT,
-    p_comment		VARCHAR(23),
+    p_comment       VARCHAR(23),
 
     PRIMARY KEY (p_partkey)
 );
@@ -19,7 +19,7 @@ CREATE TABLE part (
 CREATE TABLE region (
 	r_regionkey	    INT(10),
 	r_name		    VARCHAR(25),
-	r_comment	    VARCHAR(152),
+    r_comment       VARCHAR(152),
 
     PRIMARY KEY (r_regionkey)
 );
@@ -29,7 +29,7 @@ CREATE TABLE nation (
 	n_nationkey 	INT(10),
 	n_name		    VARCHAR(25),
 	n_regionkey	    INT(10) NOT NULL,
-	b_comment	    VARCHAR(152),
+    n_comment       VARCHAR(152),
 
 	PRIMARY KEY (n_nationkey),
 	FOREIGN KEY (n_regionkey) REFERENCES region(r_regionkey)
@@ -42,7 +42,7 @@ CREATE TABLE supplier (
     s_nationkey	    INT(10) NOT NULL,
     s_phone		    VARCHAR(15),
     s_acctbal	    FLOAT,
-    s_comment	    VARCHAR(101),
+    s_comment       VARCHAR(101),
 
 	PRIMARY KEY (s_suppkey),
 	FOREIGN KEY (s_nationkey) REFERENCES nation(n_nationkey)
@@ -56,7 +56,7 @@ CREATE TABLE customer (
     c_phone			VARCHAR(15),
     c_acctbal		FLOAT,
     c_mktsegment	VARCHAR(10),
-    c_comment		VARCHAR(117),
+    c_comment       VARCHAR(117),
 
 	PRIMARY KEY (c_custkey),
 	FOREIGN KEY (c_nationkey) REFERENCES nation(n_nationkey)
@@ -67,7 +67,7 @@ CREATE TABLE partsupp (
     ps_suppkey	    INT(10) NOT NULL,
     ps_availqty	    INT(10),
     ps_supplycost  	FLOAT,
-    ps_comment	    VARCHAR(199),
+    ps_comment      VARCHAR(199),
 
     PRIMARY KEY (ps_partkey, ps_suppkey),
     FOREIGN KEY (ps_partkey) REFERENCES part(p_partkey),
@@ -83,7 +83,7 @@ CREATE TABLE orders (
     o_orderpriority VARCHAR(15),
     o_clerk		    VARCHAR(15),
     o_shippriority  INT(10),
-    o_comment	    VARCHAR(79),
+    o_comment       VARCHAR(79),
 
     PRIMARY KEY (o_orderkey),
     FOREIGN KEY (o_custkey) REFERENCES customer(c_custkey)
@@ -105,7 +105,6 @@ CREATE TABLE lineitem (
     l_receipdate	DATE,
     l_shipinstruct	VARCHAR(25),
     l_shipmode		VARCHAR(10),
-    l_comment		VARCHAR(44),
 
     PRIMARY KEY (l_orderkey, l_linenumber),
     FOREIGN KEY (l_orderkey) REFERENCES orders(o_orderkey),

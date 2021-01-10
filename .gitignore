@@ -210,5 +210,6 @@ temp*
 .INDEX
 *.cmd
 *.zip
+*.xlsx
 
 ############################## Here ends custom ignorance  ##############################

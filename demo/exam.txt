@@ -1,0 +1,8 @@
+CREATE TABLE nationBack(
+	n_nationkey INT(10) NOT NULL,
+	n_name VARCHAR(25) NOT NULL,
+	n_regionkey INT(10) NOT NULL,
+	n_comment VARCHAR(152)
+);
+
+SELECT COUNT(*) FROM customer WHERE c_nationkey<10;

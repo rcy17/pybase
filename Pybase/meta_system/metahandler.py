@@ -106,12 +106,16 @@ class MetaHandler:
         table.remove_foreign(col)
         self._dump()
 
-    def rename_col(self, tbname, oldname, newname):
-        table: TableInfo = self.get_table(tbname)
-        table.column_map[newname] = table.column_map[oldname]
-        table._colindex[newname] = table._colindex[oldname]
-        table.column_map.pop(oldname)
-        table._colindex.pop(oldname)
+    def rename_table(self, old_name, new_name):
+        if old_name not in self._db_info._tbMap:
+            raise DataBaseError(f"Table {old_name} not in database.")
+        tbInfo = self._db_info._tbMap[old_name]
+        self._db_info._tbMap.pop(old_name)
+        self._db_info._tbMap[new_name] = tbInfo
+        for index_name in self._db_info._index_map:
+            pair = self._db_info._index_map[index_name]
+            if pair[0] == old_name:
+                self._db_info._index_map[index_name] = (new_name, pair[1])
         self._dump()
 
     def rename_index(self, old_index, new_index):
