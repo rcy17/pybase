@@ -18,16 +18,13 @@ from Pybase.record_system.record import Record
 
 class Converter:
     @staticmethod
-    def parse_date(value:str):
+    def parse_date(value: str):
         value = value.replace("/", "-")
         value_list = value.split("-")
-        if len(value_list) != 3:
-            raise DataBaseError(f"Expect DATE but get {value} instead")
-        value = "%04d-%02d-%02d" % tuple(int(i) for i in value_list)
         try:
-            return date.fromisoformat(value)
+            return date(*map(int, value_list))
             # return parse_date(value).date()
-        except (TypeError, AttributeError, ValueError):
+        except (TypeError, AttributeError, ValueError, TypeError):
             raise DataBaseError(f"Expect DATE but get {value} instead")
 
     @staticmethod
