@@ -174,10 +174,11 @@ class SystemManger:
     def add_foreign(self, table_name, col, foreign, foreign_name = None):
         meta_handle = self._MM.open_meta(self.using_db)
         meta_handle.add_foreign(table_name, col, foreign)
-        if not meta_handle.exists_index(foreign[0] + "." + foreign[1]):
-            if foreign_name is None:
+        if foreign_name is None:
+            if not meta_handle.exists_index(foreign[0] + "." + foreign[1]):
                 self.create_index(foreign[0] + "." + foreign[1], foreign[0], foreign[1])
-            else:
+        else:
+            if not meta_handle.exists_index(foreign_name):
                 self.create_index(foreign_name, foreign[0], foreign[1])
 
     def remove_foreign(self, table_name, col, foreign_name = None):
@@ -187,7 +188,6 @@ class SystemManger:
             foreign = meta_handle.get_table(table_name).foreign[col]
             self.drop_index(foreign[0] + "." + foreign[1])
         else:
-            print(foreign_name)
             self.drop_index(foreign_name)
 
     def set_primary(self, table_name, primary):
@@ -254,8 +254,11 @@ class SystemManger:
 
     def create_index(self, index_name, table_name, column_name):
         meta_handle, table_info = self.get_table_info(table_name, "create index")
+        if meta_handle.exists_index(index_name):
+            raise DataBaseError(f"Indexes {index_name} not exists.")
         if table_info.exists_index(column_name):
-            raise DataBaseError(f"Indexes already exists.")
+            meta_handle.create_index(index_name, table_name, column_name)
+            return 
         index = self._IM.create_index(self.using_db, table_name)
         table_info.create_index(column_name, index.root_id)
         col_id = table_info.get_col_index(column_name)
@@ -275,8 +278,8 @@ class SystemManger:
         meta_handle = self._MM.open_meta(self.using_db)
         table_name, column_name = meta_handle.get_index_info(index_name)
         table_info = meta_handle.get_table(table_name)
-        if not table_info.exists_index(column_name):
-            raise DataBaseError(f"Indexes already exists.")
+        if not meta_handle.exists_index(index_name):
+            raise DataBaseError(f"Indexes {index_name} not exists.")
         table_info.drop_index(column_name)
         meta_handle.drop_index(index_name)
         self._MM.close_meta(self.using_db)

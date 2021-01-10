@@ -7,10 +7,17 @@ CREATE TABLE nationBack(
 
 SELECT COUNT(*) FROM customer WHERE c_nationkey<10;
 
-ALTER TABLE nation DROP PRIMARY KEY;
+ALTER TABLE nation ADD n_comment_2 VARCHAR(32);
+ALTER TABLE nation DROP n_comment_2;
 
+ALTER TABLE nation RENAME TO province;
+ALTER TABLE province RENAME TO nation;
+
+ALTER TABLE nation DROP PRIMARY KEY;
 ALTER TABLE nation ADD CONSTRAINT nation_pkey PRIMARY KEY (n_nationkey);
 
 ALTER TABLE nation ADD CONSTRAINT NATION_FK1 FOREIGN KEY (n_regionkey) REFERENCES region(r_regionkey);
-
 ALTER TABLE nation DROP FOREIGN KEY NATION_FK1;
+
+ALTER TABLE customer ADD INDEX Idx_residual(c_acctbal);
+ALTER TABLE customer DROP INDEX Idx_residual;

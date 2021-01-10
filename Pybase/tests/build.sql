@@ -87,28 +87,3 @@ CREATE TABLE orders (
     PRIMARY KEY (o_orderkey),
     FOREIGN KEY (o_custkey) REFERENCES customer(c_custkey)
 );
-
-CREATE TABLE lineitem (
-    l_orderkey		INT(10) NOT NULL,
-    l_partkey		INT(10) NOT NULL,
-    l_suppkey		INT(10) NOT NULL,
-    l_linenumber	INT(10),
-    l_quantity		FLOAT,
-    l_extendedprice	FLOAT,
-    l_discount		FLOAT,
-    l_tax			FLOAT,
-    l_returnflag	VARCHAR(1),
-    l_linestatus	VARCHAR(1),
-    l_shipdate		DATE,
-    l_commitdate	DATE,
-    l_receipdate	DATE,
-    l_shipinstruct	VARCHAR(25),
-    l_shipmode		VARCHAR(10),
-
-    PRIMARY KEY (l_orderkey, l_linenumber),
-    FOREIGN KEY (l_orderkey) REFERENCES orders(o_orderkey),
-    FOREIGN KEY (l_partkey) REFERENCES part(p_partkey),
-    FOREIGN KEY (l_suppkey) REFERENCES supplier(s_suppkey)
-);
-
-ALTER TABLE lineitem ADD CONSTRAINT L_PSKEY FOREIGN KEY (l_partkey,l_suppkey) REFERENCES partsupp(ps_partkey,ps_suppkey);
