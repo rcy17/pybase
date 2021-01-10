@@ -1,115 +1,116 @@
+DROP DATABASE DATASET;
 CREATE DATABASE DATASET;
 USE DATASET;
 
-CREATE TABLE PART (
-    P_PARTKEY       INT(10),
-    P_NAME			VARCHAR(55),
-    P_MFGR			VARCHAR(25),
-    P_BRAND			VARCHAR(10),
-    P_TYPE			VARCHAR(25),
-    P_SIZE			INT(10),
-    P_CONTAINER		VARCHAR(10),
-    P_RETAILPRICE	FLOAT,
-    P_COMMENT		VARCHAR(23),
+CREATE TABLE part (
+    p_partkey       INT(10),
+    p_name			VARCHAR(55),
+    p_mfgr			VARCHAR(25),
+    p_brand			VARCHAR(10),
+    p_type			VARCHAR(25),
+    p_size			INT(10),
+    p_container		VARCHAR(10),
+    p_retailpreice	FLOAT,
+    p_comment		VARCHAR(23),
 
-    PRIMARY KEY (P_PARTKEY)
+    PRIMARY KEY (p_partkey)
 );
 
-CREATE TABLE REGION (
-	R_REGIONKEY	    INT(10),
-	R_NAME		    VARCHAR(25),
-	R_COMMENT	    VARCHAR(152),
+CREATE TABLE region (
+	r_regionkey	    INT(10),
+	r_name		    VARCHAR(25),
+	r_comment	    VARCHAR(152),
 
-    PRIMARY KEY (R_REGIONKEY)
+    PRIMARY KEY (r_regionkey)
 );
 
 
-CREATE TABLE NATION (
-	N_NATIONKEY 	INT(10),
-	N_NAME		    VARCHAR(25),
-	N_REGIONKEY	    INT(10) NOT NULL,
-	N_COMMENT	    VARCHAR(152),
+CREATE TABLE nation (
+	n_nationkey 	INT(10),
+	n_name		    VARCHAR(25),
+	n_regionkey	    INT(10) NOT NULL,
+	b_comment	    VARCHAR(152),
 
-	PRIMARY KEY (N_NATIONKEY),
-	FOREIGN KEY (N_REGIONKEY) REFERENCES REGION(R_REGIONKEY)
+	PRIMARY KEY (n_nationkey),
+	FOREIGN KEY (n_regionkey) REFERENCES region(r_regionkey)
 );
 
-CREATE TABLE SUPPLIER (
-    S_SUPPKEY	    INT(10),
-    S_NAME		    VARCHAR(25),
-    S_ADDRESS	    VARCHAR(40),
-    S_NATIONKEY	    INT(10) NOT NULL,
-    S_PHONE		    VARCHAR(15),
-    S_ACCTBAL	    FLOAT,
-    S_COMMENT	    VARCHAR(101),
+CREATE TABLE supplier (
+    s_suppkey	    INT(10),
+    s_name		    VARCHAR(25),
+    s_address	    VARCHAR(40),
+    s_nationkey	    INT(10) NOT NULL,
+    s_phone		    VARCHAR(15),
+    s_acctbal	    FLOAT,
+    s_comment	    VARCHAR(101),
 
-	PRIMARY KEY (S_SUPPKEY),
-	FOREIGN KEY (S_NATIONKEY) REFERENCES NATION(N_NATIONKEY)
+	PRIMARY KEY (s_suppkey),
+	FOREIGN KEY (s_nationkey) REFERENCES nation(n_nationkey)
 );
 
-CREATE TABLE CUSTOMER (
-    C_CUSTKEY	    INT(10),
-    C_NAME		    VARCHAR(25),
-    C_ADDRESS		VARCHAR(40),
-    C_NATIONKEY		INT(10) NOT NULL,
-    C_PHONE			VARCHAR(15),
-    C_ACCTBAL		FLOAT,
-    C_MKTSEGMENT	VARCHAR(10),
-    C_COMMENT		VARCHAR(117),
+CREATE TABLE customer (
+    c_custkey	    INT(10),
+    c_name		    VARCHAR(25),
+    c_address		VARCHAR(40),
+    c_nationkey		INT(10) NOT NULL,
+    c_phone			VARCHAR(15),
+    c_acctbal		FLOAT,
+    c_mktsegment	VARCHAR(10),
+    c_comment		VARCHAR(117),
 
-	PRIMARY KEY (C_CUSTKEY),
-	FOREIGN KEY (C_NATIONKEY) REFERENCES NATION(N_NATIONKEY)
+	PRIMARY KEY (c_custkey),
+	FOREIGN KEY (c_nationkey) REFERENCES nation(n_nationkey)
 );
 
-CREATE TABLE PARTSUPP (
-    PS_PARTKEY  	INT(10) NOT NULL,
-    PS_SUPPKEY	    INT(10) NOT NULL,
-    PS_AVAILQTY	    INT(10),
-    PS_SUPPLYCOST  	FLOAT,
-    PS_COMMENT	    VARCHAR(199),
+CREATE TABLE partsupp (
+    ps_partkey  	INT(10) NOT NULL,
+    ps_suppkey	    INT(10) NOT NULL,
+    ps_availqty	    INT(10),
+    ps_supplycost  	FLOAT,
+    ps_comment	    VARCHAR(199),
 
-    PRIMARY KEY (PS_PARTKEY, PS_SUPPKEY),
-    FOREIGN KEY (PS_PARTKEY) REFERENCES PART(P_PARTKEY),
-    FOREIGN KEY (PS_SUPPKEY) REFERENCES SUPPLIER(S_SUPPKEY)
+    PRIMARY KEY (ps_partkey, ps_suppkey),
+    FOREIGN KEY (ps_partkey) REFERENCES part(p_partkey),
+    FOREIGN KEY (ps_suppkey) REFERENCES supplier(s_suppkey)
 );
 
-CREATE TABLE ORDERS (
-    O_ORDERKEY	    INT(10),
-    O_CUSTKEY	    INT(10) NOT NULL,
-    O_ORDERSTATUS   VARCHAR(1),
-    O_TOTALPRICE    FLOAT,
-    O_ORDERDATE	    DATE,
-    O_ORDERPRIORITY VARCHAR(15),
-    O_CLERK		    VARCHAR(15),
-    O_SHIPPRIORITY  INT(10),
-    O_COMMENT	    VARCHAR(79),
+CREATE TABLE orders (
+    o_orderkey	    INT(10),
+    o_custkey	    INT(10) NOT NULL,
+    o_orderstatus   VARCHAR(1),
+    o_totalprice    FLOAT,
+    o_orderdate	    DATE,
+    o_orderpriority VARCHAR(15),
+    o_clerk		    VARCHAR(15),
+    o_shippriority  INT(10),
+    o_comment	    VARCHAR(79),
 
-    PRIMARY KEY (O_ORDERKEY),
-    FOREIGN KEY (O_CUSTKEY) REFERENCES CUSTOMER(C_CUSTKEY)
+    PRIMARY KEY (o_orderkey),
+    FOREIGN KEY (o_custkey) REFERENCES customer(c_custkey)
 );
 
-CREATE TABLE LINEITEM (
-    L_ORDERKEY		INT(10) NOT NULL,
-    L_PARTKEY		INT(10) NOT NULL,
-    L_SUPPKEY		INT(10) NOT NULL,
-    L_LINENUMBER	INT(10),
-    L_QUANTITY		FLOAT,
-    L_EXTENDEDPRICE	FLOAT,
-    L_DISCOUNT		FLOAT,
-    L_TAX			FLOAT,
-    L_RETURNFLAG	VARCHAR(1),
-    L_LINESTATUS	VARCHAR(1),
-    L_SHIPDATE		DATE,
-    L_COMMITDATE	DATE,
-    L_RECEIPTDATE	DATE,
-    L_SHIPINSTRUCT	VARCHAR(25),
-    L_SHIPMODE		VARCHAR(10),
-    L_COMMENT		VARCHAR(44),
+CREATE TABLE lineitem (
+    l_orderkey		INT(10) NOT NULL,
+    l_partkey		INT(10) NOT NULL,
+    l_suppkey		INT(10) NOT NULL,
+    l_linenumber	INT(10),
+    l_quantity		FLOAT,
+    l_extendedprice	FLOAT,
+    l_discount		FLOAT,
+    l_tax			FLOAT,
+    l_returnflag	VARCHAR(1),
+    l_linestatus	VARCHAR(1),
+    l_shipdate		DATE,
+    l_commitdate	DATE,
+    l_receipdate	DATE,
+    l_shipinstruct	VARCHAR(25),
+    l_shipmode		VARCHAR(10),
+    l_comment		VARCHAR(44),
 
-    PRIMARY KEY (L_ORDERKEY, L_LINENUMBER),
-    FOREIGN KEY (L_ORDERKEY) REFERENCES ORDERS(O_ORDERKEY),
-    FOREIGN KEY (L_PARTKEY) REFERENCES PART(P_PARTKEY),
-    FOREIGN KEY (L_SUPPKEY) REFERENCES SUPPLIER(S_SUPPKEY)
+    PRIMARY KEY (l_orderkey, l_linenumber),
+    FOREIGN KEY (l_orderkey) REFERENCES orders(o_orderkey),
+    FOREIGN KEY (l_partkey) REFERENCES part(p_partkey),
+    FOREIGN KEY (l_suppkey) REFERENCES supplier(s_suppkey)
 );
 
-ALTER TABLE LINEITEM ADD CONSTRAINT L_PSKEY FOREIGN KEY (L_PARTKEY,L_SUPPKEY) REFERENCES PARTSUPP(PS_PARTKEY,PS_SUPPKEY);
+ALTER TABLE lineitem ADD CONSTRAINT L_PSKEY FOREIGN KEY (l_partkey,l_suppkey) REFERENCES partsupp(ps_partkey,ps_suppkey);
