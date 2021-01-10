@@ -171,7 +171,7 @@ class SystemManger:
         data = tuple((column.get_description()) for column in table_info.column_map.values())
         return QueryResult(header, data)
 
-    def add_foreign(self, table_name, col, foreign, foreign_name = None):
+    def add_foreign(self, table_name, col, foreign, foreign_name=None):
         meta_handle = self._MM.open_meta(self.using_db)
         meta_handle.add_foreign(table_name, col, foreign)
         if foreign_name is None:
@@ -181,7 +181,7 @@ class SystemManger:
             if not meta_handle.exists_index(foreign_name):
                 self.create_index(foreign_name, foreign[0], foreign[1])
 
-    def remove_foreign(self, table_name, col, foreign_name = None):
+    def remove_foreign(self, table_name, col, foreign_name=None):
         if foreign_name is None:
             meta_handle = self._MM.open_meta(self.using_db)
             meta_handle.remove_foreign(table_name, col)
@@ -417,8 +417,14 @@ class SystemManger:
             results = new_result
         return results
 
-    def select_records(self, selectors: Tuple[Selector], table_names: Tuple[str, ...],
-                       conditions: Tuple[Condition], group_by: Tuple[str, str]) -> QueryResult:
+    def select_records_limit(self, selectors, table_names, conditions,
+                             group_by, limit: int, offset: int) -> QueryResult:
+        result = self.select_records(selectors, table_names, conditions, group_by)
+        data = result.data[offset:] if limit is None else result.data[offset: offset + limit]
+        return QueryResult(result.headers, data)
+
+    def select_records(self, selectors: Tuple[Selector], table_names: Tuple[str, ...], conditions: Tuple[Condition],
+                       group_by: Tuple[str, str]) -> QueryResult:
         def get_selected_data(column_to_data):
             column_to_data['*.*'] = next(iter(column_to_data.values()))
             return tuple(map(lambda selector: selector.select(column_to_data[selector.target()]), selectors))

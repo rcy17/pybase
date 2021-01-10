@@ -11,8 +11,8 @@ else:
 
 def serializedATN():
     with StringIO() as buf:
-        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3D")
-        buf.write("\u0196\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3G")
+        buf.write("\u01a5\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
         buf.write("\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23\t\23")
         buf.write("\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31")
@@ -23,177 +23,184 @@ def serializedATN():
         buf.write("\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6")
         buf.write("\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\5\6}\n\6")
         buf.write("\3\7\3\7\3\7\3\7\3\7\3\7\5\7\u0085\n\7\3\7\3\7\3\7\5\7")
-        buf.write("\u008a\n\7\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b")
+        buf.write("\u008a\n\7\3\7\3\7\3\7\3\7\5\7\u0090\n\7\5\7\u0092\n\7")
         buf.write("\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3")
-        buf.write("\b\3\b\3\b\3\b\5\b\u00a8\n\b\3\t\3\t\3\t\3\t\3\t\3\t\3")
-        buf.write("\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t")
-        buf.write("\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\5\t\u00c7\n\t\3\t")
+        buf.write("\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b")
+        buf.write("\3\b\5\b\u00b0\n\b\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t")
         buf.write("\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3")
+        buf.write("\t\3\t\3\t\3\t\3\t\3\t\3\t\5\t\u00cf\n\t\3\t\3\t\3\t\3")
         buf.write("\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t")
-        buf.write("\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\5\t\u00ed\n\t\3\n\3\n")
-        buf.write("\3\n\7\n\u00f2\n\n\f\n\16\n\u00f5\13\n\3\13\3\13\3\13")
-        buf.write("\3\13\5\13\u00fb\n\13\3\13\3\13\5\13\u00ff\n\13\3\13\3")
-        buf.write("\13\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3\13")
-        buf.write("\3\13\3\13\3\13\3\13\5\13\u0111\n\13\3\f\3\f\3\f\3\f\3")
-        buf.write("\f\3\f\3\f\3\f\3\f\3\f\5\f\u011d\n\f\3\r\3\r\3\r\7\r\u0122")
-        buf.write("\n\r\f\r\16\r\u0125\13\r\3\16\3\16\3\16\3\16\7\16\u012b")
-        buf.write("\n\16\f\16\16\16\u012e\13\16\3\16\3\16\3\17\3\17\3\20")
-        buf.write("\3\20\3\20\7\20\u0137\n\20\f\20\16\20\u013a\13\20\3\21")
-        buf.write("\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21")
-        buf.write("\3\21\5\21\u0149\n\21\3\21\3\21\3\21\3\21\3\21\3\21\3")
-        buf.write("\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\5\21")
-        buf.write("\u015b\n\21\3\22\3\22\5\22\u015f\n\22\3\22\3\22\3\23\3")
-        buf.write("\23\5\23\u0165\n\23\3\24\3\24\3\24\3\24\3\24\3\24\3\24")
-        buf.write("\7\24\u016e\n\24\f\24\16\24\u0171\13\24\3\25\3\25\3\25")
-        buf.write("\3\25\7\25\u0177\n\25\f\25\16\25\u017a\13\25\5\25\u017c")
-        buf.write("\n\25\3\26\3\26\3\26\3\26\3\26\3\26\3\26\3\26\3\26\3\26")
-        buf.write("\5\26\u0188\n\26\3\27\3\27\3\27\7\27\u018d\n\27\f\27\16")
-        buf.write("\27\u0190\13\27\3\30\3\30\3\31\3\31\3\31\2\2\32\2\4\6")
-        buf.write("\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\2\5\4\2")
-        buf.write(">>@B\3\2\638\3\29=\2\u01b3\2\65\3\2\2\2\4M\3\2\2\2\6O")
-        buf.write("\3\2\2\2\b\\\3\2\2\2\n|\3\2\2\2\f~\3\2\2\2\16\u00a7\3")
-        buf.write("\2\2\2\20\u00ec\3\2\2\2\22\u00ee\3\2\2\2\24\u0110\3\2")
-        buf.write("\2\2\26\u011c\3\2\2\2\30\u011e\3\2\2\2\32\u0126\3\2\2")
-        buf.write("\2\34\u0131\3\2\2\2\36\u0133\3\2\2\2 \u015a\3\2\2\2\"")
-        buf.write("\u015e\3\2\2\2$\u0164\3\2\2\2&\u0166\3\2\2\2(\u017b\3")
-        buf.write("\2\2\2*\u0187\3\2\2\2,\u0189\3\2\2\2.\u0191\3\2\2\2\60")
-        buf.write("\u0193\3\2\2\2\62\64\5\4\3\2\63\62\3\2\2\2\64\67\3\2\2")
-        buf.write("\2\65\63\3\2\2\2\65\66\3\2\2\2\668\3\2\2\2\67\65\3\2\2")
-        buf.write("\289\7\2\2\39\3\3\2\2\2:;\5\6\4\2;<\7\3\2\2<N\3\2\2\2")
-        buf.write("=>\5\b\5\2>?\7\3\2\2?N\3\2\2\2@A\5\n\6\2AB\7\3\2\2BN\3")
-        buf.write("\2\2\2CD\5\16\b\2DE\7\3\2\2EN\3\2\2\2FG\5\20\t\2GH\7\3")
-        buf.write("\2\2HN\3\2\2\2IJ\7D\2\2JN\7\3\2\2KL\7>\2\2LN\7\3\2\2M")
-        buf.write(":\3\2\2\2M=\3\2\2\2M@\3\2\2\2MC\3\2\2\2MF\3\2\2\2MI\3")
-        buf.write("\2\2\2MK\3\2\2\2N\5\3\2\2\2OP\7\4\2\2PQ\7\5\2\2Q\7\3\2")
-        buf.write("\2\2RS\7\6\2\2ST\7\7\2\2T]\7?\2\2UV\7\b\2\2VW\7\7\2\2")
-        buf.write("W]\7?\2\2XY\7\t\2\2Y]\7?\2\2Z[\7\4\2\2[]\7\n\2\2\\R\3")
-        buf.write("\2\2\2\\U\3\2\2\2\\X\3\2\2\2\\Z\3\2\2\2]\t\3\2\2\2^_\7")
-        buf.write("\6\2\2_`\7\13\2\2`a\7?\2\2ab\7\f\2\2bc\5\22\n\2cd\7\r")
-        buf.write("\2\2d}\3\2\2\2ef\7\b\2\2fg\7\13\2\2g}\7?\2\2hi\7\16\2")
-        buf.write("\2i}\7?\2\2jk\7\17\2\2kl\7\20\2\2lm\7?\2\2mn\7\21\2\2")
-        buf.write("n}\5\30\r\2op\7\22\2\2pq\7\23\2\2qr\7?\2\2rs\7\24\2\2")
-        buf.write("s}\5\36\20\2tu\7\25\2\2uv\7?\2\2vw\7\26\2\2wx\5&\24\2")
-        buf.write("xy\7\24\2\2yz\5\36\20\2z}\3\2\2\2{}\5\f\7\2|^\3\2\2\2")
-        buf.write("|e\3\2\2\2|h\3\2\2\2|j\3\2\2\2|o\3\2\2\2|t\3\2\2\2|{\3")
-        buf.write("\2\2\2}\13\3\2\2\2~\177\7\27\2\2\177\u0080\5(\25\2\u0080")
-        buf.write("\u0081\7\23\2\2\u0081\u0084\5,\27\2\u0082\u0083\7\24\2")
-        buf.write("\2\u0083\u0085\5\36\20\2\u0084\u0082\3\2\2\2\u0084\u0085")
-        buf.write("\3\2\2\2\u0085\u0089\3\2\2\2\u0086\u0087\7\30\2\2\u0087")
-        buf.write("\u0088\7\31\2\2\u0088\u008a\5\"\22\2\u0089\u0086\3\2\2")
-        buf.write("\2\u0089\u008a\3\2\2\2\u008a\r\3\2\2\2\u008b\u008c\7\6")
-        buf.write("\2\2\u008c\u008d\7\32\2\2\u008d\u008e\7?\2\2\u008e\u008f")
-        buf.write("\7\33\2\2\u008f\u0090\7?\2\2\u0090\u0091\7\f\2\2\u0091")
-        buf.write("\u0092\5,\27\2\u0092\u0093\7\r\2\2\u0093\u00a8\3\2\2\2")
-        buf.write("\u0094\u0095\7\b\2\2\u0095\u0096\7\32\2\2\u0096\u00a8")
-        buf.write("\7?\2\2\u0097\u0098\7\34\2\2\u0098\u0099\7\13\2\2\u0099")
-        buf.write("\u009a\7?\2\2\u009a\u009b\7\35\2\2\u009b\u009c\7\32\2")
-        buf.write("\2\u009c\u009d\7?\2\2\u009d\u009e\7\f\2\2\u009e\u009f")
-        buf.write("\5,\27\2\u009f\u00a0\7\r\2\2\u00a0\u00a8\3\2\2\2\u00a1")
-        buf.write("\u00a2\7\34\2\2\u00a2\u00a3\7\13\2\2\u00a3\u00a4\7?\2")
-        buf.write("\2\u00a4\u00a5\7\b\2\2\u00a5\u00a6\7\32\2\2\u00a6\u00a8")
-        buf.write("\7?\2\2\u00a7\u008b\3\2\2\2\u00a7\u0094\3\2\2\2\u00a7")
-        buf.write("\u0097\3\2\2\2\u00a7\u00a1\3\2\2\2\u00a8\17\3\2\2\2\u00a9")
-        buf.write("\u00aa\7\34\2\2\u00aa\u00ab\7\13\2\2\u00ab\u00ac\7?\2")
-        buf.write("\2\u00ac\u00ad\7\35\2\2\u00ad\u00ed\5\24\13\2\u00ae\u00af")
-        buf.write("\7\34\2\2\u00af\u00b0\7\13\2\2\u00b0\u00b1\7?\2\2\u00b1")
-        buf.write("\u00b2\7\b\2\2\u00b2\u00ed\7?\2\2\u00b3\u00b4\7\34\2\2")
-        buf.write("\u00b4\u00b5\7\13\2\2\u00b5\u00b6\7?\2\2\u00b6\u00b7\7")
-        buf.write("\36\2\2\u00b7\u00b8\7?\2\2\u00b8\u00ed\5\24\13\2\u00b9")
-        buf.write("\u00ba\7\34\2\2\u00ba\u00bb\7\13\2\2\u00bb\u00bc\7?\2")
-        buf.write("\2\u00bc\u00bd\7\37\2\2\u00bd\u00be\7 \2\2\u00be\u00ed")
-        buf.write("\7?\2\2\u00bf\u00c0\7\34\2\2\u00c0\u00c1\7\13\2\2\u00c1")
-        buf.write("\u00c2\7?\2\2\u00c2\u00c3\7\b\2\2\u00c3\u00c4\7!\2\2\u00c4")
-        buf.write("\u00c6\7\"\2\2\u00c5\u00c7\7?\2\2\u00c6\u00c5\3\2\2\2")
-        buf.write("\u00c6\u00c7\3\2\2\2\u00c7\u00ed\3\2\2\2\u00c8\u00c9\7")
-        buf.write("\34\2\2\u00c9\u00ca\7\13\2\2\u00ca\u00cb\7?\2\2\u00cb")
-        buf.write("\u00cc\7\b\2\2\u00cc\u00cd\7#\2\2\u00cd\u00ce\7\"\2\2")
-        buf.write("\u00ce\u00ed\7?\2\2\u00cf\u00d0\7\34\2\2\u00d0\u00d1\7")
-        buf.write("\13\2\2\u00d1\u00d2\7?\2\2\u00d2\u00d3\7\35\2\2\u00d3")
-        buf.write("\u00d4\7$\2\2\u00d4\u00d5\7?\2\2\u00d5\u00d6\7!\2\2\u00d6")
-        buf.write("\u00d7\7\"\2\2\u00d7\u00d8\7\f\2\2\u00d8\u00d9\5,\27\2")
-        buf.write("\u00d9\u00da\7\r\2\2\u00da\u00ed\3\2\2\2\u00db\u00dc\7")
-        buf.write("\34\2\2\u00dc\u00dd\7\13\2\2\u00dd\u00de\7?\2\2\u00de")
-        buf.write("\u00df\7\35\2\2\u00df\u00e0\7$\2\2\u00e0\u00e1\7?\2\2")
-        buf.write("\u00e1\u00e2\7#\2\2\u00e2\u00e3\7\"\2\2\u00e3\u00e4\7")
-        buf.write("\f\2\2\u00e4\u00e5\5,\27\2\u00e5\u00e6\7\r\2\2\u00e6\u00e7")
-        buf.write("\7%\2\2\u00e7\u00e8\7?\2\2\u00e8\u00e9\7\f\2\2\u00e9\u00ea")
-        buf.write("\5,\27\2\u00ea\u00eb\7\r\2\2\u00eb\u00ed\3\2\2\2\u00ec")
-        buf.write("\u00a9\3\2\2\2\u00ec\u00ae\3\2\2\2\u00ec\u00b3\3\2\2\2")
-        buf.write("\u00ec\u00b9\3\2\2\2\u00ec\u00bf\3\2\2\2\u00ec\u00c8\3")
-        buf.write("\2\2\2\u00ec\u00cf\3\2\2\2\u00ec\u00db\3\2\2\2\u00ed\21")
-        buf.write("\3\2\2\2\u00ee\u00f3\5\24\13\2\u00ef\u00f0\7&\2\2\u00f0")
-        buf.write("\u00f2\5\24\13\2\u00f1\u00ef\3\2\2\2\u00f2\u00f5\3\2\2")
-        buf.write("\2\u00f3\u00f1\3\2\2\2\u00f3\u00f4\3\2\2\2\u00f4\23\3")
-        buf.write("\2\2\2\u00f5\u00f3\3\2\2\2\u00f6\u00f7\7?\2\2\u00f7\u00fa")
-        buf.write("\5\26\f\2\u00f8\u00f9\7\'\2\2\u00f9\u00fb\7>\2\2\u00fa")
-        buf.write("\u00f8\3\2\2\2\u00fa\u00fb\3\2\2\2\u00fb\u00fe\3\2\2\2")
-        buf.write("\u00fc\u00fd\7(\2\2\u00fd\u00ff\5\34\17\2\u00fe\u00fc")
-        buf.write("\3\2\2\2\u00fe\u00ff\3\2\2\2\u00ff\u0111\3\2\2\2\u0100")
-        buf.write("\u0101\7!\2\2\u0101\u0102\7\"\2\2\u0102\u0103\7\f\2\2")
-        buf.write("\u0103\u0104\5,\27\2\u0104\u0105\7\r\2\2\u0105\u0111\3")
-        buf.write("\2\2\2\u0106\u0107\7#\2\2\u0107\u0108\7\"\2\2\u0108\u0109")
-        buf.write("\7\f\2\2\u0109\u010a\7?\2\2\u010a\u010b\7\r\2\2\u010b")
-        buf.write("\u010c\7%\2\2\u010c\u010d\7?\2\2\u010d\u010e\7\f\2\2\u010e")
-        buf.write("\u010f\7?\2\2\u010f\u0111\7\r\2\2\u0110\u00f6\3\2\2\2")
-        buf.write("\u0110\u0100\3\2\2\2\u0110\u0106\3\2\2\2\u0111\25\3\2")
-        buf.write("\2\2\u0112\u0113\7)\2\2\u0113\u0114\7\f\2\2\u0114\u0115")
-        buf.write("\7@\2\2\u0115\u011d\7\r\2\2\u0116\u0117\7*\2\2\u0117\u0118")
-        buf.write("\7\f\2\2\u0118\u0119\7@\2\2\u0119\u011d\7\r\2\2\u011a")
-        buf.write("\u011d\7+\2\2\u011b\u011d\7,\2\2\u011c\u0112\3\2\2\2\u011c")
-        buf.write("\u0116\3\2\2\2\u011c\u011a\3\2\2\2\u011c\u011b\3\2\2\2")
-        buf.write("\u011d\27\3\2\2\2\u011e\u0123\5\32\16\2\u011f\u0120\7")
-        buf.write("&\2\2\u0120\u0122\5\32\16\2\u0121\u011f\3\2\2\2\u0122")
-        buf.write("\u0125\3\2\2\2\u0123\u0121\3\2\2\2\u0123\u0124\3\2\2\2")
-        buf.write("\u0124\31\3\2\2\2\u0125\u0123\3\2\2\2\u0126\u0127\7\f")
-        buf.write("\2\2\u0127\u012c\5\34\17\2\u0128\u0129\7&\2\2\u0129\u012b")
-        buf.write("\5\34\17\2\u012a\u0128\3\2\2\2\u012b\u012e\3\2\2\2\u012c")
-        buf.write("\u012a\3\2\2\2\u012c\u012d\3\2\2\2\u012d\u012f\3\2\2\2")
-        buf.write("\u012e\u012c\3\2\2\2\u012f\u0130\7\r\2\2\u0130\33\3\2")
-        buf.write("\2\2\u0131\u0132\t\2\2\2\u0132\35\3\2\2\2\u0133\u0138")
-        buf.write("\5 \21\2\u0134\u0135\7-\2\2\u0135\u0137\5 \21\2\u0136")
-        buf.write("\u0134\3\2\2\2\u0137\u013a\3\2\2\2\u0138\u0136\3\2\2\2")
-        buf.write("\u0138\u0139\3\2\2\2\u0139\37\3\2\2\2\u013a\u0138\3\2")
-        buf.write("\2\2\u013b\u013c\5\"\22\2\u013c\u013d\5.\30\2\u013d\u013e")
-        buf.write("\5$\23\2\u013e\u015b\3\2\2\2\u013f\u0140\5\"\22\2\u0140")
-        buf.write("\u0141\5.\30\2\u0141\u0142\7\f\2\2\u0142\u0143\5\f\7\2")
-        buf.write("\u0143\u0144\7\r\2\2\u0144\u015b\3\2\2\2\u0145\u0146\5")
-        buf.write("\"\22\2\u0146\u0148\7.\2\2\u0147\u0149\7\'\2\2\u0148\u0147")
-        buf.write("\3\2\2\2\u0148\u0149\3\2\2\2\u0149\u014a\3\2\2\2\u014a")
-        buf.write("\u014b\7>\2\2\u014b\u015b\3\2\2\2\u014c\u014d\5\"\22\2")
-        buf.write("\u014d\u014e\7/\2\2\u014e\u014f\5\32\16\2\u014f\u015b")
-        buf.write("\3\2\2\2\u0150\u0151\5\"\22\2\u0151\u0152\7/\2\2\u0152")
-        buf.write("\u0153\7\f\2\2\u0153\u0154\5\f\7\2\u0154\u0155\7\r\2\2")
-        buf.write("\u0155\u015b\3\2\2\2\u0156\u0157\5\"\22\2\u0157\u0158")
-        buf.write("\7\60\2\2\u0158\u0159\7A\2\2\u0159\u015b\3\2\2\2\u015a")
-        buf.write("\u013b\3\2\2\2\u015a\u013f\3\2\2\2\u015a\u0145\3\2\2\2")
-        buf.write("\u015a\u014c\3\2\2\2\u015a\u0150\3\2\2\2\u015a\u0156\3")
-        buf.write("\2\2\2\u015b!\3\2\2\2\u015c\u015d\7?\2\2\u015d\u015f\7")
-        buf.write("\61\2\2\u015e\u015c\3\2\2\2\u015e\u015f\3\2\2\2\u015f")
-        buf.write("\u0160\3\2\2\2\u0160\u0161\7?\2\2\u0161#\3\2\2\2\u0162")
-        buf.write("\u0165\5\34\17\2\u0163\u0165\5\"\22\2\u0164\u0162\3\2")
-        buf.write("\2\2\u0164\u0163\3\2\2\2\u0165%\3\2\2\2\u0166\u0167\7")
-        buf.write("?\2\2\u0167\u0168\7\63\2\2\u0168\u016f\5\34\17\2\u0169")
-        buf.write("\u016a\7&\2\2\u016a\u016b\7?\2\2\u016b\u016c\7\63\2\2")
-        buf.write("\u016c\u016e\5\34\17\2\u016d\u0169\3\2\2\2\u016e\u0171")
-        buf.write("\3\2\2\2\u016f\u016d\3\2\2\2\u016f\u0170\3\2\2\2\u0170")
-        buf.write("\'\3\2\2\2\u0171\u016f\3\2\2\2\u0172\u017c\7\62\2\2\u0173")
-        buf.write("\u0178\5*\26\2\u0174\u0175\7&\2\2\u0175\u0177\5*\26\2")
-        buf.write("\u0176\u0174\3\2\2\2\u0177\u017a\3\2\2\2\u0178\u0176\3")
-        buf.write("\2\2\2\u0178\u0179\3\2\2\2\u0179\u017c\3\2\2\2\u017a\u0178")
-        buf.write("\3\2\2\2\u017b\u0172\3\2\2\2\u017b\u0173\3\2\2\2\u017c")
-        buf.write(")\3\2\2\2\u017d\u0188\5\"\22\2\u017e\u017f\5\60\31\2\u017f")
-        buf.write("\u0180\7\f\2\2\u0180\u0181\5\"\22\2\u0181\u0182\7\r\2")
-        buf.write("\2\u0182\u0188\3\2\2\2\u0183\u0184\79\2\2\u0184\u0185")
-        buf.write("\7\f\2\2\u0185\u0186\7\62\2\2\u0186\u0188\7\r\2\2\u0187")
-        buf.write("\u017d\3\2\2\2\u0187\u017e\3\2\2\2\u0187\u0183\3\2\2\2")
-        buf.write("\u0188+\3\2\2\2\u0189\u018e\7?\2\2\u018a\u018b\7&\2\2")
-        buf.write("\u018b\u018d\7?\2\2\u018c\u018a\3\2\2\2\u018d\u0190\3")
-        buf.write("\2\2\2\u018e\u018c\3\2\2\2\u018e\u018f\3\2\2\2\u018f-")
-        buf.write("\3\2\2\2\u0190\u018e\3\2\2\2\u0191\u0192\t\3\2\2\u0192")
-        buf.write("/\3\2\2\2\u0193\u0194\t\4\2\2\u0194\61\3\2\2\2\34\65M")
-        buf.write("\\|\u0084\u0089\u00a7\u00c6\u00ec\u00f3\u00fa\u00fe\u0110")
-        buf.write("\u011c\u0123\u012c\u0138\u0148\u015a\u015e\u0164\u016f")
-        buf.write("\u0178\u017b\u0187\u018e")
+        buf.write("\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3")
+        buf.write("\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\5\t")
+        buf.write("\u00fc\n\t\3\n\3\n\3\n\7\n\u0101\n\n\f\n\16\n\u0104\13")
+        buf.write("\n\3\13\3\13\3\13\3\13\5\13\u010a\n\13\3\13\3\13\5\13")
+        buf.write("\u010e\n\13\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3")
+        buf.write("\13\3\13\3\13\3\13\3\13\3\13\3\13\3\13\5\13\u0120\n\13")
+        buf.write("\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\5\f\u012c\n\f")
+        buf.write("\3\r\3\r\3\r\7\r\u0131\n\r\f\r\16\r\u0134\13\r\3\16\3")
+        buf.write("\16\3\16\3\16\7\16\u013a\n\16\f\16\16\16\u013d\13\16\3")
+        buf.write("\16\3\16\3\17\3\17\3\20\3\20\3\20\7\20\u0146\n\20\f\20")
+        buf.write("\16\20\u0149\13\20\3\21\3\21\3\21\3\21\3\21\3\21\3\21")
+        buf.write("\3\21\3\21\3\21\3\21\3\21\3\21\5\21\u0158\n\21\3\21\3")
+        buf.write("\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21")
+        buf.write("\3\21\3\21\3\21\3\21\5\21\u016a\n\21\3\22\3\22\5\22\u016e")
+        buf.write("\n\22\3\22\3\22\3\23\3\23\5\23\u0174\n\23\3\24\3\24\3")
+        buf.write("\24\3\24\3\24\3\24\3\24\7\24\u017d\n\24\f\24\16\24\u0180")
+        buf.write("\13\24\3\25\3\25\3\25\3\25\7\25\u0186\n\25\f\25\16\25")
+        buf.write("\u0189\13\25\5\25\u018b\n\25\3\26\3\26\3\26\3\26\3\26")
+        buf.write("\3\26\3\26\3\26\3\26\3\26\5\26\u0197\n\26\3\27\3\27\3")
+        buf.write("\27\7\27\u019c\n\27\f\27\16\27\u019f\13\27\3\30\3\30\3")
+        buf.write("\31\3\31\3\31\2\2\32\2\4\6\b\n\f\16\20\22\24\26\30\32")
+        buf.write("\34\36 \"$&(*,.\60\2\5\4\2AACE\3\2\66;\3\2<@\2\u01c5\2")
+        buf.write("\65\3\2\2\2\4M\3\2\2\2\6O\3\2\2\2\b\\\3\2\2\2\n|\3\2\2")
+        buf.write("\2\f~\3\2\2\2\16\u00af\3\2\2\2\20\u00fb\3\2\2\2\22\u00fd")
+        buf.write("\3\2\2\2\24\u011f\3\2\2\2\26\u012b\3\2\2\2\30\u012d\3")
+        buf.write("\2\2\2\32\u0135\3\2\2\2\34\u0140\3\2\2\2\36\u0142\3\2")
+        buf.write("\2\2 \u0169\3\2\2\2\"\u016d\3\2\2\2$\u0173\3\2\2\2&\u0175")
+        buf.write("\3\2\2\2(\u018a\3\2\2\2*\u0196\3\2\2\2,\u0198\3\2\2\2")
+        buf.write(".\u01a0\3\2\2\2\60\u01a2\3\2\2\2\62\64\5\4\3\2\63\62\3")
+        buf.write("\2\2\2\64\67\3\2\2\2\65\63\3\2\2\2\65\66\3\2\2\2\668\3")
+        buf.write("\2\2\2\67\65\3\2\2\289\7\2\2\39\3\3\2\2\2:;\5\6\4\2;<")
+        buf.write("\7\3\2\2<N\3\2\2\2=>\5\b\5\2>?\7\3\2\2?N\3\2\2\2@A\5\n")
+        buf.write("\6\2AB\7\3\2\2BN\3\2\2\2CD\5\16\b\2DE\7\3\2\2EN\3\2\2")
+        buf.write("\2FG\5\20\t\2GH\7\3\2\2HN\3\2\2\2IJ\7G\2\2JN\7\3\2\2K")
+        buf.write("L\7A\2\2LN\7\3\2\2M:\3\2\2\2M=\3\2\2\2M@\3\2\2\2MC\3\2")
+        buf.write("\2\2MF\3\2\2\2MI\3\2\2\2MK\3\2\2\2N\5\3\2\2\2OP\7\4\2")
+        buf.write("\2PQ\7\5\2\2Q\7\3\2\2\2RS\7\6\2\2ST\7\7\2\2T]\7B\2\2U")
+        buf.write("V\7\b\2\2VW\7\7\2\2W]\7B\2\2XY\7\t\2\2Y]\7B\2\2Z[\7\4")
+        buf.write("\2\2[]\7\n\2\2\\R\3\2\2\2\\U\3\2\2\2\\X\3\2\2\2\\Z\3\2")
+        buf.write("\2\2]\t\3\2\2\2^_\7\6\2\2_`\7\13\2\2`a\7B\2\2ab\7\f\2")
+        buf.write("\2bc\5\22\n\2cd\7\r\2\2d}\3\2\2\2ef\7\b\2\2fg\7\13\2\2")
+        buf.write("g}\7B\2\2hi\7\16\2\2i}\7B\2\2jk\7\17\2\2kl\7\20\2\2lm")
+        buf.write("\7B\2\2mn\7\21\2\2n}\5\30\r\2op\7\22\2\2pq\7\23\2\2qr")
+        buf.write("\7B\2\2rs\7\24\2\2s}\5\36\20\2tu\7\25\2\2uv\7B\2\2vw\7")
+        buf.write("\26\2\2wx\5&\24\2xy\7\24\2\2yz\5\36\20\2z}\3\2\2\2{}\5")
+        buf.write("\f\7\2|^\3\2\2\2|e\3\2\2\2|h\3\2\2\2|j\3\2\2\2|o\3\2\2")
+        buf.write("\2|t\3\2\2\2|{\3\2\2\2}\13\3\2\2\2~\177\7\27\2\2\177\u0080")
+        buf.write("\5(\25\2\u0080\u0081\7\23\2\2\u0081\u0084\5,\27\2\u0082")
+        buf.write("\u0083\7\24\2\2\u0083\u0085\5\36\20\2\u0084\u0082\3\2")
+        buf.write("\2\2\u0084\u0085\3\2\2\2\u0085\u0089\3\2\2\2\u0086\u0087")
+        buf.write("\7\30\2\2\u0087\u0088\7\31\2\2\u0088\u008a\5\"\22\2\u0089")
+        buf.write("\u0086\3\2\2\2\u0089\u008a\3\2\2\2\u008a\u0091\3\2\2\2")
+        buf.write("\u008b\u008c\7\32\2\2\u008c\u008f\7C\2\2\u008d\u008e\7")
+        buf.write("\33\2\2\u008e\u0090\7C\2\2\u008f\u008d\3\2\2\2\u008f\u0090")
+        buf.write("\3\2\2\2\u0090\u0092\3\2\2\2\u0091\u008b\3\2\2\2\u0091")
+        buf.write("\u0092\3\2\2\2\u0092\r\3\2\2\2\u0093\u0094\7\6\2\2\u0094")
+        buf.write("\u0095\7\34\2\2\u0095\u0096\7B\2\2\u0096\u0097\7\35\2")
+        buf.write("\2\u0097\u0098\7B\2\2\u0098\u0099\7\f\2\2\u0099\u009a")
+        buf.write("\5,\27\2\u009a\u009b\7\r\2\2\u009b\u00b0\3\2\2\2\u009c")
+        buf.write("\u009d\7\b\2\2\u009d\u009e\7\34\2\2\u009e\u00b0\7B\2\2")
+        buf.write("\u009f\u00a0\7\36\2\2\u00a0\u00a1\7\13\2\2\u00a1\u00a2")
+        buf.write("\7B\2\2\u00a2\u00a3\7\37\2\2\u00a3\u00a4\7\34\2\2\u00a4")
+        buf.write("\u00a5\7B\2\2\u00a5\u00a6\7\f\2\2\u00a6\u00a7\5,\27\2")
+        buf.write("\u00a7\u00a8\7\r\2\2\u00a8\u00b0\3\2\2\2\u00a9\u00aa\7")
+        buf.write("\36\2\2\u00aa\u00ab\7\13\2\2\u00ab\u00ac\7B\2\2\u00ac")
+        buf.write("\u00ad\7\b\2\2\u00ad\u00ae\7\34\2\2\u00ae\u00b0\7B\2\2")
+        buf.write("\u00af\u0093\3\2\2\2\u00af\u009c\3\2\2\2\u00af\u009f\3")
+        buf.write("\2\2\2\u00af\u00a9\3\2\2\2\u00b0\17\3\2\2\2\u00b1\u00b2")
+        buf.write("\7\36\2\2\u00b2\u00b3\7\13\2\2\u00b3\u00b4\7B\2\2\u00b4")
+        buf.write("\u00b5\7\37\2\2\u00b5\u00fc\5\24\13\2\u00b6\u00b7\7\36")
+        buf.write("\2\2\u00b7\u00b8\7\13\2\2\u00b8\u00b9\7B\2\2\u00b9\u00ba")
+        buf.write("\7\b\2\2\u00ba\u00fc\7B\2\2\u00bb\u00bc\7\36\2\2\u00bc")
+        buf.write("\u00bd\7\13\2\2\u00bd\u00be\7B\2\2\u00be\u00bf\7 \2\2")
+        buf.write("\u00bf\u00c0\7B\2\2\u00c0\u00fc\5\24\13\2\u00c1\u00c2")
+        buf.write("\7\36\2\2\u00c2\u00c3\7\13\2\2\u00c3\u00c4\7B\2\2\u00c4")
+        buf.write("\u00c5\7!\2\2\u00c5\u00c6\7\"\2\2\u00c6\u00fc\7B\2\2\u00c7")
+        buf.write("\u00c8\7\36\2\2\u00c8\u00c9\7\13\2\2\u00c9\u00ca\7B\2")
+        buf.write("\2\u00ca\u00cb\7\b\2\2\u00cb\u00cc\7#\2\2\u00cc\u00ce")
+        buf.write("\7$\2\2\u00cd\u00cf\7B\2\2\u00ce\u00cd\3\2\2\2\u00ce\u00cf")
+        buf.write("\3\2\2\2\u00cf\u00fc\3\2\2\2\u00d0\u00d1\7\36\2\2\u00d1")
+        buf.write("\u00d2\7\13\2\2\u00d2\u00d3\7B\2\2\u00d3\u00d4\7\b\2\2")
+        buf.write("\u00d4\u00d5\7%\2\2\u00d5\u00d6\7$\2\2\u00d6\u00fc\7B")
+        buf.write("\2\2\u00d7\u00d8\7\36\2\2\u00d8\u00d9\7\13\2\2\u00d9\u00da")
+        buf.write("\7B\2\2\u00da\u00db\7\37\2\2\u00db\u00dc\7&\2\2\u00dc")
+        buf.write("\u00dd\7B\2\2\u00dd\u00de\7#\2\2\u00de\u00df\7$\2\2\u00df")
+        buf.write("\u00e0\7\f\2\2\u00e0\u00e1\5,\27\2\u00e1\u00e2\7\r\2\2")
+        buf.write("\u00e2\u00fc\3\2\2\2\u00e3\u00e4\7\36\2\2\u00e4\u00e5")
+        buf.write("\7\13\2\2\u00e5\u00e6\7B\2\2\u00e6\u00e7\7\37\2\2\u00e7")
+        buf.write("\u00e8\7&\2\2\u00e8\u00e9\7B\2\2\u00e9\u00ea\7%\2\2\u00ea")
+        buf.write("\u00eb\7$\2\2\u00eb\u00ec\7\f\2\2\u00ec\u00ed\5,\27\2")
+        buf.write("\u00ed\u00ee\7\r\2\2\u00ee\u00ef\7\'\2\2\u00ef\u00f0\7")
+        buf.write("B\2\2\u00f0\u00f1\7\f\2\2\u00f1\u00f2\5,\27\2\u00f2\u00f3")
+        buf.write("\7\r\2\2\u00f3\u00fc\3\2\2\2\u00f4\u00f5\7\36\2\2\u00f5")
+        buf.write("\u00f6\7\13\2\2\u00f6\u00f7\7B\2\2\u00f7\u00f8\7\37\2")
+        buf.write("\2\u00f8\u00f9\7(\2\2\u00f9\u00fa\7B\2\2\u00fa\u00fc\7")
+        buf.write("B\2\2\u00fb\u00b1\3\2\2\2\u00fb\u00b6\3\2\2\2\u00fb\u00bb")
+        buf.write("\3\2\2\2\u00fb\u00c1\3\2\2\2\u00fb\u00c7\3\2\2\2\u00fb")
+        buf.write("\u00d0\3\2\2\2\u00fb\u00d7\3\2\2\2\u00fb\u00e3\3\2\2\2")
+        buf.write("\u00fb\u00f4\3\2\2\2\u00fc\21\3\2\2\2\u00fd\u0102\5\24")
+        buf.write("\13\2\u00fe\u00ff\7)\2\2\u00ff\u0101\5\24\13\2\u0100\u00fe")
+        buf.write("\3\2\2\2\u0101\u0104\3\2\2\2\u0102\u0100\3\2\2\2\u0102")
+        buf.write("\u0103\3\2\2\2\u0103\23\3\2\2\2\u0104\u0102\3\2\2\2\u0105")
+        buf.write("\u0106\7B\2\2\u0106\u0109\5\26\f\2\u0107\u0108\7*\2\2")
+        buf.write("\u0108\u010a\7A\2\2\u0109\u0107\3\2\2\2\u0109\u010a\3")
+        buf.write("\2\2\2\u010a\u010d\3\2\2\2\u010b\u010c\7+\2\2\u010c\u010e")
+        buf.write("\5\34\17\2\u010d\u010b\3\2\2\2\u010d\u010e\3\2\2\2\u010e")
+        buf.write("\u0120\3\2\2\2\u010f\u0110\7#\2\2\u0110\u0111\7$\2\2\u0111")
+        buf.write("\u0112\7\f\2\2\u0112\u0113\5,\27\2\u0113\u0114\7\r\2\2")
+        buf.write("\u0114\u0120\3\2\2\2\u0115\u0116\7%\2\2\u0116\u0117\7")
+        buf.write("$\2\2\u0117\u0118\7\f\2\2\u0118\u0119\7B\2\2\u0119\u011a")
+        buf.write("\7\r\2\2\u011a\u011b\7\'\2\2\u011b\u011c\7B\2\2\u011c")
+        buf.write("\u011d\7\f\2\2\u011d\u011e\7B\2\2\u011e\u0120\7\r\2\2")
+        buf.write("\u011f\u0105\3\2\2\2\u011f\u010f\3\2\2\2\u011f\u0115\3")
+        buf.write("\2\2\2\u0120\25\3\2\2\2\u0121\u0122\7,\2\2\u0122\u0123")
+        buf.write("\7\f\2\2\u0123\u0124\7C\2\2\u0124\u012c\7\r\2\2\u0125")
+        buf.write("\u0126\7-\2\2\u0126\u0127\7\f\2\2\u0127\u0128\7C\2\2\u0128")
+        buf.write("\u012c\7\r\2\2\u0129\u012c\7.\2\2\u012a\u012c\7/\2\2\u012b")
+        buf.write("\u0121\3\2\2\2\u012b\u0125\3\2\2\2\u012b\u0129\3\2\2\2")
+        buf.write("\u012b\u012a\3\2\2\2\u012c\27\3\2\2\2\u012d\u0132\5\32")
+        buf.write("\16\2\u012e\u012f\7)\2\2\u012f\u0131\5\32\16\2\u0130\u012e")
+        buf.write("\3\2\2\2\u0131\u0134\3\2\2\2\u0132\u0130\3\2\2\2\u0132")
+        buf.write("\u0133\3\2\2\2\u0133\31\3\2\2\2\u0134\u0132\3\2\2\2\u0135")
+        buf.write("\u0136\7\f\2\2\u0136\u013b\5\34\17\2\u0137\u0138\7)\2")
+        buf.write("\2\u0138\u013a\5\34\17\2\u0139\u0137\3\2\2\2\u013a\u013d")
+        buf.write("\3\2\2\2\u013b\u0139\3\2\2\2\u013b\u013c\3\2\2\2\u013c")
+        buf.write("\u013e\3\2\2\2\u013d\u013b\3\2\2\2\u013e\u013f\7\r\2\2")
+        buf.write("\u013f\33\3\2\2\2\u0140\u0141\t\2\2\2\u0141\35\3\2\2\2")
+        buf.write("\u0142\u0147\5 \21\2\u0143\u0144\7\60\2\2\u0144\u0146")
+        buf.write("\5 \21\2\u0145\u0143\3\2\2\2\u0146\u0149\3\2\2\2\u0147")
+        buf.write("\u0145\3\2\2\2\u0147\u0148\3\2\2\2\u0148\37\3\2\2\2\u0149")
+        buf.write("\u0147\3\2\2\2\u014a\u014b\5\"\22\2\u014b\u014c\5.\30")
+        buf.write("\2\u014c\u014d\5$\23\2\u014d\u016a\3\2\2\2\u014e\u014f")
+        buf.write("\5\"\22\2\u014f\u0150\5.\30\2\u0150\u0151\7\f\2\2\u0151")
+        buf.write("\u0152\5\f\7\2\u0152\u0153\7\r\2\2\u0153\u016a\3\2\2\2")
+        buf.write("\u0154\u0155\5\"\22\2\u0155\u0157\7\61\2\2\u0156\u0158")
+        buf.write("\7*\2\2\u0157\u0156\3\2\2\2\u0157\u0158\3\2\2\2\u0158")
+        buf.write("\u0159\3\2\2\2\u0159\u015a\7A\2\2\u015a\u016a\3\2\2\2")
+        buf.write("\u015b\u015c\5\"\22\2\u015c\u015d\7\62\2\2\u015d\u015e")
+        buf.write("\5\32\16\2\u015e\u016a\3\2\2\2\u015f\u0160\5\"\22\2\u0160")
+        buf.write("\u0161\7\62\2\2\u0161\u0162\7\f\2\2\u0162\u0163\5\f\7")
+        buf.write("\2\u0163\u0164\7\r\2\2\u0164\u016a\3\2\2\2\u0165\u0166")
+        buf.write("\5\"\22\2\u0166\u0167\7\63\2\2\u0167\u0168\7D\2\2\u0168")
+        buf.write("\u016a\3\2\2\2\u0169\u014a\3\2\2\2\u0169\u014e\3\2\2\2")
+        buf.write("\u0169\u0154\3\2\2\2\u0169\u015b\3\2\2\2\u0169\u015f\3")
+        buf.write("\2\2\2\u0169\u0165\3\2\2\2\u016a!\3\2\2\2\u016b\u016c")
+        buf.write("\7B\2\2\u016c\u016e\7\64\2\2\u016d\u016b\3\2\2\2\u016d")
+        buf.write("\u016e\3\2\2\2\u016e\u016f\3\2\2\2\u016f\u0170\7B\2\2")
+        buf.write("\u0170#\3\2\2\2\u0171\u0174\5\34\17\2\u0172\u0174\5\"")
+        buf.write("\22\2\u0173\u0171\3\2\2\2\u0173\u0172\3\2\2\2\u0174%\3")
+        buf.write("\2\2\2\u0175\u0176\7B\2\2\u0176\u0177\7\66\2\2\u0177\u017e")
+        buf.write("\5\34\17\2\u0178\u0179\7)\2\2\u0179\u017a\7B\2\2\u017a")
+        buf.write("\u017b\7\66\2\2\u017b\u017d\5\34\17\2\u017c\u0178\3\2")
+        buf.write("\2\2\u017d\u0180\3\2\2\2\u017e\u017c\3\2\2\2\u017e\u017f")
+        buf.write("\3\2\2\2\u017f\'\3\2\2\2\u0180\u017e\3\2\2\2\u0181\u018b")
+        buf.write("\7\65\2\2\u0182\u0187\5*\26\2\u0183\u0184\7)\2\2\u0184")
+        buf.write("\u0186\5*\26\2\u0185\u0183\3\2\2\2\u0186\u0189\3\2\2\2")
+        buf.write("\u0187\u0185\3\2\2\2\u0187\u0188\3\2\2\2\u0188\u018b\3")
+        buf.write("\2\2\2\u0189\u0187\3\2\2\2\u018a\u0181\3\2\2\2\u018a\u0182")
+        buf.write("\3\2\2\2\u018b)\3\2\2\2\u018c\u0197\5\"\22\2\u018d\u018e")
+        buf.write("\5\60\31\2\u018e\u018f\7\f\2\2\u018f\u0190\5\"\22\2\u0190")
+        buf.write("\u0191\7\r\2\2\u0191\u0197\3\2\2\2\u0192\u0193\7<\2\2")
+        buf.write("\u0193\u0194\7\f\2\2\u0194\u0195\7\65\2\2\u0195\u0197")
+        buf.write("\7\r\2\2\u0196\u018c\3\2\2\2\u0196\u018d\3\2\2\2\u0196")
+        buf.write("\u0192\3\2\2\2\u0197+\3\2\2\2\u0198\u019d\7B\2\2\u0199")
+        buf.write("\u019a\7)\2\2\u019a\u019c\7B\2\2\u019b\u0199\3\2\2\2\u019c")
+        buf.write("\u019f\3\2\2\2\u019d\u019b\3\2\2\2\u019d\u019e\3\2\2\2")
+        buf.write("\u019e-\3\2\2\2\u019f\u019d\3\2\2\2\u01a0\u01a1\t\3\2")
+        buf.write("\2\u01a1/\3\2\2\2\u01a2\u01a3\t\4\2\2\u01a3\61\3\2\2\2")
+        buf.write("\36\65M\\|\u0084\u0089\u008f\u0091\u00af\u00ce\u00fb\u0102")
+        buf.write("\u0109\u010d\u011f\u012b\u0132\u013b\u0147\u0157\u0169")
+        buf.write("\u016d\u0173\u017e\u0187\u018a\u0196\u019d")
         return buf.getvalue()
 
 
@@ -211,14 +218,14 @@ class SQLParser ( Parser ):
                      "'DATABASE'", "'DROP'", "'USE'", "'TABLES'", "'TABLE'", 
                      "'('", "')'", "'DESC'", "'INSERT'", "'INTO'", "'VALUES'", 
                      "'DELETE'", "'FROM'", "'WHERE'", "'UPDATE'", "'SET'", 
-                     "'SELECT'", "'GROUP'", "'BY'", "'INDEX'", "'ON'", "'ALTER'", 
-                     "'ADD'", "'CHANGE'", "'RENAME'", "'TO'", "'PRIMARY'", 
-                     "'KEY'", "'FOREIGN'", "'CONSTRAINT'", "'REFERENCES'", 
-                     "','", "'NOT'", "'DEFAULT'", "'INT'", "'VARCHAR'", 
-                     "'DATE'", "'FLOAT'", "'AND'", "'IS'", "'IN'", "'LIKE'", 
-                     "'.'", "'*'", "'='", "'<'", "'<='", "'>'", "'>='", 
-                     "'<>'", "'COUNT'", "'AVG'", "'MAX'", "'MIN'", "'SUM'", 
-                     "'NULL'" ]
+                     "'SELECT'", "'GROUP'", "'BY'", "'LIMIT'", "'OFFSET'", 
+                     "'INDEX'", "'ON'", "'ALTER'", "'ADD'", "'CHANGE'", 
+                     "'RENAME'", "'TO'", "'PRIMARY'", "'KEY'", "'FOREIGN'", 
+                     "'CONSTRAINT'", "'REFERENCES'", "'UNIQUE'", "','", 
+                     "'NOT'", "'DEFAULT'", "'INT'", "'VARCHAR'", "'DATE'", 
+                     "'FLOAT'", "'AND'", "'IS'", "'IN'", "'LIKE'", "'.'", 
+                     "'*'", "'='", "'<'", "'<='", "'>'", "'>='", "'<>'", 
+                     "'COUNT'", "'AVG'", "'MAX'", "'MIN'", "'SUM'", "'NULL'" ]
 
     symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
@@ -232,10 +239,11 @@ class SQLParser ( Parser ):
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
-                      "<INVALID>", "EqualOrAssign", "Less", "LessEqual", 
-                      "Greater", "GreaterEqual", "NotEqual", "Count", "Average", 
-                      "Max", "Min", "Sum", "Null", "Identifier", "Integer", 
-                      "String", "Float", "Whitespace", "Annotation" ]
+                      "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
+                      "EqualOrAssign", "Less", "LessEqual", "Greater", "GreaterEqual", 
+                      "NotEqual", "Count", "Average", "Max", "Min", "Sum", 
+                      "Null", "Identifier", "Integer", "String", "Float", 
+                      "Whitespace", "Annotation" ]
 
     RULE_program = 0
     RULE_statement = 1
@@ -318,24 +326,27 @@ class SQLParser ( Parser ):
     T__45=46
     T__46=47
     T__47=48
-    EqualOrAssign=49
-    Less=50
-    LessEqual=51
-    Greater=52
-    GreaterEqual=53
-    NotEqual=54
-    Count=55
-    Average=56
-    Max=57
-    Min=58
-    Sum=59
-    Null=60
-    Identifier=61
-    Integer=62
-    String=63
-    Float=64
-    Whitespace=65
-    Annotation=66
+    T__48=49
+    T__49=50
+    T__50=51
+    EqualOrAssign=52
+    Less=53
+    LessEqual=54
+    Greater=55
+    GreaterEqual=56
+    NotEqual=57
+    Count=58
+    Average=59
+    Max=60
+    Min=61
+    Sum=62
+    Null=63
+    Identifier=64
+    Integer=65
+    String=66
+    Float=67
+    Whitespace=68
+    Annotation=69
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -384,7 +395,7 @@ class SQLParser ( Parser ):
             self.state = 51
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << SQLParser.T__1) | (1 << SQLParser.T__3) | (1 << SQLParser.T__5) | (1 << SQLParser.T__6) | (1 << SQLParser.T__11) | (1 << SQLParser.T__12) | (1 << SQLParser.T__15) | (1 << SQLParser.T__18) | (1 << SQLParser.T__20) | (1 << SQLParser.T__25) | (1 << SQLParser.Null))) != 0) or _la==SQLParser.Annotation:
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << SQLParser.T__1) | (1 << SQLParser.T__3) | (1 << SQLParser.T__5) | (1 << SQLParser.T__6) | (1 << SQLParser.T__11) | (1 << SQLParser.T__12) | (1 << SQLParser.T__15) | (1 << SQLParser.T__18) | (1 << SQLParser.T__20) | (1 << SQLParser.T__27) | (1 << SQLParser.Null))) != 0) or _la==SQLParser.Annotation:
                 self.state = 48
                 self.statement()
                 self.state = 53
@@ -964,6 +975,12 @@ class SQLParser ( Parser ):
             return self.getTypedRuleContext(SQLParser.ColumnContext,0)
 
 
+        def Integer(self, i:int=None):
+            if i is None:
+                return self.getTokens(SQLParser.Integer)
+            else:
+                return self.getToken(SQLParser.Integer, i)
+
         def getRuleIndex(self):
             return SQLParser.RULE_select_table
 
@@ -1011,6 +1028,26 @@ class SQLParser ( Parser ):
                 self.match(SQLParser.T__22)
                 self.state = 134
                 self.column()
+
+
+            self.state = 143
+            self._errHandler.sync(self)
+            _la = self._input.LA(1)
+            if _la==SQLParser.T__23:
+                self.state = 137
+                self.match(SQLParser.T__23)
+                self.state = 138
+                self.match(SQLParser.Integer)
+                self.state = 141
+                self._errHandler.sync(self)
+                _la = self._input.LA(1)
+                if _la==SQLParser.T__24:
+                    self.state = 139
+                    self.match(SQLParser.T__24)
+                    self.state = 140
+                    self.match(SQLParser.Integer)
+
+
 
 
         except RecognitionException as re:
@@ -1123,78 +1160,78 @@ class SQLParser ( Parser ):
         localctx = SQLParser.Index_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 12, self.RULE_index_statement)
         try:
-            self.state = 165
+            self.state = 173
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,6,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input,8,self._ctx)
             if la_ == 1:
                 localctx = SQLParser.Create_indexContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 137
+                self.state = 145
                 self.match(SQLParser.T__3)
-                self.state = 138
-                self.match(SQLParser.T__23)
-                self.state = 139
+                self.state = 146
+                self.match(SQLParser.T__25)
+                self.state = 147
                 self.match(SQLParser.Identifier)
-                self.state = 140
-                self.match(SQLParser.T__24)
-                self.state = 141
+                self.state = 148
+                self.match(SQLParser.T__26)
+                self.state = 149
                 self.match(SQLParser.Identifier)
-                self.state = 142
+                self.state = 150
                 self.match(SQLParser.T__9)
-                self.state = 143
+                self.state = 151
                 self.identifiers()
-                self.state = 144
+                self.state = 152
                 self.match(SQLParser.T__10)
                 pass
 
             elif la_ == 2:
                 localctx = SQLParser.Drop_indexContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 146
+                self.state = 154
                 self.match(SQLParser.T__5)
-                self.state = 147
-                self.match(SQLParser.T__23)
-                self.state = 148
+                self.state = 155
+                self.match(SQLParser.T__25)
+                self.state = 156
                 self.match(SQLParser.Identifier)
                 pass
 
             elif la_ == 3:
                 localctx = SQLParser.Alter_add_indexContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 149
-                self.match(SQLParser.T__25)
-                self.state = 150
-                self.match(SQLParser.T__8)
-                self.state = 151
-                self.match(SQLParser.Identifier)
-                self.state = 152
-                self.match(SQLParser.T__26)
-                self.state = 153
-                self.match(SQLParser.T__23)
-                self.state = 154
-                self.match(SQLParser.Identifier)
-                self.state = 155
-                self.match(SQLParser.T__9)
-                self.state = 156
-                self.identifiers()
                 self.state = 157
+                self.match(SQLParser.T__27)
+                self.state = 158
+                self.match(SQLParser.T__8)
+                self.state = 159
+                self.match(SQLParser.Identifier)
+                self.state = 160
+                self.match(SQLParser.T__28)
+                self.state = 161
+                self.match(SQLParser.T__25)
+                self.state = 162
+                self.match(SQLParser.Identifier)
+                self.state = 163
+                self.match(SQLParser.T__9)
+                self.state = 164
+                self.identifiers()
+                self.state = 165
                 self.match(SQLParser.T__10)
                 pass
 
             elif la_ == 4:
                 localctx = SQLParser.Alter_drop_indexContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
-                self.state = 159
-                self.match(SQLParser.T__25)
-                self.state = 160
+                self.state = 167
+                self.match(SQLParser.T__27)
+                self.state = 168
                 self.match(SQLParser.T__8)
-                self.state = 161
+                self.state = 169
                 self.match(SQLParser.Identifier)
-                self.state = 162
+                self.state = 170
                 self.match(SQLParser.T__5)
-                self.state = 163
-                self.match(SQLParser.T__23)
-                self.state = 164
+                self.state = 171
+                self.match(SQLParser.T__25)
+                self.state = 172
                 self.match(SQLParser.Identifier)
                 pass
 
@@ -1264,6 +1301,25 @@ class SQLParser ( Parser ):
         def accept(self, visitor:ParseTreeVisitor):
             if hasattr( visitor, "visitAlter_table_add_foreign_key" ):
                 return visitor.visitAlter_table_add_foreign_key(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class Alter_table_add_uniqueContext(Alter_statementContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a SQLParser.Alter_statementContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def Identifier(self, i:int=None):
+            if i is None:
+                return self.getTokens(SQLParser.Identifier)
+            else:
+                return self.getToken(SQLParser.Identifier, i)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitAlter_table_add_unique" ):
+                return visitor.visitAlter_table_add_unique(self)
             else:
                 return visitor.visitChildren(self)
 
@@ -1395,93 +1451,93 @@ class SQLParser ( Parser ):
         self.enterRule(localctx, 14, self.RULE_alter_statement)
         self._la = 0 # Token type
         try:
-            self.state = 234
+            self.state = 249
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,8,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input,10,self._ctx)
             if la_ == 1:
                 localctx = SQLParser.Alter_table_addContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 167
-                self.match(SQLParser.T__25)
-                self.state = 168
+                self.state = 175
+                self.match(SQLParser.T__27)
+                self.state = 176
                 self.match(SQLParser.T__8)
-                self.state = 169
+                self.state = 177
                 self.match(SQLParser.Identifier)
-                self.state = 170
-                self.match(SQLParser.T__26)
-                self.state = 171
+                self.state = 178
+                self.match(SQLParser.T__28)
+                self.state = 179
                 self.field()
                 pass
 
             elif la_ == 2:
                 localctx = SQLParser.Alter_table_dropContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 172
-                self.match(SQLParser.T__25)
-                self.state = 173
+                self.state = 180
+                self.match(SQLParser.T__27)
+                self.state = 181
                 self.match(SQLParser.T__8)
-                self.state = 174
+                self.state = 182
                 self.match(SQLParser.Identifier)
-                self.state = 175
+                self.state = 183
                 self.match(SQLParser.T__5)
-                self.state = 176
+                self.state = 184
                 self.match(SQLParser.Identifier)
                 pass
 
             elif la_ == 3:
                 localctx = SQLParser.Alter_table_changeContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 177
-                self.match(SQLParser.T__25)
-                self.state = 178
-                self.match(SQLParser.T__8)
-                self.state = 179
-                self.match(SQLParser.Identifier)
-                self.state = 180
+                self.state = 185
                 self.match(SQLParser.T__27)
-                self.state = 181
+                self.state = 186
+                self.match(SQLParser.T__8)
+                self.state = 187
                 self.match(SQLParser.Identifier)
-                self.state = 182
+                self.state = 188
+                self.match(SQLParser.T__29)
+                self.state = 189
+                self.match(SQLParser.Identifier)
+                self.state = 190
                 self.field()
                 pass
 
             elif la_ == 4:
                 localctx = SQLParser.Alter_table_renameContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
-                self.state = 183
-                self.match(SQLParser.T__25)
-                self.state = 184
+                self.state = 191
+                self.match(SQLParser.T__27)
+                self.state = 192
                 self.match(SQLParser.T__8)
-                self.state = 185
+                self.state = 193
                 self.match(SQLParser.Identifier)
-                self.state = 186
-                self.match(SQLParser.T__28)
-                self.state = 187
-                self.match(SQLParser.T__29)
-                self.state = 188
+                self.state = 194
+                self.match(SQLParser.T__30)
+                self.state = 195
+                self.match(SQLParser.T__31)
+                self.state = 196
                 self.match(SQLParser.Identifier)
                 pass
 
             elif la_ == 5:
                 localctx = SQLParser.Alter_table_drop_pkContext(self, localctx)
                 self.enterOuterAlt(localctx, 5)
-                self.state = 189
-                self.match(SQLParser.T__25)
-                self.state = 190
+                self.state = 197
+                self.match(SQLParser.T__27)
+                self.state = 198
                 self.match(SQLParser.T__8)
-                self.state = 191
+                self.state = 199
                 self.match(SQLParser.Identifier)
-                self.state = 192
+                self.state = 200
                 self.match(SQLParser.T__5)
-                self.state = 193
-                self.match(SQLParser.T__30)
-                self.state = 194
-                self.match(SQLParser.T__31)
-                self.state = 196
+                self.state = 201
+                self.match(SQLParser.T__32)
+                self.state = 202
+                self.match(SQLParser.T__33)
+                self.state = 204
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if _la==SQLParser.Identifier:
-                    self.state = 195
+                    self.state = 203
                     self.match(SQLParser.Identifier)
 
 
@@ -1490,84 +1546,104 @@ class SQLParser ( Parser ):
             elif la_ == 6:
                 localctx = SQLParser.Alter_table_drop_foreign_keyContext(self, localctx)
                 self.enterOuterAlt(localctx, 6)
-                self.state = 198
-                self.match(SQLParser.T__25)
-                self.state = 199
+                self.state = 206
+                self.match(SQLParser.T__27)
+                self.state = 207
                 self.match(SQLParser.T__8)
-                self.state = 200
+                self.state = 208
                 self.match(SQLParser.Identifier)
-                self.state = 201
+                self.state = 209
                 self.match(SQLParser.T__5)
-                self.state = 202
-                self.match(SQLParser.T__32)
-                self.state = 203
-                self.match(SQLParser.T__31)
-                self.state = 204
+                self.state = 210
+                self.match(SQLParser.T__34)
+                self.state = 211
+                self.match(SQLParser.T__33)
+                self.state = 212
                 self.match(SQLParser.Identifier)
                 pass
 
             elif la_ == 7:
                 localctx = SQLParser.Alter_table_add_pkContext(self, localctx)
                 self.enterOuterAlt(localctx, 7)
-                self.state = 205
-                self.match(SQLParser.T__25)
-                self.state = 206
-                self.match(SQLParser.T__8)
-                self.state = 207
-                self.match(SQLParser.Identifier)
-                self.state = 208
-                self.match(SQLParser.T__26)
-                self.state = 209
-                self.match(SQLParser.T__33)
-                self.state = 210
-                self.match(SQLParser.Identifier)
-                self.state = 211
-                self.match(SQLParser.T__30)
-                self.state = 212
-                self.match(SQLParser.T__31)
                 self.state = 213
-                self.match(SQLParser.T__9)
+                self.match(SQLParser.T__27)
                 self.state = 214
-                self.identifiers()
+                self.match(SQLParser.T__8)
                 self.state = 215
+                self.match(SQLParser.Identifier)
+                self.state = 216
+                self.match(SQLParser.T__28)
+                self.state = 217
+                self.match(SQLParser.T__35)
+                self.state = 218
+                self.match(SQLParser.Identifier)
+                self.state = 219
+                self.match(SQLParser.T__32)
+                self.state = 220
+                self.match(SQLParser.T__33)
+                self.state = 221
+                self.match(SQLParser.T__9)
+                self.state = 222
+                self.identifiers()
+                self.state = 223
                 self.match(SQLParser.T__10)
                 pass
 
             elif la_ == 8:
                 localctx = SQLParser.Alter_table_add_foreign_keyContext(self, localctx)
                 self.enterOuterAlt(localctx, 8)
-                self.state = 217
-                self.match(SQLParser.T__25)
-                self.state = 218
-                self.match(SQLParser.T__8)
-                self.state = 219
-                self.match(SQLParser.Identifier)
-                self.state = 220
-                self.match(SQLParser.T__26)
-                self.state = 221
-                self.match(SQLParser.T__33)
-                self.state = 222
-                self.match(SQLParser.Identifier)
-                self.state = 223
-                self.match(SQLParser.T__32)
-                self.state = 224
-                self.match(SQLParser.T__31)
                 self.state = 225
-                self.match(SQLParser.T__9)
+                self.match(SQLParser.T__27)
                 self.state = 226
-                self.identifiers()
+                self.match(SQLParser.T__8)
                 self.state = 227
-                self.match(SQLParser.T__10)
-                self.state = 228
-                self.match(SQLParser.T__34)
-                self.state = 229
                 self.match(SQLParser.Identifier)
+                self.state = 228
+                self.match(SQLParser.T__28)
+                self.state = 229
+                self.match(SQLParser.T__35)
                 self.state = 230
-                self.match(SQLParser.T__9)
+                self.match(SQLParser.Identifier)
                 self.state = 231
-                self.identifiers()
+                self.match(SQLParser.T__34)
                 self.state = 232
+                self.match(SQLParser.T__33)
+                self.state = 233
+                self.match(SQLParser.T__9)
+                self.state = 234
+                self.identifiers()
+                self.state = 235
                 self.match(SQLParser.T__10)
+                self.state = 236
+                self.match(SQLParser.T__36)
+                self.state = 237
+                self.match(SQLParser.Identifier)
+                self.state = 238
+                self.match(SQLParser.T__9)
+                self.state = 239
+                self.identifiers()
+                self.state = 240
+                self.match(SQLParser.T__10)
+                pass
+
+            elif la_ == 9:
+                localctx = SQLParser.Alter_table_add_uniqueContext(self, localctx)
+                self.enterOuterAlt(localctx, 9)
+                self.state = 242
+                self.match(SQLParser.T__27)
+                self.state = 243
+                self.match(SQLParser.T__8)
+                self.state = 244
+                self.match(SQLParser.Identifier)
+                self.state = 245
+                self.match(SQLParser.T__28)
+                self.state = 246
+                self.match(SQLParser.T__37)
+                self.state = 247
+                self.match(SQLParser.Identifier)
+
+                self.state = 248
+                self.match(SQLParser.Identifier)
                 pass
 
 
@@ -1612,17 +1688,17 @@ class SQLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 236
+            self.state = 251
             self.field()
-            self.state = 241
+            self.state = 256
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==SQLParser.T__35:
-                self.state = 237
-                self.match(SQLParser.T__35)
-                self.state = 238
+            while _la==SQLParser.T__38:
+                self.state = 252
+                self.match(SQLParser.T__38)
+                self.state = 253
                 self.field()
-                self.state = 243
+                self.state = 258
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -1718,73 +1794,73 @@ class SQLParser ( Parser ):
         self.enterRule(localctx, 18, self.RULE_field)
         self._la = 0 # Token type
         try:
-            self.state = 270
+            self.state = 285
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [SQLParser.Identifier]:
                 localctx = SQLParser.Normal_fieldContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 244
+                self.state = 259
                 self.match(SQLParser.Identifier)
-                self.state = 245
+                self.state = 260
                 self.type_()
-                self.state = 248
+                self.state = 263
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==SQLParser.T__36:
-                    self.state = 246
-                    self.match(SQLParser.T__36)
-                    self.state = 247
+                if _la==SQLParser.T__39:
+                    self.state = 261
+                    self.match(SQLParser.T__39)
+                    self.state = 262
                     self.match(SQLParser.Null)
 
 
-                self.state = 252
+                self.state = 267
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==SQLParser.T__37:
-                    self.state = 250
-                    self.match(SQLParser.T__37)
-                    self.state = 251
+                if _la==SQLParser.T__40:
+                    self.state = 265
+                    self.match(SQLParser.T__40)
+                    self.state = 266
                     self.value()
 
 
                 pass
-            elif token in [SQLParser.T__30]:
+            elif token in [SQLParser.T__32]:
                 localctx = SQLParser.Primary_key_fieldContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 254
-                self.match(SQLParser.T__30)
-                self.state = 255
-                self.match(SQLParser.T__31)
-                self.state = 256
+                self.state = 269
+                self.match(SQLParser.T__32)
+                self.state = 270
+                self.match(SQLParser.T__33)
+                self.state = 271
                 self.match(SQLParser.T__9)
-                self.state = 257
+                self.state = 272
                 self.identifiers()
-                self.state = 258
+                self.state = 273
                 self.match(SQLParser.T__10)
                 pass
-            elif token in [SQLParser.T__32]:
+            elif token in [SQLParser.T__34]:
                 localctx = SQLParser.Foreign_key_fieldContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 260
-                self.match(SQLParser.T__32)
-                self.state = 261
-                self.match(SQLParser.T__31)
-                self.state = 262
-                self.match(SQLParser.T__9)
-                self.state = 263
-                self.match(SQLParser.Identifier)
-                self.state = 264
-                self.match(SQLParser.T__10)
-                self.state = 265
+                self.state = 275
                 self.match(SQLParser.T__34)
-                self.state = 266
-                self.match(SQLParser.Identifier)
-                self.state = 267
+                self.state = 276
+                self.match(SQLParser.T__33)
+                self.state = 277
                 self.match(SQLParser.T__9)
-                self.state = 268
+                self.state = 278
                 self.match(SQLParser.Identifier)
-                self.state = 269
+                self.state = 279
+                self.match(SQLParser.T__10)
+                self.state = 280
+                self.match(SQLParser.T__36)
+                self.state = 281
+                self.match(SQLParser.Identifier)
+                self.state = 282
+                self.match(SQLParser.T__9)
+                self.state = 283
+                self.match(SQLParser.Identifier)
+                self.state = 284
                 self.match(SQLParser.T__10)
                 pass
             else:
@@ -1825,40 +1901,40 @@ class SQLParser ( Parser ):
         localctx = SQLParser.Type_Context(self, self._ctx, self.state)
         self.enterRule(localctx, 20, self.RULE_type_)
         try:
-            self.state = 282
+            self.state = 297
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [SQLParser.T__38]:
+            if token in [SQLParser.T__41]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 272
-                self.match(SQLParser.T__38)
-                self.state = 273
-                self.match(SQLParser.T__9)
-                self.state = 274
-                self.match(SQLParser.Integer)
-                self.state = 275
-                self.match(SQLParser.T__10)
-                pass
-            elif token in [SQLParser.T__39]:
-                self.enterOuterAlt(localctx, 2)
-                self.state = 276
-                self.match(SQLParser.T__39)
-                self.state = 277
-                self.match(SQLParser.T__9)
-                self.state = 278
-                self.match(SQLParser.Integer)
-                self.state = 279
-                self.match(SQLParser.T__10)
-                pass
-            elif token in [SQLParser.T__40]:
-                self.enterOuterAlt(localctx, 3)
-                self.state = 280
-                self.match(SQLParser.T__40)
-                pass
-            elif token in [SQLParser.T__41]:
-                self.enterOuterAlt(localctx, 4)
-                self.state = 281
+                self.state = 287
                 self.match(SQLParser.T__41)
+                self.state = 288
+                self.match(SQLParser.T__9)
+                self.state = 289
+                self.match(SQLParser.Integer)
+                self.state = 290
+                self.match(SQLParser.T__10)
+                pass
+            elif token in [SQLParser.T__42]:
+                self.enterOuterAlt(localctx, 2)
+                self.state = 291
+                self.match(SQLParser.T__42)
+                self.state = 292
+                self.match(SQLParser.T__9)
+                self.state = 293
+                self.match(SQLParser.Integer)
+                self.state = 294
+                self.match(SQLParser.T__10)
+                pass
+            elif token in [SQLParser.T__43]:
+                self.enterOuterAlt(localctx, 3)
+                self.state = 295
+                self.match(SQLParser.T__43)
+                pass
+            elif token in [SQLParser.T__44]:
+                self.enterOuterAlt(localctx, 4)
+                self.state = 296
+                self.match(SQLParser.T__44)
                 pass
             else:
                 raise NoViableAltException(self)
@@ -1904,17 +1980,17 @@ class SQLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 284
+            self.state = 299
             self.value_list()
-            self.state = 289
+            self.state = 304
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==SQLParser.T__35:
-                self.state = 285
-                self.match(SQLParser.T__35)
-                self.state = 286
+            while _la==SQLParser.T__38:
+                self.state = 300
+                self.match(SQLParser.T__38)
+                self.state = 301
                 self.value_list()
-                self.state = 291
+                self.state = 306
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -1959,23 +2035,23 @@ class SQLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 292
+            self.state = 307
             self.match(SQLParser.T__9)
-            self.state = 293
+            self.state = 308
             self.value()
-            self.state = 298
+            self.state = 313
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==SQLParser.T__35:
-                self.state = 294
-                self.match(SQLParser.T__35)
-                self.state = 295
+            while _la==SQLParser.T__38:
+                self.state = 309
+                self.match(SQLParser.T__38)
+                self.state = 310
                 self.value()
-                self.state = 300
+                self.state = 315
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
-            self.state = 301
+            self.state = 316
             self.match(SQLParser.T__10)
         except RecognitionException as re:
             localctx.exception = re
@@ -2023,9 +2099,9 @@ class SQLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 303
+            self.state = 318
             _la = self._input.LA(1)
-            if not(((((_la - 60)) & ~0x3f) == 0 and ((1 << (_la - 60)) & ((1 << (SQLParser.Null - 60)) | (1 << (SQLParser.Integer - 60)) | (1 << (SQLParser.String - 60)) | (1 << (SQLParser.Float - 60)))) != 0)):
+            if not(((((_la - 63)) & ~0x3f) == 0 and ((1 << (_la - 63)) & ((1 << (SQLParser.Null - 63)) | (1 << (SQLParser.Integer - 63)) | (1 << (SQLParser.String - 63)) | (1 << (SQLParser.Float - 63)))) != 0)):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -2071,17 +2147,17 @@ class SQLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 305
+            self.state = 320
             self.where_clause()
-            self.state = 310
+            self.state = 325
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==SQLParser.T__42:
-                self.state = 306
-                self.match(SQLParser.T__42)
-                self.state = 307
+            while _la==SQLParser.T__45:
+                self.state = 321
+                self.match(SQLParser.T__45)
+                self.state = 322
                 self.where_clause()
-                self.state = 312
+                self.state = 327
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -2241,88 +2317,88 @@ class SQLParser ( Parser ):
         self.enterRule(localctx, 30, self.RULE_where_clause)
         self._la = 0 # Token type
         try:
-            self.state = 344
+            self.state = 359
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,18,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input,20,self._ctx)
             if la_ == 1:
                 localctx = SQLParser.Where_operator_expressionContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 313
+                self.state = 328
                 self.column()
-                self.state = 314
+                self.state = 329
                 self.operator()
-                self.state = 315
+                self.state = 330
                 self.expression()
                 pass
 
             elif la_ == 2:
                 localctx = SQLParser.Where_operator_selectContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 317
+                self.state = 332
                 self.column()
-                self.state = 318
+                self.state = 333
                 self.operator()
-                self.state = 319
+                self.state = 334
                 self.match(SQLParser.T__9)
-                self.state = 320
+                self.state = 335
                 self.select_table()
-                self.state = 321
+                self.state = 336
                 self.match(SQLParser.T__10)
                 pass
 
             elif la_ == 3:
                 localctx = SQLParser.Where_nullContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 323
+                self.state = 338
                 self.column()
-                self.state = 324
-                self.match(SQLParser.T__43)
-                self.state = 326
+                self.state = 339
+                self.match(SQLParser.T__46)
+                self.state = 341
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==SQLParser.T__36:
-                    self.state = 325
-                    self.match(SQLParser.T__36)
+                if _la==SQLParser.T__39:
+                    self.state = 340
+                    self.match(SQLParser.T__39)
 
 
-                self.state = 328
+                self.state = 343
                 self.match(SQLParser.Null)
                 pass
 
             elif la_ == 4:
                 localctx = SQLParser.Where_in_listContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
-                self.state = 330
+                self.state = 345
                 self.column()
-                self.state = 331
-                self.match(SQLParser.T__44)
-                self.state = 332
+                self.state = 346
+                self.match(SQLParser.T__47)
+                self.state = 347
                 self.value_list()
                 pass
 
             elif la_ == 5:
                 localctx = SQLParser.Where_in_selectContext(self, localctx)
                 self.enterOuterAlt(localctx, 5)
-                self.state = 334
+                self.state = 349
                 self.column()
-                self.state = 335
-                self.match(SQLParser.T__44)
-                self.state = 336
+                self.state = 350
+                self.match(SQLParser.T__47)
+                self.state = 351
                 self.match(SQLParser.T__9)
-                self.state = 337
+                self.state = 352
                 self.select_table()
-                self.state = 338
+                self.state = 353
                 self.match(SQLParser.T__10)
                 pass
 
             elif la_ == 6:
                 localctx = SQLParser.Where_like_stringContext(self, localctx)
                 self.enterOuterAlt(localctx, 6)
-                self.state = 340
+                self.state = 355
                 self.column()
-                self.state = 341
-                self.match(SQLParser.T__45)
-                self.state = 342
+                self.state = 356
+                self.match(SQLParser.T__48)
+                self.state = 357
                 self.match(SQLParser.String)
                 pass
 
@@ -2366,17 +2442,17 @@ class SQLParser ( Parser ):
         self.enterRule(localctx, 32, self.RULE_column)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 348
+            self.state = 363
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,19,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input,21,self._ctx)
             if la_ == 1:
-                self.state = 346
+                self.state = 361
                 self.match(SQLParser.Identifier)
-                self.state = 347
-                self.match(SQLParser.T__46)
+                self.state = 362
+                self.match(SQLParser.T__49)
 
 
-            self.state = 350
+            self.state = 365
             self.match(SQLParser.Identifier)
         except RecognitionException as re:
             localctx.exception = re
@@ -2418,17 +2494,17 @@ class SQLParser ( Parser ):
         localctx = SQLParser.ExpressionContext(self, self._ctx, self.state)
         self.enterRule(localctx, 34, self.RULE_expression)
         try:
-            self.state = 354
+            self.state = 369
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [SQLParser.Null, SQLParser.Integer, SQLParser.String, SQLParser.Float]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 352
+                self.state = 367
                 self.value()
                 pass
             elif token in [SQLParser.Identifier]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 353
+                self.state = 368
                 self.column()
                 pass
             else:
@@ -2487,25 +2563,25 @@ class SQLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 356
+            self.state = 371
             self.match(SQLParser.Identifier)
-            self.state = 357
+            self.state = 372
             self.match(SQLParser.EqualOrAssign)
-            self.state = 358
+            self.state = 373
             self.value()
-            self.state = 365
+            self.state = 380
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==SQLParser.T__35:
-                self.state = 359
-                self.match(SQLParser.T__35)
-                self.state = 360
+            while _la==SQLParser.T__38:
+                self.state = 374
+                self.match(SQLParser.T__38)
+                self.state = 375
                 self.match(SQLParser.Identifier)
-                self.state = 361
+                self.state = 376
                 self.match(SQLParser.EqualOrAssign)
-                self.state = 362
+                self.state = 377
                 self.value()
-                self.state = 367
+                self.state = 382
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -2549,27 +2625,27 @@ class SQLParser ( Parser ):
         self.enterRule(localctx, 38, self.RULE_selectors)
         self._la = 0 # Token type
         try:
-            self.state = 377
+            self.state = 392
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [SQLParser.T__47]:
+            if token in [SQLParser.T__50]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 368
-                self.match(SQLParser.T__47)
+                self.state = 383
+                self.match(SQLParser.T__50)
                 pass
             elif token in [SQLParser.Count, SQLParser.Average, SQLParser.Max, SQLParser.Min, SQLParser.Sum, SQLParser.Identifier]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 369
+                self.state = 384
                 self.selector()
-                self.state = 374
+                self.state = 389
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==SQLParser.T__35:
-                    self.state = 370
-                    self.match(SQLParser.T__35)
-                    self.state = 371
+                while _la==SQLParser.T__38:
+                    self.state = 385
+                    self.match(SQLParser.T__38)
+                    self.state = 386
                     self.selector()
-                    self.state = 376
+                    self.state = 391
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
 
@@ -2620,36 +2696,36 @@ class SQLParser ( Parser ):
         localctx = SQLParser.SelectorContext(self, self._ctx, self.state)
         self.enterRule(localctx, 40, self.RULE_selector)
         try:
-            self.state = 389
+            self.state = 404
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,24,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input,26,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 379
+                self.state = 394
                 self.column()
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 380
+                self.state = 395
                 self.aggregator()
-                self.state = 381
+                self.state = 396
                 self.match(SQLParser.T__9)
-                self.state = 382
+                self.state = 397
                 self.column()
-                self.state = 383
+                self.state = 398
                 self.match(SQLParser.T__10)
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 385
+                self.state = 400
                 self.match(SQLParser.Count)
-                self.state = 386
+                self.state = 401
                 self.match(SQLParser.T__9)
-                self.state = 387
-                self.match(SQLParser.T__47)
-                self.state = 388
+                self.state = 402
+                self.match(SQLParser.T__50)
+                self.state = 403
                 self.match(SQLParser.T__10)
                 pass
 
@@ -2694,17 +2770,17 @@ class SQLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 391
+            self.state = 406
             self.match(SQLParser.Identifier)
-            self.state = 396
+            self.state = 411
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==SQLParser.T__35:
-                self.state = 392
-                self.match(SQLParser.T__35)
-                self.state = 393
+            while _la==SQLParser.T__38:
+                self.state = 407
+                self.match(SQLParser.T__38)
+                self.state = 408
                 self.match(SQLParser.Identifier)
-                self.state = 398
+                self.state = 413
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -2760,7 +2836,7 @@ class SQLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 399
+            self.state = 414
             _la = self._input.LA(1)
             if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << SQLParser.EqualOrAssign) | (1 << SQLParser.Less) | (1 << SQLParser.LessEqual) | (1 << SQLParser.Greater) | (1 << SQLParser.GreaterEqual) | (1 << SQLParser.NotEqual))) != 0)):
                 self._errHandler.recoverInline(self)
@@ -2816,7 +2892,7 @@ class SQLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 401
+            self.state = 416
             _la = self._input.LA(1)
             if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << SQLParser.Count) | (1 << SQLParser.Average) | (1 << SQLParser.Max) | (1 << SQLParser.Min) | (1 << SQLParser.Sum))) != 0)):
                 self._errHandler.recoverInline(self)

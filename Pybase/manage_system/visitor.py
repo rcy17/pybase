@@ -145,7 +145,9 @@ class SystemVisitor(SQLVisitor):
         conditions = ctx.where_and_clause().accept(self) if ctx.where_and_clause() else ()
         selectors = ctx.selectors().accept(self)
         group_by = ctx.column().accept(self) if ctx.column() else (None, '')
-        return self.manager.select_records(selectors, table_names, conditions, group_by)
+        limit = to_int(ctx.Integer(0)) if ctx.Integer() else None
+        offset = to_int(ctx.Integer(1)) if ctx.Integer(1) else 0
+        return self.manager.select_records_limit(selectors, table_names, conditions, group_by, limit, offset)
 
     def visitDelete_from_table(self, ctx: SQLParser.Delete_from_tableContext):
         table_name = to_str(ctx.Identifier())
@@ -296,3 +298,6 @@ class SystemVisitor(SQLVisitor):
         for_list = ctx.identifiers(1).accept(self)
         for (tb_col, for_col) in zip(tb_list, for_list):
             self.manager.add_foreign(table_name, tb_col, (for_table_name, for_col), foreign_name)
+
+    def visitAlter_table_add_unique(self, ctx: SQLParser.Alter_table_add_uniqueContext):
+        pass
