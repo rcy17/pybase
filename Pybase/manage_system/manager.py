@@ -187,6 +187,7 @@ class SystemManger:
             foreign = meta_handle.get_table(table_name).foreign[col]
             self.drop_index(foreign[0] + "." + foreign[1])
         else:
+            print(foreign_name)
             self.drop_index(foreign_name)
 
     def set_primary(self, table_name, primary):
@@ -201,7 +202,6 @@ class SystemManger:
     def drop_primary(self, table_name):
         meta_handle = self._MM.open_meta(self.using_db)
         primary = meta_handle.get_table(table_name).primary
-        meta_handle.drop_table(table_name)
         for col in primary:
             if meta_handle.exists_index(table_name + "." + col):
                 self.drop_index(table_name + "." + col)
@@ -290,9 +290,9 @@ class SystemManger:
     def rename_table(self, old_name, new_name):
         if self.using_db is None:
             raise DataBaseError(f"No using database to rename table")
-        meta_handle = self._MM.open_meta(self.using_db)
+        meta_handle:TableInfo = self._MM.open_meta(self.using_db)
         meta_handle.rename_table(old_name, new_name)
-        pass
+        self._RM.rename_file(self.get_table_path(old_name), self.get_table_path(new_name))
 
     def insert_record(self, table_name, value_list: list):
         # Remember to get the order in Record from meta

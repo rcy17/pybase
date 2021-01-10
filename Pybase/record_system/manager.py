@@ -67,6 +67,11 @@ class RecordManager:
             self.close_file(dest)
         self.remove_file(dest)
         self._FM.move_file(source, dest)
+    
+    def rename_file(self, old_name, new_name):
+        if old_name in self.opened_files:
+            self.close_file(old_name)
+        self._FM.move_file(old_name, new_name)
 
     def close_file(self, filename):
         if filename not in self.opened_files:

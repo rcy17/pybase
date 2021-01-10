@@ -31,8 +31,7 @@ CREATE TABLE nation (
 	n_regionkey	    INT(10) NOT NULL,
     n_comment       VARCHAR(152),
 
-	PRIMARY KEY (n_nationkey),
-	FOREIGN KEY (n_regionkey) REFERENCES region(r_regionkey)
+	PRIMARY KEY (n_nationkey)
 );
 
 CREATE TABLE supplier (

@@ -6,3 +6,11 @@ CREATE TABLE nationBack(
 );
 
 SELECT COUNT(*) FROM customer WHERE c_nationkey<10;
+
+ALTER TABLE nation DROP PRIMARY KEY;
+
+ALTER TABLE nation ADD CONSTRAINT nation_pkey PRIMARY KEY (n_nationkey);
+
+ALTER TABLE nation ADD CONSTRAINT NATION_FK1 FOREIGN KEY (n_regionkey) REFERENCES region(r_regionkey);
+
+ALTER TABLE nation DROP FOREIGN KEY NATION_FK1;

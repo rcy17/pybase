@@ -275,7 +275,7 @@ class SystemVisitor(SQLVisitor):
         self.manager.rename_table(old_name, new_name)
 
     def visitAlter_table_drop_pk(self, ctx: SQLParser.Alter_table_drop_pkContext):
-        table_name = to_str(ctx.Identifier())
+        table_name = to_str(ctx.Identifier(0))
         self.manager.drop_primary(table_name)
 
     def visitAlter_table_drop_foreign_key(self, ctx: SQLParser.Alter_table_drop_foreign_keyContext):
