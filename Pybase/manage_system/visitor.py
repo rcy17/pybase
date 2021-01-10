@@ -277,9 +277,9 @@ class SystemVisitor(SQLVisitor):
         self.manager.drop_primary(table_name)
 
     def visitAlter_table_drop_foreign_key(self, ctx: SQLParser.Alter_table_drop_foreign_keyContext):
-        table_name = to_str(ctx.Identifier(0))
-        col_name = to_str(ctx.Identifier(1))
-        self.manager.remove_foreign(table_name, col_name)
+        # table_name = to_str(ctx.Identifier(0))
+        foreign_name = to_str(ctx.Identifier(1))
+        self.manager.remove_foreign(None, None, foreign_name)
 
     def visitAlter_table_add_pk(self, ctx: SQLParser.Alter_table_add_pkContext):
         table_name = to_str(ctx.Identifier(0))

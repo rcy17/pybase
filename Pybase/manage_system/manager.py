@@ -171,17 +171,23 @@ class SystemManger:
         data = tuple((column.get_description()) for column in table_info.column_map.values())
         return QueryResult(header, data)
 
-    def add_foreign(self, table_name, col, foreign):
+    def add_foreign(self, table_name, col, foreign, foreign_name = None):
         meta_handle = self._MM.open_meta(self.using_db)
         meta_handle.add_foreign(table_name, col, foreign)
         if not meta_handle.exists_index(foreign[0] + "." + foreign[1]):
-            self.create_index(foreign[0] + "." + foreign[1], foreign[0], foreign[1])
+            if foreign_name is None:
+                self.create_index(foreign[0] + "." + foreign[1], foreign[0], foreign[1])
+            else:
+                self.create_index(foreign_name, foreign[0], foreign[1])
 
-    def remove_foreign(self, table_name, col):
-        meta_handle = self._MM.open_meta(self.using_db)
-        meta_handle.remove_foreign(table_name, col)
-        foreign = meta_handle.get_table(table_name).foreign[col]
-        self.drop_index(foreign[0] + "." + foreign[1])
+    def remove_foreign(self, table_name, col, foreign_name = None):
+        if foreign_name is None:
+            meta_handle = self._MM.open_meta(self.using_db)
+            meta_handle.remove_foreign(table_name, col)
+            foreign = meta_handle.get_table(table_name).foreign[col]
+            self.drop_index(foreign[0] + "." + foreign[1])
+        else:
+            self.drop_index(foreign_name)
 
     def set_primary(self, table_name, primary):
         meta_handle = self._MM.open_meta(self.using_db)
