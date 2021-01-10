@@ -144,6 +144,11 @@ class SQLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by SQLParser#alter_table_add_unique.
+    def visitAlter_table_add_unique(self, ctx:SQLParser.Alter_table_add_uniqueContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by SQLParser#field_list.
     def visitField_list(self, ctx:SQLParser.Field_listContext):
         return self.visitChildren(ctx)
