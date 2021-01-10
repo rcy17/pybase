@@ -88,9 +88,7 @@ class SystemVisitor(SQLVisitor):
                 type_, size = field.type_().accept(self)
                 # not_null = field.getChild(2) == 'NOT'
                 # default = to_str(field.value()) if field.value() else None
-                name_to_column[name] = ColumnInfo(type=type_,
-                                                  name=name,
-                                                  size=size)
+                name_to_column[name] = ColumnInfo(type_, name, size)
             elif isinstance(field, SQLParser.Foreign_key_fieldContext):
 
                 field_name, table_name, refer_name = tuple(to_str(each) for each in field.Identifier())
@@ -107,7 +105,7 @@ class SystemVisitor(SQLVisitor):
     def visitNormal_field(self, ctx: SQLParser.Normal_fieldContext):
         name = to_str(ctx.Identifier())
         type_, size = ctx.type_().accept(self)
-        return ColumnInfo(type=type_, name=name, size=size)
+        return ColumnInfo(type_, name, size)
 
     def visitForeign_key_field(self, ctx: SQLParser.Foreign_key_fieldContext):
         pass

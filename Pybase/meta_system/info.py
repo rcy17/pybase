@@ -78,9 +78,9 @@ class TableInfo:
     def describe(self):
         desc = {column.name: column.get_description() for column in self.column_map.values()}
         for each in self.primary:
-            desc[each][3] += ' PRI'
+            desc[each][3] = 'PRI'
         for each in self.foreign:
-            desc[each][3] += ' FOR'
+            desc[each][3] = 'MUL' if desc[each][3] else 'FOR'
         return tuple(desc.values())
 
     def update_params(self):
