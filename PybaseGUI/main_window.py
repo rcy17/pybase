@@ -39,6 +39,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.connection = connection
         self.base_path = base
+        self.base_path.mkdir(parents=True, exist_ok=True)
         self.last_start = None
         self.status = None
         self.cost = None

@@ -63,10 +63,10 @@ def main(args: Namespace):
                 prefix = f'pybase({printer.using_db})'
                 print(('-'.rjust(len(prefix)) if sql else prefix) + '> ', end='')
             try:
-                sql += input().strip()
+                sql += ' ' + input()
             except (KeyboardInterrupt, EOFError):
                 break
-            if sql.lower() in ('quit', 'exit', '.quit', '.exit'):
+            if sql.strip().lower() in ('quit', 'exit', '.quit', '.exit'):
                 break
             if sql.endswith(';'):
                 parent_conn.send(sql)
