@@ -205,11 +205,8 @@ fabric.properties
 
 data
 *.db
-*.tbl
 temp*
-.INDEX
 *.cmd
 *.zip
-*.xlsx
 
 ############################## Here ends custom ignorance  ##############################
